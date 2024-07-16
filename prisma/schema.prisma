@@ -1,0 +1,257 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductStatus {
+  Published
+  Draft
+  Suspended
+  OutOfStock
+}
+
+enum ProductType {
+  Simple
+  Variable
+}
+
+enum userRole {
+  Admin
+  Vendor
+  Customer
+}
+
+enum orderStatus {
+  Pending
+  Processing
+  Complete
+}
+
+model avatar {
+  id        String   @id @default(uuid())
+  original  String
+  thumbnail String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  userId    String   @unique
+  user      user     @relation(fields: [userId], references: [id])
+}
+
+model user {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String?
+  firstname         String?
+  lastname          String?
+  role              userRole? @default(Customer)
+  profile           profile?
+  emailVerified     DateTime?
+  image             String?
+  accounts          account[]
+  avatar            avatar?
+  name              String?
+  isOnboardedVendor Boolean?
+  hasPaid           Boolean?
+  products          product[] @relation("UserProducts")
+  shop              shop?     @relation("UserShop")
+  orders            order[]
+  cart              cart?
+}
+
+model account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              user    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model profile {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      userRole? @default(Customer)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+  shop      shop?     @relation("ProfileShop")
+  userId    String    @unique
+  user      user      @relation(fields: [userId], references: [id])
+}
+
+model shop {
+  id          String    @id @default(cuid())
+  shopname    String?
+  description String?
+  address     String?
+  logo        String?
+  banner      String?
+  slug        String?
+  bankName    String?
+  accountNo   String?
+  country     String?
+  city        String?
+  state       String?
+  zip         String?
+  phoneNumber String?
+  website     String?
+  accountName String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+  deletedAt   DateTime?
+  profileId   String?   @unique
+  profile     profile?  @relation("ProfileShop", fields: [profileId], references: [id])
+  products    product[] @relation("ShopProducts")
+  userId      String?   @unique
+  user        user?     @relation("UserShop", fields: [userId], references: [id])
+  orders      order[]
+}
+
+model product {
+  id            String        @id @default(uuid())
+  name          String
+  slug          String
+  description   String
+  price         Int
+  sale_price    Int
+  sku           Int           @default(autoincrement())
+  quantity      Int
+  in_stock      Boolean?
+  is_taxable    Boolean?
+  status        ProductStatus @default(Draft)
+  product_type  ProductType   @default(Simple)
+  video         String?
+  image_id      String?
+  image         String?
+  gallery_id    Int?
+  author_id     String?
+  ratings       Float?
+  total_reviews Int?
+  my_review     String?
+  in_wishlist   Boolean?
+  shop_id       String?
+  categories    category[]
+  shop          shop?         @relation("ShopProducts", fields: [shop_id], references: [id])
+  author        user?         @relation("UserProducts", fields: [author_id], references: [id])
+  gallery       String[]
+  shop_name     String?
+}
+
+model image {
+  id        String  @id @default(uuid())
+  url       String
+  productId String? @unique
+  galleryId String?
+  // gallery   gallery? @relation(fields: [galleryId], references: [id])
+  imageId   String?
+}
+
+model category {
+  id       String    @id @unique @default(uuid())
+  name     String
+  slug     String
+  products product[]
+
+  @@unique([name, slug])
+}
+
+// model gallery {
+//   id        String   @id @default(uuid())
+//   productId String?
+//   product   product? @relation(fields: [productId], references: [id])
+//   Image     image[]
+
+//   @@unique([productId])
+// }
+
+model verificationToken {
+  id      String   @id @default(uuid())
+  token   String   @unique
+  email   String
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model passwordResetToken {
+  id      String   @id @default(uuid())
+  token   String   @unique
+  email   String
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model orderItem {
+  id        String   @id @default(uuid()) @map("_id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId String
+  quantity  Int
+
+  orderId String
+  order   order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model order {
+  id        String   @id @default(uuid()) @map("id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  status     orderStatus
+  totalPrice Float
+
+  orderItems orderItem[] // [Order] one-to-many [OrderItem]
+
+  userId String
+  user   user    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shop   shop?   @relation(fields: [shopId], references: [id])
+  shopId String?
+
+  @@map("orders")
+}
+
+model cartItem {
+  id        String   @id @default(uuid()) @map("id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId String
+  quantity  Int
+
+  cartId String
+  cart   cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+}
+
+model cart {
+  id        String   @id @default(uuid()) @map("id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cartItems cartItem[]
+
+  userId String @unique
+  user   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
