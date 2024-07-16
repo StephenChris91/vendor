@@ -25,7 +25,7 @@ export default function Login() {
 
   const formSchema = yup.object().shape({
     email: yup.string().email("invalid email").required("${path} is required"),
-    password: yup.string().required("${path} is required")
+    password: yup.string().required("${path} is required"),
   });
 
   const handleFormSubmit = async (values: any) => {
@@ -33,20 +33,27 @@ export default function Login() {
     console.log(values);
   };
 
-  const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
-    initialValues,
-    onSubmit: handleFormSubmit,
-    validationSchema: formSchema
-  });
+  const { values, errors, touched, handleBlur, handleChange, handleSubmit } =
+    useFormik({
+      initialValues,
+      onSubmit: handleFormSubmit,
+      validationSchema: formSchema,
+    });
 
   return (
     <StyledRoot mx="auto" my="2rem" boxShadow="large" borderRadius={8}>
       <form className="content" onSubmit={handleSubmit}>
         <H3 textAlign="center" mb="0.5rem">
-          Welcome To Ecommerce
+          Welcome To Vendorspot
         </H3>
 
-        <H5 fontWeight="600" fontSize="12px" color="gray.800" textAlign="center" mb="2.25rem">
+        <H5
+          fontWeight="600"
+          fontSize="12px"
+          color="gray.800"
+          textAlign="center"
+          mb="2.25rem"
+        >
           Log in with email & password
         </H5>
 
@@ -81,7 +88,8 @@ export default function Login() {
               mr="0.25rem"
               type="button"
               onClick={togglePasswordVisibility}
-              color={passwordVisibility ? "gray.700" : "gray.600"}>
+              color={passwordVisibility ? "gray.700" : "gray.600"}
+            >
               <Icon variant="small" defaultcolor="currentColor">
                 {passwordVisibility ? "eye-alt" : "eye"}
               </Icon>
@@ -89,7 +97,13 @@ export default function Login() {
           }
         />
 
-        <Button mb="1.65rem" variant="contained" color="primary" type="submit" fullwidth>
+        <Button
+          mb="1.65rem"
+          variant="contained"
+          color="primary"
+          type="submit"
+          fullwidth
+        >
           Login
         </Button>
 
@@ -110,7 +124,8 @@ export default function Login() {
           borderRadius={5}
           cursor="pointer"
           alignItems="center"
-          justifyContent="center">
+          justifyContent="center"
+        >
           <Icon variant="small" defaultcolor="auto" mr="0.5rem">
             facebook-filled-white
           </Icon>
@@ -126,7 +141,8 @@ export default function Login() {
           borderRadius={5}
           cursor="pointer"
           alignItems="center"
-          justifyContent="center">
+          justifyContent="center"
+        >
           <Icon variant="small" defaultcolor="auto" mr="0.5rem">
             google-1
           </Icon>
