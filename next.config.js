@@ -30,6 +30,9 @@ const nextConfig = {
       // "https://mukoxyechbobgdvpbirs.supabase.co",
     ],
   },
+  experimental: {
+    serverActions: true,
+  },
 };
 
 module.exports = nextConfig;

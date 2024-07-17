@@ -6,10 +6,10 @@ export const getUserByEmail = async (email: string) => {
             where: { email },
         });
         console.log('User fetched:', user);
-        return user;
+        return user; // Return null if user doesn't exist
     } catch (error) {
         console.error('Error fetching user:', error);
-        throw new Error('User fetch failed');
+        throw new Error('Database error while fetching user');
     }
 };
 

@@ -7,7 +7,12 @@ export default function EditProfileButton() {
   const { push } = useRouter();
 
   return (
-    <Button color="primary" bg="primary.light" px="2rem" onClick={() => push("/profile/edit")}>
+    <Button
+      color="secondary"
+      bg="primary.light"
+      px="2rem"
+      onClick={() => push("/profile/edit")}
+    >
       Edit Profile
     </Button>
   );

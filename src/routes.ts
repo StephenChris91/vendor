@@ -1,55 +1,52 @@
-// routes.ts
+/**
+ * @description: Public routes
+ * An array of routes accessible to all users who visit the site.
+ * @type {string[]}
+ */
+export const publicRoutes: (string | undefined)[] = ['/', '/vendors', '/vendors/:id', '/shop', '/track', '/compare', '/support', '/verification'];
 
-export const publicRoutes: string[] = [
-    '/',
-    '/auth/new-verification',
-    '/auth/forgot-password',
-    '/vendors',
-    '/vendors/:id',
-    '/shop',
-    '/track',
-    '/compare',
-    '/support',
-];
+/**
+ * @description: Authenticated routes
+ * An array of routes accessible to only authenticated users who visit the site.
+ * @type {string[]}
+ */
+export const authRoutes: (string | undefined)[] = ['/login', '/signup', '/new-password', '/onboarding'];
 
-export const authRoutes: string[] = [
-    '/auth/login',
-    '/auth/signup',
-    '/auth/new-password',
-    '/auth/onboarding',
-];
+/**
+ * @description: Authenticated routes
+ * An array of routes accessible to only users with admin roles. This routes will redirect to the admin dashboard
+ * @type {string[]}
+ */
+export const adminRoutes: (string | undefined)[] = ['/dashboard'];
 
-export const userRoutes: string[] = [
-    '/auth/profile',
-    '/profile',
-    '/profile/edit',
-    '/orders',
-    '/orders/:id',
-    '/address',
-    '/address/create',
-    '/support-tickets',
-    '/support-tickets/:id',
-    '/wish-list',
-    '/cart',
-    '/checkout',
-    '/checkout-alternative',
-];
+/**
+ * @description: Authenticated routes
+ * An array of routes accessible to only users with vendor roles. This routes will redirect to the vendor dashboard
+ * @type {string[]}
+ */
+export const vendorRoutes = ['/complete'];
 
-export const adminRoutes: string[] = [
-    '/dashboard',
-];
-
-export const vendorRoutes: string[] = [
-    '/vendor/dashboard',
-    '/vendor/products',
-    '/vendor/products/:id',
-    '/vendor/orders',
-    '/vendor/orders/:id',
-    '/vendor/account-settings',
-];
-
+/**
+ * @description: A prefix for api auth routes
+ * Routes with this prefix are used for api authentication processes
+ * @type {string}
+ */
 export const apiAuthPrefix = '/api/auth';
 
-export const DEFAULT_LOGIN_REDIRECT = '/profile';
+/**
+ * @description: A default redirect path for authenticated users
+ * @type {string}
+ */
+export const DEFAULT_LOGIN_REDIRECT = '/settings';
+
+/**
+ * @description: A default redirect path for admin users
+ * @type {string}
+ */
 export const DEFAULT_ADMIN_REDIRECT = '/dashboard';
-export const DEFAULT_VENDOR_REDIRECT = '/vendor/dashboard';
+
+/**
+ * @description: A default redirect path for vendor users
+ * @type {string}
+ */
+export const DEFAULT_VENDOR_REDIRECT = '/dashboard';

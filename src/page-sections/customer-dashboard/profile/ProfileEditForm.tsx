@@ -11,15 +11,16 @@ import Grid from "@component/grid/Grid";
 import FlexBox from "@component/FlexBox";
 import { Button } from "@component/buttons";
 import TextField from "@component/text-field";
-import User from "@models/user.model";
+import { User } from "types";
+// import User from "@models/user.model";
 
 export default function ProfileEditForm({ user }: { user: User }) {
   const INITIAL_VALUES = {
-    first_name: user.name.firstName || "",
-    last_name: user.name.lastName || "",
+    first_name: user.firstname || "",
+    last_name: user.lastname || "",
     email: user.email || "",
-    contact: user.phone || "",
-    birth_date: format(new Date(user.dateOfBirth), "yyyy-MM-dd") || ""
+    role: user.role || "",
+    // birth_date: format(new Date(user.dateOfBirth), "yyyy-MM-dd") || ""
   };
 
   const VALIDATION_SCHEMA = yup.object().shape({
@@ -27,7 +28,7 @@ export default function ProfileEditForm({ user }: { user: User }) {
     last_name: yup.string().required("required"),
     email: yup.string().email("invalid email").required("required"),
     contact: yup.string().required("required"),
-    birth_date: yup.date().required("invalid date")
+    birth_date: yup.date().required("invalid date"),
   });
 
   const handleFormSubmit = async (values: typeof INITIAL_VALUES) => {
@@ -48,7 +49,8 @@ export default function ProfileEditForm({ user }: { user: User }) {
               height="auto"
               bg="gray.300"
               color="secondary"
-              borderRadius="50%">
+              borderRadius="50%"
+            >
               <Icon>camera</Icon>
             </Button>
           </label>
@@ -68,8 +70,16 @@ export default function ProfileEditForm({ user }: { user: User }) {
       <Formik
         onSubmit={handleFormSubmit}
         initialValues={INITIAL_VALUES}
-        validationSchema={VALIDATION_SCHEMA}>
-        {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
+        validationSchema={VALIDATION_SCHEMA}
+      >
+        {({
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+        }) => (
           <form onSubmit={handleSubmit}>
             <Box mb="30px">
               <Grid container horizontal_spacing={6} vertical_spacing={4}>
@@ -110,7 +120,7 @@ export default function ProfileEditForm({ user }: { user: User }) {
                   />
                 </Grid>
 
-                <Grid item md={6} xs={12}>
+                {/* <Grid item md={6} xs={12}>
                   <TextField
                     fullwidth
                     label="Phone"
@@ -120,9 +130,9 @@ export default function ProfileEditForm({ user }: { user: User }) {
                     onChange={handleChange}
                     errorText={touched.contact && errors.contact}
                   />
-                </Grid>
+                </Grid> */}
 
-                <Grid item md={6} xs={12}>
+                {/* <Grid item md={6} xs={12}>
                   <TextField
                     fullwidth
                     type="date"
@@ -133,7 +143,7 @@ export default function ProfileEditForm({ user }: { user: User }) {
                     value={values.birth_date}
                     errorText={touched.birth_date && errors.birth_date}
                   />
-                </Grid>
+                </Grid> */}
               </Grid>
             </Box>
 

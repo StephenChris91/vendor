@@ -5,6 +5,8 @@ import { db } from '../prisma/prisma';
 import { getUserById } from 'lib/data/user';
 import { userRole } from 'app/next-auth';
 // import { userRole } from "@prisma/client"
+import type { Adapter } from 'next-auth/adapters';
+
 
 
 export const {
@@ -87,7 +89,7 @@ export const {
             return token
         }
     },
-    adapter: PrismaAdapter(db),
+    adapter: PrismaAdapter(db) as Adapter,
     session: { strategy: 'jwt' },
     ...authConfig,
 })

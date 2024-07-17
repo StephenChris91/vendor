@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 
 import useVisibility from "./useVisibility";
+import { toast } from "react-hot-toast";
 
 import Box from "@component/Box";
 import Icon from "@component/icon/Icon";
@@ -16,10 +17,13 @@ import { Button, IconButton } from "@component/buttons";
 import { H3, H5, H6, SemiSpan, Small, Span } from "@component/Typography";
 // STYLED COMPONENT
 import { StyledRoot } from "./styles";
+import { login } from "actions/login";
+import { useState } from "react";
 
 export default function Login() {
   const router = useRouter();
   const { passwordVisibility, togglePasswordVisibility } = useVisibility();
+  const [isLoading, setIsLoading] = useState(false);
 
   const initialValues = { email: "", password: "" };
 
@@ -29,8 +33,20 @@ export default function Login() {
   });
 
   const handleFormSubmit = async (values: any) => {
-    router.push("/profile");
-    console.log(values);
+    setIsLoading(true);
+    try {
+      const result = await login(values);
+      if (result.error) {
+        toast.error(result.error);
+      } else if (result.success) {
+        toast.success(result.success);
+        // The redirection is handled by the server action, so we don't need to do it here
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } =
@@ -44,7 +60,7 @@ export default function Login() {
     <StyledRoot mx="auto" my="2rem" boxShadow="large" borderRadius={8}>
       <form className="content" onSubmit={handleSubmit}>
         <H3 textAlign="center" mb="0.5rem">
-          Welcome To Vendorspot
+          Welcome To Ecommerce
         </H3>
 
         <H5
@@ -103,8 +119,9 @@ export default function Login() {
           color="primary"
           type="submit"
           fullwidth
+          disabled={isLoading}
         >
-          Login
+          {isLoading ? "Logging in..." : "Login"}
         </Button>
 
         <Box mb="1rem">

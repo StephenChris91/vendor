@@ -2,33 +2,40 @@
 
 import * as z from 'zod';
 import { hash } from 'bcrypt-ts'
-import { signupSchema } from '@/app/schemas';
-import { getUserByEmail } from '@/lib/data/user';
-import { db } from '@/prisma/prisma';
-import { generateVerificationToken } from '@/lib/data/tokens';
-import { sendVerificationEmail } from '@/lib/mail';
+import { signupSchema } from 'schemas';
+import { getUserByEmail } from 'lib/data/user';
+import { generateVerificationToken } from 'lib/data/tokens';
+import { sendVerificationEmail } from 'lib/mail';
+import { db } from '../../prisma/prisma';
 
 export const register = async (values: z.infer<typeof signupSchema>) => {
+
+    console.log("Registration attempt with values:", values);
+
     const validInput = signupSchema.safeParse(values)
 
     if (!validInput.success) {
-        return { error: 'Invalid Credentials'}
+        console.log("Invalid input:", validInput.error);
+
+        return { error: 'Invalid Credentials' }
     }
 
-    const {email, password, confirmPassword, firstname, lastname, role } = validInput.data;
+    const { email, password, confirmPassword, firstname, lastname, role } = validInput.data;
 
-    const existingUser = await getUserByEmail(email);
-    
-    const hashedPassword = await hash(password, 10)
-    if(existingUser) {
-        if(!password || password !== confirmPassword) {
-            return { error: 'Passwords do not match'}
+    if (password !== confirmPassword) {
+        return { error: 'Passwords do not match' }
+    }
+
+    try {
+        const existingUser = await getUserByEmail(email);
+
+        if (existingUser) {
+            return { error: 'User already exists' }
         }
-        return {error: 'User already exists'}
-    }
 
-        try {
-           await db.user.create({
+        const hashedPassword = await hash(password, 10)
+
+        await db.user.create({
             data: {
                 email,
                 password: hashedPassword,
@@ -36,12 +43,7 @@ export const register = async (values: z.infer<typeof signupSchema>) => {
                 lastname,
                 role,
             }
-           })
-        } catch (error) {
-            console.log(error)
-
-            throw error
-        }
+        })
 
         const verificationToken = await generateVerificationToken(email);
 
@@ -49,5 +51,10 @@ export const register = async (values: z.infer<typeof signupSchema>) => {
             verificationToken.email,
             verificationToken.token
         )
-        return { success: 'Confirmation email sent'}
+        console.log("Registration successful, sending verification email");
+        return { success: 'Confirmation email sent' }
+    } catch (error) {
+        console.error('Registration error:', error);
+        return { error: 'An error occurred during registration' }
+    }
 }

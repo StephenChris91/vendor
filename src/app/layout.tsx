@@ -6,6 +6,8 @@ import StyledComponentsRegistry from "@lib/registry";
 import { AppProvider } from "@context/app-context";
 import StyledContext from "@context/StyledContext";
 import { SessionProvider } from "next-auth/react";
+import { auth } from "auth";
+import { Toaster } from "react-hot-toast";
 
 const openSans = Open_Sans({ subsets: ["latin"] });
 
@@ -17,21 +19,23 @@ export const metadata: Metadata = {
   keywords: ["e-commerce", "e-commerce template", "next.js", "react", "bonik"],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
   return (
     <html lang="en">
       <body className={openSans.className}>
         <StyledComponentsRegistry>
           <AppProvider>
-            <SessionProvider>
+            <SessionProvider session={session}>
               <StyledContext>{children}</StyledContext>
             </SessionProvider>
           </AppProvider>
         </StyledComponentsRegistry>
+        <Toaster />
       </body>
     </html>
   );

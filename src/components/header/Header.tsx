@@ -11,7 +11,7 @@ import Icon from "@component/icon/Icon";
 import FlexBox from "@component/FlexBox";
 import MiniCart from "@component/mini-cart";
 import Container from "@component/Container";
-import { Tiny } from "@component/Typography";
+import { H2, H5, Tiny } from "@component/Typography";
 import { IconButton } from "@component/buttons";
 import Sidenav from "@component/sidenav/Sidenav";
 import Categories from "@component/categories/Categories";
@@ -19,6 +19,8 @@ import { SearchInputWithCategory } from "@component/search-box";
 import { useAppContext } from "@context/app-context";
 import StyledHeader from "./styles";
 import UserLoginDialog from "./LoginDialog";
+import { useCurrentUser } from "@lib/use-session-client";
+import { LogoutButton } from "@component/logout-button";
 
 // ====================================================================
 type HeaderProps = { isFixed?: boolean; className?: string };
@@ -28,6 +30,7 @@ export default function Header({ isFixed, className }: HeaderProps) {
   const { state } = useAppContext();
   const [open, setOpen] = useState(false);
   const toggleSidenav = () => setOpen(!open);
+  const user = useCurrentUser();
 
   const CART_HANDLE = (
     <Box ml="20px" position="relative">
@@ -45,7 +48,8 @@ export default function Header({ isFixed, className }: HeaderProps) {
           borderRadius="50%"
           alignItems="center"
           position="absolute"
-          justifyContent="center">
+          justifyContent="center"
+        >
           <Tiny color="white" fontWeight="600" lineHeight={1}>
             {state.cart.length}
           </Tiny>
@@ -62,10 +66,20 @@ export default function Header({ isFixed, className }: HeaderProps) {
 
   return (
     <StyledHeader className={className}>
-      <Container display="flex" alignItems="center" justifyContent="space-between" height="100%">
+      <Container
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        height="100%"
+      >
         <FlexBox className="logo" alignItems="center" mr="1rem">
           <Link href="/">
-            <Image src="/assets/images/logo.svg" alt="logo" />
+            <Image
+              src="/assets/images/logo.svg"
+              alt="logo"
+              width={"120px"}
+              height={"auto"}
+            />
           </Link>
 
           {isFixed && (
@@ -85,18 +99,21 @@ export default function Header({ isFixed, className }: HeaderProps) {
         </FlexBox>
 
         <FlexBox className="header-right" alignItems="center">
-          <UserLoginDialog handle={LOGIN_HANDLE}>
-            <div>
+          {user ? (
+            <LogoutButton>{`Welcome ${user.firstname}`}</LogoutButton>
+          ) : (
+            <UserLoginDialog handle={LOGIN_HANDLE}>
               <Login />
-            </div>
-          </UserLoginDialog>
+            </UserLoginDialog>
+          )}
 
           <Sidenav
             open={open}
             width={380}
             position="right"
             handle={CART_HANDLE}
-            toggleSidenav={toggleSidenav}>
+            toggleSidenav={toggleSidenav}
+          >
             <MiniCart toggleSidenav={toggleSidenav} />
           </Sidenav>
         </FlexBox>

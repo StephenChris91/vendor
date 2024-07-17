@@ -21,7 +21,7 @@ export default async function Profile() {
     { title: "16", subtitle: "All Orders" },
     { title: "02", subtitle: "Awaiting Payments" },
     { title: "00", subtitle: "Awaiting Shipment" },
-    { title: "01", subtitle: "Awaiting Delivery" }
+    { title: "01", subtitle: "Awaiting Delivery" },
   ];
 
   return (
@@ -35,13 +35,23 @@ export default async function Profile() {
       <Box mb="30px">
         <Grid container spacing={6}>
           <Grid item lg={6} md={6} sm={12} xs={12}>
-            <FlexBox as={Card} p="14px 32px" height="100%" borderRadius={8} alignItems="center">
-              <Avatar src={user.avatar} size={64} />
+            <FlexBox
+              as={Card}
+              p="14px 32px"
+              height="100%"
+              borderRadius={8}
+              alignItems="center"
+            >
+              <Avatar src={user.image} size={64} />
 
               <Box ml="12px" flex="1 1 0">
-                <FlexBox flexWrap="wrap" justifyContent="space-between" alignItems="center">
+                <FlexBox
+                  flexWrap="wrap"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   <div>
-                    <H5 my="0px">{`${user.name.firstName} ${user.name.lastName}`}</H5>
+                    <H5 my="0px">{`${user.firstname} ${user.lastname}`}</H5>
 
                     <FlexBox alignItems="center">
                       <Typography fontSize="14px" color="text.hint">
@@ -54,8 +64,12 @@ export default async function Profile() {
                     </FlexBox>
                   </div>
 
-                  <Typography ontSize="14px" color="text.hint" letterSpacing="0.2em">
-                    SILVER USER
+                  <Typography
+                    ontSize="14px"
+                    color="text.hint"
+                    letterSpacing="0.2em"
+                  >
+                    {user.role}
                   </Typography>
                 </FlexBox>
               </Box>
@@ -73,7 +87,8 @@ export default async function Profile() {
                     borderRadius={8}
                     alignItems="center"
                     flexDirection="column"
-                    justifyContent="center">
+                    justifyContent="center"
+                  >
                     <H3 color="primary.main" my="0px" fontWeight="600">
                       {item.title}
                     </H3>
@@ -95,7 +110,7 @@ export default async function Profile() {
             First Name
           </Small>
 
-          <span>{user.name.firstName}</span>
+          <span>{user.firstname}</span>
         </FlexBox>
 
         <FlexBox flexDirection="column" p="0.5rem">
@@ -103,7 +118,7 @@ export default async function Profile() {
             Last Name
           </Small>
 
-          <span>{user.name.lastName}</span>
+          <span>{user.lastname}</span>
         </FlexBox>
 
         <FlexBox flexDirection="column" p="0.5rem">
@@ -116,19 +131,21 @@ export default async function Profile() {
 
         <FlexBox flexDirection="column" p="0.5rem">
           <Small color="text.muted" mb="4px" textAlign="left">
-            Phone
+            Email
           </Small>
 
-          <span>{user.phone}</span>
+          <span>{user.email}</span>
         </FlexBox>
 
-        <FlexBox flexDirection="column" p="0.5rem">
+        {/* <FlexBox flexDirection="column" p="0.5rem">
           <Small color="text.muted" mb="4px">
             Birth date
           </Small>
 
-          <span className="pre">{format(new Date(user.dateOfBirth), "dd MMM, yyyy")}</span>
-        </FlexBox>
+          <span className="pre">
+            {format(new Date(user.role), "dd MMM, yyyy")}
+          </span>
+        </FlexBox> */}
       </TableRow>
     </Fragment>
   );

@@ -1,9 +1,9 @@
-import { productSchema } from "@/app/schemas";
-import { db } from "@/prisma/prisma";
+import { productSchema } from "schemas";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
-import { getUserById } from "@/lib/data/user";
+import { auth } from "auth";
+import { getUserById } from "lib/data/user";
+import { db } from "../../prisma/prisma";
 
 export async function createProduct(values: z.infer<typeof productSchema>) {
   const session = await auth();
