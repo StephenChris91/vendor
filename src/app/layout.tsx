@@ -8,15 +8,16 @@ import StyledContext from "@context/StyledContext";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "auth";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@context/authContext";
 
 const openSans = Open_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Bonik - The Best React eCommerce Template",
+  title: "Vendorspot | No 1, Multivendor Ecommerce Place",
   description:
-    "Bonik is a React Next.js E-commerce template. Build SEO friendly Online store, delivery app and Multi vendor store",
-  authors: [{ name: "UI-LIB", url: "https://ui-lib.com" }],
-  keywords: ["e-commerce", "e-commerce template", "next.js", "react", "bonik"],
+    "Vendorspot is an E-commerce Marketplace for all. Build SEO friendly Online store, delivery app and Multi vendor store",
+  authors: [{ name: "Stephen Chris", url: "https://stephenchris.com" }],
+  keywords: ["e-commerce", "Multivendor ", "next.js", "react", "Vendorspot"],
 };
 
 export default async function RootLayout({
@@ -28,14 +29,16 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={openSans.className}>
-        <StyledComponentsRegistry>
+        <SessionProvider session={session}>
           <AppProvider>
-            <SessionProvider session={session}>
-              <StyledContext>{children}</StyledContext>
-            </SessionProvider>
+            <StyledComponentsRegistry>
+              <AuthProvider>
+                <StyledContext>{children}</StyledContext>
+              </AuthProvider>
+            </StyledComponentsRegistry>
+            <Toaster />
           </AppProvider>
-        </StyledComponentsRegistry>
-        <Toaster />
+        </SessionProvider>
       </body>
     </html>
   );

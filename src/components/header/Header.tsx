@@ -11,7 +11,7 @@ import Icon from "@component/icon/Icon";
 import FlexBox from "@component/FlexBox";
 import MiniCart from "@component/mini-cart";
 import Container from "@component/Container";
-import { H2, H5, Tiny } from "@component/Typography";
+import { Tiny } from "@component/Typography";
 import { IconButton } from "@component/buttons";
 import Sidenav from "@component/sidenav/Sidenav";
 import Categories from "@component/categories/Categories";
@@ -19,8 +19,8 @@ import { SearchInputWithCategory } from "@component/search-box";
 import { useAppContext } from "@context/app-context";
 import StyledHeader from "./styles";
 import UserLoginDialog from "./LoginDialog";
-import { useCurrentUser } from "@lib/use-session-client";
 import { LogoutButton } from "@component/logout-button";
+import { useAuth } from "@context/authContext";
 
 // ====================================================================
 type HeaderProps = { isFixed?: boolean; className?: string };
@@ -30,7 +30,7 @@ export default function Header({ isFixed, className }: HeaderProps) {
   const { state } = useAppContext();
   const [open, setOpen] = useState(false);
   const toggleSidenav = () => setOpen(!open);
-  const user = useCurrentUser();
+  const { user, signIn } = useAuth();
 
   const CART_HANDLE = (
     <Box ml="20px" position="relative">
@@ -59,7 +59,7 @@ export default function Header({ isFixed, className }: HeaderProps) {
   );
 
   const LOGIN_HANDLE = (
-    <IconButton ml="1rem" bg="gray.200" p="8px">
+    <IconButton ml="1rem" bg="gray.200" p="8px" onClick={() => signIn()}>
       <Icon size="28px">user</Icon>
     </IconButton>
   );

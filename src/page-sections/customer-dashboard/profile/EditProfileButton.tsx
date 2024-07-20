@@ -8,7 +8,7 @@ export default function EditProfileButton() {
 
   return (
     <Button
-      color="secondary"
+      color="primary"
       bg="primary.light"
       px="2rem"
       onClick={() => push("/profile/edit")}

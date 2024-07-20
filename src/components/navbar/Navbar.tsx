@@ -14,22 +14,39 @@ import Categories from "../categories/Categories";
 
 import StyledNavbar from "./styles";
 import navbarNavigations from "@data/navbarNavigations";
+import { useAuth } from "@context/authContext";
 
 // ==============================================================
 interface Nav {
   url: string;
-  child: Nav[];
+  child?: Nav[];
   title: string;
-  badge: string;
+  badge?: string;
   extLink?: boolean;
+  requiresAuth?: boolean;
+  requiresNoAuth?: boolean;
+  requiresRole?: string;
 }
 
 type NavbarProps = { navListOpen?: boolean };
 // ==============================================================
 
 export default function Navbar({ navListOpen }: NavbarProps) {
-  const renderNestedNav = (list: any[], isRoot = false) => {
+  const { user } = useAuth();
+
+  const renderNestedNav = (list: Nav[], isRoot = false) => {
     return list?.map((nav: Nav) => {
+      // Conditionally render nav items based on user's login state and role
+      if (nav.requiresAuth && !user) {
+        return null;
+      }
+      if (nav.requiresNoAuth && user) {
+        return null;
+      }
+      if (nav.requiresRole && user?.role !== nav.requiresRole) {
+        return null;
+      }
+
       if (isRoot) {
         if (nav.url && nav.extLink) {
           return (
@@ -38,7 +55,8 @@ export default function Navbar({ navListOpen }: NavbarProps) {
               key={nav.title}
               target="_blank"
               className="nav-link"
-              rel="noopener noreferrer">
+              rel="noopener noreferrer"
+            >
               {nav.badge ? (
                 <Badge style={{ marginRight: "0px" }} title={nav.badge}>
                   {nav.title}
@@ -57,14 +75,21 @@ export default function Navbar({ navListOpen }: NavbarProps) {
               position="relative"
               flexDirection="column"
               alignItems="center"
-              key={nav.title}>
+              key={nav.title}
+            >
               {nav.badge ? (
                 <Badge title={nav.badge}>{nav.title}</Badge>
               ) : (
                 <Span className="nav-link">{nav.title}</Span>
               )}
               <div className="root-child">
-                <Card borderRadius={8} mt="1.25rem" py="0.5rem" boxShadow="large" minWidth="230px">
+                <Card
+                  borderRadius={8}
+                  mt="1.25rem"
+                  py="0.5rem"
+                  boxShadow="large"
+                  minWidth="230px"
+                >
                   {renderNestedNav(nav.child)}
                 </Card>
               </div>
@@ -104,10 +129,16 @@ export default function Navbar({ navListOpen }: NavbarProps) {
 
         if (nav.child) {
           return (
-            <Box className="parent" position="relative" minWidth="230px" key={nav.title}>
+            <Box
+              className="parent"
+              position="relative"
+              minWidth="230px"
+              key={nav.title}
+            >
               <MenuItem
                 color="gray.700"
-                style={{ display: "flex", justifyContent: "space-between" }}>
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
                 {nav.badge ? (
                   <Badge style={{ marginRight: "0px" }} title={nav.badge}>
                     {nav.title}
@@ -121,7 +152,12 @@ export default function Navbar({ navListOpen }: NavbarProps) {
               </MenuItem>
 
               <Box className="child" pl="0.5rem">
-                <Card py="0.5rem" borderRadius={8} boxShadow="large" minWidth="230px">
+                <Card
+                  py="0.5rem"
+                  borderRadius={8}
+                  boxShadow="large"
+                  minWidth="230px"
+                >
                   {renderNestedNav(nav.child)}
                 </Card>
               </Box>
@@ -134,11 +170,22 @@ export default function Navbar({ navListOpen }: NavbarProps) {
 
   return (
     <StyledNavbar>
-      <Container height="100%" display="flex" alignItems="center" justifyContent="space-between">
+      <Container
+        height="100%"
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+      >
         <Categories open={navListOpen}>
           <Button width="278px" height="40px" bg="body.default" variant="text">
             <Icon>categories</Icon>
-            <Typography ml="10px" flex="1 1 0" fontWeight="600" textAlign="left" color="text.muted">
+            <Typography
+              ml="10px"
+              flex="1 1 0"
+              fontWeight="600"
+              textAlign="left"
+              color="text.muted"
+            >
               Categories
             </Typography>
 
@@ -148,7 +195,9 @@ export default function Navbar({ navListOpen }: NavbarProps) {
           </Button>
         </Categories>
 
-        <FlexBox style={{ gap: 32 }}>{renderNestedNav(navbarNavigations, true)}</FlexBox>
+        <FlexBox style={{ gap: 32 }}>
+          {renderNestedNav(navbarNavigations, true)}
+        </FlexBox>
       </Container>
     </StyledNavbar>
   );

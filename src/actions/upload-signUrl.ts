@@ -1,6 +1,6 @@
 "use server";
-import { s3Client } from "@/lib/utils";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { s3Client } from "@lib/utils";
 import sharp from "sharp";
 
 

@@ -1,17 +1,27 @@
 "use client";
 
-import { useMemo, useReducer, useContext, createContext, PropsWithChildren } from "react";
+import {
+  useMemo,
+  useReducer,
+  useContext,
+  createContext,
+  PropsWithChildren,
+} from "react";
 
 // TYPES
-import { ActionType, InitialState, ContextProps } from "./types";
+import { ActionType, InitialState, ContextProps, Product } from "./types";
 // DATA
-import { INITIAL_CART } from "./data";
+import { INITIAL_CART, INITIAL_PRODUCTS } from "./data";
 
-const INITIAL_STATE = { cart: INITIAL_CART, isHeaderFixed: false };
+const INITIAL_STATE: InitialState = {
+  cart: INITIAL_CART,
+  products: INITIAL_PRODUCTS,
+  isHeaderFixed: false,
+};
 
 export const AppContext = createContext<ContextProps>({
   state: INITIAL_STATE,
-  dispatch: () => {}
+  dispatch: () => {},
 });
 
 const reducer = (state: InitialState, action: ActionType) => {
@@ -29,7 +39,6 @@ const reducer = (state: InitialState, action: ActionType) => {
         return { ...state, cart: filteredCart };
       }
 
-      // IF PRODUCT ALREADY EXITS IN CART
       if (exist) {
         const newCart = cartList.map((item) =>
           item.id === cartItem.id ? { ...item, qty: cartItem.qty } : item
@@ -39,6 +48,25 @@ const reducer = (state: InitialState, action: ActionType) => {
       }
 
       return { ...state, cart: [...cartList, cartItem] };
+
+    case "ADD_PRODUCT":
+      return { ...state, products: [...state.products, action.payload] };
+
+    case "REMOVE_PRODUCT":
+      return {
+        ...state,
+        products: state.products.filter(
+          (product) => product.id !== action.payload
+        ),
+      };
+
+    case "UPDATE_PRODUCT":
+      return {
+        ...state,
+        products: state.products.map((product) =>
+          product.id === action.payload.id ? action.payload : product
+        ),
+      };
 
     default: {
       return state;
@@ -50,7 +78,9 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const contextValue = useMemo(() => ({ state, dispatch }), [state, dispatch]);
 
-  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
+  );
 }
 
 export const useAppContext = () => useContext<ContextProps>(AppContext);

@@ -1,25 +1,32 @@
-// components/LogoutButton.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Logout } from "actions/logout";
-import { Button, IconButton } from "@component/buttons";
+import { signOut } from "next-auth/react";
+import { Button } from "@component/buttons";
+import { useAuth } from "@context/authContext";
+
 interface LogoutButtonProps {
   children?: React.ReactNode;
+  onLogout?: () => void;
 }
 
-export const LogoutButton = ({ children }: LogoutButtonProps) => {
+export const LogoutButton: React.FC<LogoutButtonProps> = ({
+  children,
+  onLogout,
+}) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useAuth();
 
   const onClick = async () => {
     try {
       setIsLoading(true);
-      await Logout();
+      await signOut({ redirect: false });
+      setUser(null); // Update the AuthContext
       toast.success("Logged out successfully");
-      // router.push("/");
+      onLogout?.(); // Call the onLogout prop if it exists
     } catch (error) {
       console.error(error);
       toast.error("Failed to logout. Please try again.");

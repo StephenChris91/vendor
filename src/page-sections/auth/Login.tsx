@@ -60,7 +60,7 @@ export default function Login() {
     <StyledRoot mx="auto" my="2rem" boxShadow="large" borderRadius={8}>
       <form className="content" onSubmit={handleSubmit}>
         <H3 textAlign="center" mb="0.5rem">
-          Welcome To Ecommerce
+          Welcome To Vendorspot
         </H3>
 
         <H5

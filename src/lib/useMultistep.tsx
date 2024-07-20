@@ -1,23 +1,25 @@
 "use client";
 
 import { useState } from "react";
-
-import { Button } from "@/components/ui/button";
-import { useFormContext } from "@/app/context/FormContext/formcontext";
-import { useCurrentUser } from "@/lib/use-session-client";
-import { createShop } from "@/actions/createshop";
-import { useToast } from "@/components/ui/use-toast";
-import { AddLogo } from "@/components/onboarding/addLogo";
-import AddBasicInfo from "@/components/onboarding/addBasicInfo";
-import AddCoverImage from "@/components/onboarding/addCoverImage";
-import AddPaymentInfo from "@/components/onboarding/addPaymentInfo";
-import AddShopAddress from "@/components/onboarding/addShopAddress";
-import AddShopSettings from "@/components/onboarding/addShopSettings";
-import ProcessPayment from "@/components/onboarding/processPayment";
-// import ProcessPayment from "@/components/dasboard/tables/createshop/processPayment";
+import { toast } from "react-hot-toast";
+import { Button } from "@component/buttons";
+import AddBasicInfo from "@component/onboarding/addBasicInfo";
+import AddLogo from "@component/onboarding/addLogo";
+import AddCoverImage from "@component/onboarding/addCoverImage";
+import AddPaymentInfo from "@component/onboarding/addPaymentInfo";
+import AddShopAddress from "@component/onboarding/addShopAddress";
+import AddShopSettings from "@component/onboarding/addShopSettings";
+import ProcessPayment from "@component/onboarding/processPayment";
+import { useFormContext } from "@context/formcontext";
+import { useCurrentUser } from "./use-session-client";
+import { createShop } from "actions/createshop";
+import { StyledRoot } from "@sections/auth/styles";
+import Box from "@component/Box";
+import FlexBox from "@component/FlexBox";
+import { H3 } from "@component/Typography";
 
 const steps = [
-  { component: AddLogo, label: "Shop Name" },
+  { component: AddLogo, label: "Shop Logo" },
   { component: AddBasicInfo, label: "Shop Details" },
   { component: AddCoverImage, label: "Cover Image" },
   { component: AddPaymentInfo, label: "Payment Info" },
@@ -30,9 +32,41 @@ const MultiStepForm = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const { formData, updateFormData } = useFormContext();
   const user = useCurrentUser();
-  const { toast } = useToast();
   const [isPaymentProcessed, setPaymentProcessed] = useState(false);
   const StepComponent = steps[currentStep].component;
+
+  const getStepProps = (step: number) => {
+    const commonProps = {
+      updateFormData,
+      userName: user?.firstname || "",
+      userEmail: user?.email || "",
+      userId: user?.id || "",
+    };
+
+    switch (step) {
+      case 0: // AddLogo
+        return { ...commonProps, logo: formData.logo };
+      case 1: // AddBasicInfo
+        return {
+          ...commonProps,
+          shopName: formData.shopName,
+          slug: formData.slug,
+          description: formData.description,
+        };
+      case 2: // AddCoverImage
+        return { ...commonProps, coverImage: formData.coverImage };
+      case 3: // AddPaymentInfo
+        return { ...commonProps, paymentInfo: formData.paymentInfo };
+      case 4: // AddShopAddress
+        return { ...commonProps, address: formData.address };
+      case 5: // AddShopSettings
+        return { ...commonProps, shopSettings: formData.shopSettings };
+      case 6: // ProcessPayment
+        return { ...commonProps, setPaymentProcessed };
+      default:
+        return commonProps;
+    }
+  };
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -51,50 +85,53 @@ const MultiStepForm = () => {
       const addshop = await createShop(formData);
       if (addshop.status === "success") {
         updateFormData({});
-        toast({
-          variant: "default",
-          title: "You Successfully created a shop! 😄",
-          description: "",
-          duration: 9000,
-        });
+        toast.success(`${addshop.message} 😄`);
         window.location.href = "/";
       } else {
-        alert(addshop.error || addshop.message || "An error occurred");
+        toast.error(addshop.error || addshop.message || "An error occurred");
       }
       console.log("Submitted data:", formData);
     } catch (error) {
       console.error("Error submitting form:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     }
   };
 
   return (
-    <div className="multi-step-form">
-      <div className="step-content">
-        <StepComponent
-          userName={user?.firstname || ""}
-          {...formData}
-          updateFormData={updateFormData}
-          setPaymentProcessed={setPaymentProcessed}
-        />
-      </div>
+    <StyledRoot mx="auto" my="2rem" boxShadow="large" borderRadius={8}>
+      <Box className="content" padding="2rem">
+        <H3 textAlign="center" mb="2rem">
+          {steps[currentStep].label}
+        </H3>
 
-      <div className="step-actions">
-        <Button
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
-          className="mr-2"
-        >
-          Previous
-        </Button>
-        {currentStep === steps.length - 1 ? (
-          <Button onClick={handleFinish} disabled={!isPaymentProcessed}>
-            Finish
+        <StepComponent {...getStepProps(currentStep)} />
+
+        <FlexBox justifyContent="space-between" mt="2rem">
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+          >
+            Previous
           </Button>
-        ) : (
-          <Button onClick={handleNext}>Next</Button>
-        )}
-      </div>
-    </div>
+          {currentStep === steps.length - 1 ? (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleFinish}
+              disabled={!isPaymentProcessed}
+            >
+              Finish
+            </Button>
+          ) : (
+            <Button variant="contained" color="primary" onClick={handleNext}>
+              Next
+            </Button>
+          )}
+        </FlexBox>
+      </Box>
+    </StyledRoot>
   );
 };
 

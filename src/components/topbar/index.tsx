@@ -52,7 +52,7 @@ export default function Topbar() {
 
         <FlexBox className="topbar-right" alignItems="center">
           <NavLink className="link" href="/">
-            Theme FAQ"s
+            Vendor FAQ"s
           </NavLink>
 
           <NavLink className="link" href="/">

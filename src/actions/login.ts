@@ -41,7 +41,7 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
     await signIn('credentials', {
         email,
         password,
-        redirectTo: vendorOnboard ? '/dashboard' : vendorNotOnboarded ? '/auth/onboarding' : '/profile'
+        redirectTo: vendorOnboard ? '/dashboard' : vendorNotOnboarded ? '/vendor/onboarding' : '/profile'
     });
 
     revalidatePath('/')

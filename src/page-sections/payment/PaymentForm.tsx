@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ChangeEvent, Fragment, useState } from "react";
 import { Formik } from "formik";
 import * as yup from "yup";
+import { usePaystackPayment } from "react-paystack";
+import { useFlutterwave, closePaymentModal } from "flutterwave-react-v3";
 
 import Box from "@component/Box";
 import Radio from "@component/radio";
@@ -16,21 +18,96 @@ import { Button } from "@component/buttons";
 import TextField from "@component/text-field";
 import Typography from "@component/Typography";
 import useWindowSize from "@hook/useWindowSize";
+import { useAuth } from "@context/authContext";
+import { useAppContext } from "@context/app-context/AppContext";
 
 export default function PaymentForm() {
   const router = useRouter();
   const width = useWindowSize();
   const [paymentMethod, setPaymentMethod] = useState("credit-card");
-
+  const { user } = useAuth();
   const isMobile = width < 769;
+  const { state, dispatch } = useAppContext();
+  const [loading, setLoading] = useState(false);
+
+  const totalAmount = state.cart.reduce(
+    (total, item) => total + item.price * item.qty,
+    0
+  );
+
+  const paystackConfig = {
+    reference: new Date().getTime().toString(),
+    email: user.email,
+    amount: totalAmount * 100, // Paystack uses kobo
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+  };
+
+  const flutterwaveConfig = {
+    public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY!,
+    tx_ref: new Date().getTime().toString(),
+    amount: totalAmount,
+    currency: "NGN",
+    payment_options: "card,mobilemoney,ussd",
+    customer: {
+      email: user.email,
+      phone_number: "",
+      name: user.name,
+    },
+    customizations: {
+      title: "Your Store Name",
+      description: "Payment for items in cart",
+      logo: "/path/to/your/logo.png",
+    },
+  };
+
+  const initializePaystackPayment = usePaystackPayment(paystackConfig);
+  const handleFlutterPayment = useFlutterwave(flutterwaveConfig);
 
   const handleFormSubmit = async (values: any) => {
     console.log(values);
     router.push("/payment");
   };
 
-  const handlePaymentMethodChange = ({ target: { name } }: ChangeEvent<HTMLInputElement>) => {
+  const handlePaymentMethodChange = ({
+    target: { name },
+  }: ChangeEvent<HTMLInputElement>) => {
     setPaymentMethod(name);
+  };
+
+  const handlePayment = () => {
+    setLoading(true);
+    if (paymentMethod === "paystack") {
+      initializePaystackPayment({
+        onSuccess: () => {
+          setLoading(false);
+          // Handle successful payment
+          console.log("Paystack payment successful");
+          router.push("/orders");
+          // Clear cart and redirect
+        },
+        onClose: () => {
+          setLoading(false);
+          console.log("Payment failed or was closed");
+        },
+      });
+    } else if (paymentMethod === "flutterwave") {
+      handleFlutterPayment({
+        callback: (response) => {
+          console.log(response);
+          setLoading(false);
+          // Handle successful payment
+          router.push("/orders");
+          console.log("Flutterwave payment successful");
+          closePaymentModal();
+          // Clear cart and redirect
+        },
+        onClose: () => {
+          setLoading(false);
+          console.log("Payment failed or was closed");
+          router.push("/orders");
+        },
+      });
+    }
   };
 
   return (
@@ -55,8 +132,16 @@ export default function PaymentForm() {
           <Formik
             onSubmit={handleFormSubmit}
             initialValues={initialValues}
-            validationSchema={checkoutSchema}>
-            {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
+            validationSchema={checkoutSchema}
+          >
+            {({
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              handleSubmit,
+            }) => (
               <form onSubmit={handleSubmit}>
                 <Box mb="1.5rem">
                   <Grid container horizontal_spacing={6} vertical_spacing={4}>
@@ -71,7 +156,6 @@ export default function PaymentForm() {
                         errorText={touched.card_no && errors.card_no}
                       />
                     </Grid>
-
                     <Grid item sm={6} xs={12}>
                       <TextField
                         fullwidth
@@ -84,7 +168,6 @@ export default function PaymentForm() {
                         errorText={touched.exp_date && errors.exp_date}
                       />
                     </Grid>
-
                     <Grid item sm={6} xs={12}>
                       <TextField
                         fullwidth
@@ -96,26 +179,28 @@ export default function PaymentForm() {
                         errorText={touched.name && errors.name}
                       />
                     </Grid>
-
                     <Grid item sm={6} xs={12}>
                       <TextField
                         fullwidth
-                        name="name"
+                        name="cvc"
+                        label="CVC"
                         onBlur={handleBlur}
-                        value={values.name}
-                        label="Name on Card"
+                        value={values.cvc}
                         onChange={handleChange}
-                        errorText={touched.name && errors.name}
+                        errorText={touched.cvc && errors.cvc}
                       />
                     </Grid>
                   </Grid>
                 </Box>
 
-                <Button variant="outlined" color="primary" mb="30px">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  mb="1.5rem"
+                >
                   Submit
                 </Button>
-
-                <Divider mb="1.5rem" mx="-2rem" />
               </form>
             )}
           </Formik>
@@ -123,35 +208,64 @@ export default function PaymentForm() {
 
         <Radio
           mb="1.5rem"
-          name="paypal"
+          name="paystack"
           color="secondary"
           onChange={handlePaymentMethodChange}
-          checked={paymentMethod === "paypal"}
+          checked={paymentMethod === "paystack"}
           label={
             <Typography ml="6px" fontWeight="600" fontSize="18px">
-              Pay with Paypal
+              Pay with Paystack
             </Typography>
           }
         />
-        <Divider mb="1.5rem" mx="-2rem" />
 
-        {paymentMethod === "paypal" && (
-          <Fragment>
-            <FlexBox alignItems="flex-end" mb="30px">
-              <TextField
-                fullwidth
-                name="email"
-                type="email"
-                label="Paypal Email"
-                mr={isMobile ? "1rem" : "30px"}
-              />
-              <Button variant="outlined" color="primary" type="button">
-                Submit
-              </Button>
-            </FlexBox>
+        <Divider mb="1.25rem" mx="-2rem" />
 
-            <Divider mb="1.5rem" mx="-2rem" />
-          </Fragment>
+        <Radio
+          mb="1.5rem"
+          name="flutterwave"
+          color="secondary"
+          onChange={handlePaymentMethodChange}
+          checked={paymentMethod === "flutterwave"}
+          label={
+            <Typography ml="6px" fontWeight="600" fontSize="18px">
+              Pay with Flutterwave
+            </Typography>
+          }
+        />
+
+        <Divider mb="1.25rem" mx="-2rem" />
+
+        {(paymentMethod === "paystack" || paymentMethod === "flutterwave") && (
+          <FlexBox alignItems="flex-end" mb="30px">
+            <TextField
+              fullwidth
+              name="email"
+              type="email"
+              label="Email"
+              value={user.email}
+              disabled
+              mr={isMobile ? "1rem" : "30px"}
+            />
+            <TextField
+              fullwidth
+              name="amount"
+              type="number"
+              label="Amount"
+              value={totalAmount}
+              disabled
+              mr={isMobile ? "1rem" : "30px"}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              onClick={handlePayment}
+              disabled={loading}
+            >
+              {loading ? "Processing..." : `Pay $${totalAmount.toFixed(2)}`}
+            </Button>
+          </FlexBox>
         )}
 
         <Radio
@@ -197,7 +311,6 @@ const initialValues = {
   shipping_country: "",
   shipping_address1: "",
   shipping_address2: "",
-
   billing_name: "",
   billing_email: "",
   billing_contact: "",
@@ -205,14 +318,15 @@ const initialValues = {
   billing_zip: "",
   billing_country: "",
   billing_address1: "",
-  billing_address2: ""
+  billing_address2: "",
 };
 
 const checkoutSchema = yup.object().shape({
   card_no: yup.string().required("required"),
   name: yup.string().required("required"),
   exp_date: yup.string().required("required"),
-  cvc: yup.string().required("required")
+  cvc: yup.string().required("required"),
+  // Uncomment these if you need them
   // shipping_zip: yup.string().required("required"),
   // shipping_country: yup.object().required("required"),
   // shipping_address1: yup.string().required("required"),

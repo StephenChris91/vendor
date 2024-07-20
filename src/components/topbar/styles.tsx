@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 const StyledTopbar = styled.div`
   background: ${getTheme("colors.secondary.main")};
-  color: white;
+  color: black;
   height: 40px;
   font-size: 12px;
 
@@ -31,7 +31,7 @@ const StyledTopbar = styled.div`
   .topbar-right {
     .link {
       padding-right: 30px;
-      color: white;
+      color: black;
     }
     .dropdown-handler {
       cursor: pointer;

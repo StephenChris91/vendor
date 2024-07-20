@@ -12,6 +12,8 @@ export type ExtendedUser = DefaultSession['user'] & {
     lastname: string,
     email: string,
     role: userRole,
+    password: string,
+    confirmPassword: string,
     isOnboardedVendor: boolean | null,
 }
 
