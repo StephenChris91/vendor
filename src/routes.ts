@@ -3,28 +3,29 @@
  * An array of routes accessible to all users who visit the site.
  * @type {string[]}
  */
-export const publicRoutes: (string | undefined)[] = ['/', '/address', '/address/:id', '/orders', '/orders/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shops', '/product', '/product/:id', '/product/search', '/product/search/:id', '/shops/:slug', '/track', '/compare', '/support', '/verification', '/checkout'];
+export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/admin/adminLogin', '/address', '/address/:id', '/orders', '/orders/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shops', '/product', '/product/:id', '/product/search', '/product/search/:id', '/shops/:slug', '/track', '/compare', '/support', '/verification', '/checkout'];
 
 /**
  * @description: Authenticated routes
  * An array of routes accessible to only authenticated users who visit the site.
  * @type {string[]}
  */
-export const authRoutes: (string | undefined)[] = ['/login', '/signup', '/new-password', '/vendor/onboarding'];
+export const authRoutes: (string | undefined)[] = ['/login', '/signup', '/new-password', '/onboarding'];
 
 /**
  * @description: Authenticated routes
  * An array of routes accessible to only users with admin roles. This routes will redirect to the admin dashboard
  * @type {string[]}
  */
-export const adminRoutes: (string | undefined)[] = ['/dashboard'];
+export const adminRoutes: (string | undefined)[] = ['/admin', '/admin/dashboard', "/admin/vendors", "/admin/products", "/admin/orders", "/admin/customers", "/admin/settings", "/admin/*"];
+
 
 /**
  * @description: Authenticated routes
  * An array of routes accessible to only users with vendor roles. This routes will redirect to the vendor dashboard
  * @type {string[]}
  */
-export const vendorRoutes = ['/vendor', '/vendor/account-settings', '/vendor/dashboard', '/vendor/products', '/vendor/products/:slug', '/vendor/products/create'];
+export const vendorRoutes = ['/vendor', '/vendor/account-settings', '/vendor/dashboard', '/vendor/products', '/vendor/products/:slug', '/vendor/products/create',];
 
 /**
  * @description: A prefix for api auth routes
@@ -43,10 +44,10 @@ export const DEFAULT_LOGIN_REDIRECT = '/settings';
  * @description: A default redirect path for admin users
  * @type {string}
  */
-export const DEFAULT_ADMIN_REDIRECT = '/dashboard';
+export const DEFAULT_ADMIN_REDIRECT = '';
 
 /**
  * @description: A default redirect path for vendor users
  * @type {string}
  */
-export const DEFAULT_VENDOR_REDIRECT = '/dashboard';
+export const DEFAULT_VENDOR_REDIRECT = '/vendor/dashboard';

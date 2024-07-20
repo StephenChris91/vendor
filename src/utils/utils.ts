@@ -81,7 +81,7 @@ export function currency(price: number, fraction: number = 2) {
   // currency: publicRuntimeConfig.currency,
 
   const formatCurrency = new Intl.NumberFormat(undefined, {
-    currency: "USD",
+    currency: "NGN",
     style: "currency",
     maximumFractionDigits: fraction,
     minimumFractionDigits: fraction

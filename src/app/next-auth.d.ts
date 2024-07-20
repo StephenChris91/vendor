@@ -2,9 +2,9 @@ import NextAuth, { type DefaultSession } from "next-auth"
 // import { db } from "@/prisma/prisma";
 // import { userRole } from "@prisma/client";
 import NextAuth from "next-auth/next";
+import { userRole } from "@prisma/client";
 
-
-export type userRole = 'Admin' | 'Vendor' | 'Customer' | null;
+// export type userRole = 'Admin' | 'Vendor' | 'Customer' | null;
 
 
 export type ExtendedUser = DefaultSession['user'] & {

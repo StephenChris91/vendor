@@ -1,5 +1,5 @@
+// actions/login.ts
 "use server"
-
 
 import { z } from 'zod';
 import { loginSchema } from 'schemas';
@@ -24,6 +24,10 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
         return { error: 'This user does not exist!' };
     }
 
+    if (existingUser.role === 'Admin') {
+        return { redirect: '/admin/login' };
+    }
+
     if (!existingUser.emailVerified) {
         const verificationToken = await generateVerificationToken(existingUser.email);
 
@@ -38,13 +42,20 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
     const vendorOnboard = existingUser.role === 'Vendor' && existingUser.isOnboardedVendor;
     const vendorNotOnboarded = existingUser.role === 'Vendor' && !existingUser.isOnboardedVendor;
 
-    await signIn('credentials', {
-        email,
-        password,
-        redirectTo: vendorOnboard ? '/dashboard' : vendorNotOnboarded ? '/vendor/onboarding' : '/profile'
-    });
+    try {
+        await signIn('credentials', {
+            email,
+            password,
+            redirectTo: vendorOnboard ? '/vendor/dashboard' : vendorNotOnboarded ? '/vendor/onboarding' : '/profile'
+        });
 
-    revalidatePath('/')
+        revalidatePath('/')
 
-    return { success: 'Logged in successfully' };
+        return { success: 'Logged in successfully' };
+    } catch (error) {
+        if ((error as Error).message.includes("CredentialsSignin")) {
+            return { error: 'Invalid email or password' };
+        }
+        throw error;
+    }
 };

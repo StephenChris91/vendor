@@ -11,10 +11,9 @@ import {
     authRoutes,
     apiAuthPrefix,
     adminRoutes,
-    DEFAULT_ADMIN_REDIRECT
+    vendorRoutes
 } from 'routes';
 
-// Helper function to filter undefined values
 const filterRoutes = (routes: (string | undefined)[]): string[] => {
     return routes.filter((route): route is string => typeof route === 'string');
 };
@@ -33,16 +32,14 @@ export default auth((req) => {
     const isPublicRoute = matchRoute(nextUrl.pathname, filterRoutes(publicRoutes));
     const isAuthRoute = matchRoute(nextUrl.pathname, filterRoutes(authRoutes));
     const isAdminRoute = matchRoute(nextUrl.pathname, filterRoutes(adminRoutes));
-    const isVerificationRoute = nextUrl.pathname === '/verification';
+    const isVendorRoute = matchRoute(nextUrl.pathname, filterRoutes(vendorRoutes));
 
+    // Allow API routes to pass through
     if (isApiAuthRoute) {
         return null;
     }
 
-    if (isVerificationRoute) {
-        return null; // Allow access to verification route without redirection
-    }
-
+    // Handle auth routes
     if (isAuthRoute) {
         if (isLoggedIn) {
             return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
@@ -50,17 +47,17 @@ export default auth((req) => {
         return null;
     }
 
-    if (!isLoggedIn && !isPublicRoute) {
-        let from = nextUrl.pathname;
-        if (nextUrl.search) {
-            from += nextUrl.search;
-        }
-        return NextResponse.redirect(new URL("/verification", nextUrl));
-    }
+    // // Handle protected routes
+    // if (!isLoggedIn && !isPublicRoute) {
+    //     let from = nextUrl.pathname;
+    //     if (nextUrl.search) {
+    //         from += nextUrl.search;
+    //     }
+    //     return NextResponse.redirect(new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl));
+    // }
 
-    if (isAdminRoute && req.auth?.user?.role !== "Admin") {
-        return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
-    }
+    // For logged-in users, we'll handle specific role-based redirects in the component level
+    // This allows the application to load and then make decisions based on the user's role
 
     return null;
 });

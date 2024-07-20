@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "vendor",
+			"path": "."
+		},
+		{
+			"name": "actions",
+			"path": "../../vendorv2/actions"
+		}
+	],
+	"settings": {}
+}

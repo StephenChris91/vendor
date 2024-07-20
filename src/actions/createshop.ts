@@ -1,13 +1,12 @@
 'use server';
-import { shopType } from './../app/types/types.d';
 // actions/createshop.ts
 
-import { shopSchema } from "@/app/schemas";
-import { db } from "@/prisma/prisma";
+import { shopSchema } from "schemas";
+import { db } from "prisma";
 import { z } from "zod";
 // import { getSessionContext } from '@blitzjs/server';
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { auth } from "auth";
 export async function createShop(values: z.infer<typeof shopSchema>) {
     const session = await auth();
 
@@ -88,26 +87,26 @@ export const getShopByName = async (shopname: string) => {
 
 
 export const getShopById = async (id: string) => {
-  try {
-    const shop = await db.shop.findUnique({
-      where: { id },
-    });
-    return shop;
-  } catch (error) {
-    console.error("Failed to fetch shop by ID:", error);
-    return null;
-  }
+    try {
+        const shop = await db.shop.findUnique({
+            where: { id },
+        });
+        return shop;
+    } catch (error) {
+        console.error("Failed to fetch shop by ID:", error);
+        return null;
+    }
 };
 
 export const getShopWithProductsById = async (id: string) => {
     const shop = await db.shop.findUnique({
-      where: { id },
-      include: {
-        products: true, // Include products related to the shop
-      },
+        where: { id },
+        include: {
+            products: true, // Include products related to the shop
+        },
     });
-  
+
     return shop;
-  };
+};
 
 

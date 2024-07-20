@@ -40,7 +40,9 @@ export default function Login() {
         toast.error(result.error);
       } else if (result.success) {
         toast.success(result.success);
-        // The redirection is handled by the server action, so we don't need to do it here
+        // The redirection is handled by the server action
+      } else if (result.redirect) {
+        router.push(result.redirect);
       }
     } catch (error) {
       toast.error("An unexpected error occurred");

@@ -13,7 +13,7 @@ import ProcessPayment from "@component/onboarding/processPayment";
 import { useFormContext } from "@context/formcontext";
 import { useCurrentUser } from "./use-session-client";
 import { createShop } from "actions/createshop";
-import { StyledRoot } from "@sections/auth/styles";
+import { OnboardingStyledRoot } from "@sections/auth/styles";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H3 } from "@component/Typography";
@@ -44,24 +44,30 @@ const MultiStepForm = () => {
     };
 
     switch (step) {
-      case 0: // AddLogo
-        return { ...commonProps, logo: formData.logo };
-      case 1: // AddBasicInfo
+      case 0:
+        return { ...commonProps, initialLogo: formData.logo || "" };
+      case 1:
         return {
           ...commonProps,
-          shopName: formData.shopName,
-          slug: formData.slug,
-          description: formData.description,
+          initialShopName: formData.shopName || "",
+          initialSlug: formData.slug || "",
+          initialDescription: formData.description || "",
         };
-      case 2: // AddCoverImage
-        return { ...commonProps, coverImage: formData.coverImage };
-      case 3: // AddPaymentInfo
-        return { ...commonProps, paymentInfo: formData.paymentInfo };
-      case 4: // AddShopAddress
-        return { ...commonProps, address: formData.address };
-      case 5: // AddShopSettings
-        return { ...commonProps, shopSettings: formData.shopSettings };
-      case 6: // ProcessPayment
+      case 2:
+        return { ...commonProps, initialCoverImage: formData.coverImage || "" };
+      case 3:
+        return {
+          ...commonProps,
+          initialPaymentInfo: formData.paymentInfo || {},
+        };
+      case 4:
+        return { ...commonProps, initialAddress: formData.address || {} };
+      case 5:
+        return {
+          ...commonProps,
+          initialShopSettings: formData.shopSettings || {},
+        };
+      case 6:
         return { ...commonProps, setPaymentProcessed };
       default:
         return commonProps;
@@ -98,13 +104,15 @@ const MultiStepForm = () => {
   };
 
   return (
-    <StyledRoot mx="auto" my="2rem" boxShadow="large" borderRadius={8}>
-      <Box className="content" padding="2rem">
+    <OnboardingStyledRoot>
+      <Box padding="2rem" width="100%">
         <H3 textAlign="center" mb="2rem">
           {steps[currentStep].label}
         </H3>
 
-        <StepComponent {...getStepProps(currentStep)} />
+        <Box mb="2rem">
+          <StepComponent {...getStepProps(currentStep)} />
+        </Box>
 
         <FlexBox justifyContent="space-between" mt="2rem">
           <Button
@@ -131,7 +139,7 @@ const MultiStepForm = () => {
           )}
         </FlexBox>
       </Box>
-    </StyledRoot>
+    </OnboardingStyledRoot>
   );
 };
 

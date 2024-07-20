@@ -1,6 +1,6 @@
 import { auth } from "auth";
-import { db } from "prisma";
 import axios from "axios";
+import { db } from "../../prisma/prisma";
 
 interface PaymentConfig {
     email: string;
@@ -39,7 +39,7 @@ export async function initializePayment(config: PaymentConfig): Promise<PaymentR
             },
             {
                 headers: {
-                    Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}`,
                     'Content-Type': 'application/json',
                 },
             }
@@ -63,15 +63,13 @@ export async function initializePayment(config: PaymentConfig): Promise<PaymentR
     }
 }
 
+
+
+
+
 export async function verifyPayment(reference: string): Promise<boolean> {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-        throw new Error("User not authenticated");
-    }
-
     try {
-        const response = await axios.get<PaymentResponse>(
+        const response = await axios.get(
             `https://api.paystack.co/transaction/verify/${reference}`,
             {
                 headers: {
@@ -80,16 +78,19 @@ export async function verifyPayment(reference: string): Promise<boolean> {
             }
         );
 
-        if (response.data.status && response.data?.message === 'success') {
+        if (response.data.status && response.data.data.status === 'success') {
+            // Extract the user ID from the reference
+            const userId = reference.split('-')[1]; // Assuming the reference format is REF-userId-timestamp
+
+            // Update the user's payment status and reference
             await db.user.update({
-                where: {
-                    id: session.user.id,
-                },
+                where: { id: userId },
                 data: {
                     hasPaid: true,
                     paymentReference: reference,
                 },
             });
+
             return true;
         } else {
             return false;

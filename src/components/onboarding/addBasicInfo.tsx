@@ -7,7 +7,12 @@ import { StyledRoot } from "@sections/auth/styles";
 import TextField from "@component/text-field";
 import { H3, H5 } from "@component/Typography";
 
-const AddBasicInfo = ({ updateFormData, shopName, slug, description }) => {
+const AddBasicInfo = ({
+  updateFormData,
+  initialShopName,
+  initialSlug,
+  initialDescription,
+}) => {
   const formSchema = yup.object().shape({
     shopName: yup.string().required("Shop name is required"),
     slug: yup
@@ -22,13 +27,17 @@ const AddBasicInfo = ({ updateFormData, shopName, slug, description }) => {
 
   const formik = useFormik({
     initialValues: {
-      shopName: shopName || "",
-      slug: slug || "",
-      description: description || "",
+      shopName: initialShopName,
+      slug: initialSlug,
+      description: initialDescription,
     },
     validationSchema: formSchema,
     onSubmit: (values) => {
-      updateFormData(values);
+      updateFormData({
+        shopName: values.shopName,
+        slug: values.slug,
+        description: values.description,
+      });
     },
   });
 
@@ -43,58 +52,52 @@ const AddBasicInfo = ({ updateFormData, shopName, slug, description }) => {
   };
 
   return (
-    <StyledRoot mx="auto" my="2rem" boxShadow="large" borderRadius={8}>
-      <form className="content">
-        <H3 textAlign="center" mb="0.5rem">
-          Shop Details
-        </H3>
+    <form className="content">
+      <H5
+        fontWeight="600"
+        fontSize="12px"
+        color="gray.800"
+        textAlign="center"
+        mb="2.25rem"
+      >
+        Please fill all fields to continue
+      </H5>
 
-        <H5
-          fontWeight="600"
-          fontSize="12px"
-          color="gray.800"
-          textAlign="center"
-          mb="2.25rem"
-        >
-          Please fill all fields to continue
-        </H5>
+      <TextField
+        fullwidth
+        mb="0.75rem"
+        name="shopName"
+        label="Shop Name"
+        onBlur={handleBlur}
+        value={formik.values.shopName}
+        onChange={handleChange}
+        errorText={formik.touched.shopName && formik.errors.shopName}
+      />
 
-        <TextField
-          fullwidth
-          mb="0.75rem"
-          name="shopName"
-          label="Shop Name"
-          onBlur={handleBlur}
-          value={formik.values.shopName}
-          onChange={handleChange}
-          errorText={formik.touched.shopName && formik.errors.shopName}
-        />
+      <TextField
+        fullwidth
+        mb="0.75rem"
+        name="slug"
+        label="Slug"
+        onBlur={handleBlur}
+        value={formik.values.slug}
+        onChange={handleChange}
+        errorText={formik.touched.slug && formik.errors.slug}
+      />
 
-        <TextField
-          fullwidth
-          mb="0.75rem"
-          name="slug"
-          label="Slug"
-          onBlur={handleBlur}
-          value={formik.values.slug}
-          onChange={handleChange}
-          errorText={formik.touched.slug && formik.errors.slug}
-        />
-
-        <TextField
-          fullwidth
-          mb="0.75rem"
-          name="description"
-          label="Description"
-          onBlur={handleBlur}
-          value={formik.values.description}
-          onChange={handleChange}
-          errorText={formik.touched.description && formik.errors.description}
-          multiline
-          rows={4}
-        />
-      </form>
-    </StyledRoot>
+      <TextField
+        fullwidth
+        mb="0.75rem"
+        name="description"
+        label="Description"
+        onBlur={handleBlur}
+        value={formik.values.description}
+        onChange={handleChange}
+        errorText={formik.touched.description && formik.errors.description}
+        multiline
+        rows={4}
+      />
+    </form>
   );
 };
 
