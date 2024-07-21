@@ -2,20 +2,18 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import NextAuth from "next-auth";
 import authConfig from "auth.config";
 import { db } from '../prisma/prisma';
-import { getUserById } from 'lib/data/user';
-import { userRole } from 'app/next-auth';
-// import { userRole } from "@prisma/client"
+import { getUserByEmail, getUserById } from 'lib/data/user';
+import { userRole } from '@prisma/client';
 import type { Adapter } from 'next-auth/adapters';
 
-
-
 export const {
-
     handlers: { GET, POST },
     auth,
     signIn,
     signOut
 } = NextAuth({
+    adapter: PrismaAdapter(db) as Adapter,
+    session: { strategy: 'jwt' },
     pages: {
         signIn: '/app/auth/login',
         error: '/app/auth/error',
@@ -34,62 +32,38 @@ export const {
     },
     callbacks: {
         async signIn({ user, account }) {
-            //allow oauth access without email verification
             if (account && account.provider !== 'credentials') return true;
 
-            const existingUser = await getUserById(user?.id ?? '');
+            const existingUser = await getUserByEmail(user?.email ?? '');
 
             if (!existingUser || !existingUser.emailVerified) return false;
 
-            //TODO add 2fa check
-
             return true;
         },
+        async jwt({ token, user }) {
+            if (user) {
+                token.role = user.role;
+                token.firstname = user.firstname;
+                token.lastname = user.lastname;
+                token.isOnboardedVendor = user.isOnboardedVendor;
+            }
+
+            return token;
+        },
         async session({ token, session }) {
-            // console.log({sessionToken: token})
-            if (token.sub && session.user) {
-                session.user.id = token.sub;
-            }
-
-            if (token.role && session.user) {
+            if (session.user) {
+                session.user.id = token.sub as string;
                 session.user.role = token.role as userRole;
-            }
-
-            if (token.emailVerified && session.user) {
-                session.user.emailVerified = new Date(token.emailVerified as string)
-            }
-
-            if (token.firstname && session.user) {
+                session.user.emailVerified = token.emailVerified as Date;
                 session.user.firstname = token.firstname as string;
-            }
-
-            if (token.lastname && session.user) {
-                session.user.lastname = token.lastname as string;;
-            }
-
-            if (token.isOnboardedVendor && session.user) {
+                session.user.lastname = token.lastname as string;
                 session.user.isOnboardedVendor = token.isOnboardedVendor as boolean;
             }
 
+            console.log("Session in callback:", session);
 
-            return session
-        },
-        async jwt({ token }) {
-            if (!token.sub) return token;
-
-            const existingUser = await getUserById(token.sub)
-
-            if (!existingUser) return token;
-
-            token.role = existingUser.role
-            token.emailVerified = existingUser.emailVerified
-            token.firstname = existingUser.firstname
-            token.lastname = existingUser.lastname
-            token.isOnboardedVendor = existingUser.isOnboardedVendor
-            return token
+            return session;
         }
     },
-    adapter: PrismaAdapter(db) as Adapter,
-    session: { strategy: 'jwt' },
     ...authConfig,
-})
+});

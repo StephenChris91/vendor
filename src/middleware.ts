@@ -1,67 +1,98 @@
-import NextAuth from 'next-auth';
-import authConfig from 'auth.config';
-import { pathToRegexp } from 'path-to-regexp';
-import { NextResponse } from 'next/server';
-
-const { auth } = NextAuth(authConfig);
-
+import NextAuth from "next-auth";
+import authConfig from "auth.config";
 import {
     DEFAULT_LOGIN_REDIRECT,
+    DEFAULT_ADMIN_REDIRECT,
+    DEFAULT_VENDOR_REDIRECT,
     publicRoutes,
     authRoutes,
     apiAuthPrefix,
     adminRoutes,
     vendorRoutes
-} from 'routes';
+} from "routes";
 
-const filterRoutes = (routes: (string | undefined)[]): string[] => {
-    return routes.filter((route): route is string => typeof route === 'string');
-};
-
-const matchRoute = (path: string, routes: string[]): boolean => {
-    return routes.some(route => {
-        const regex = pathToRegexp(route);
-        return regex.test(path);
-    });
-};
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
     const { nextUrl } = req;
     const isLoggedIn = !!req.auth;
-    const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-    const isPublicRoute = matchRoute(nextUrl.pathname, filterRoutes(publicRoutes));
-    const isAuthRoute = matchRoute(nextUrl.pathname, filterRoutes(authRoutes));
-    const isAdminRoute = matchRoute(nextUrl.pathname, filterRoutes(adminRoutes));
-    const isVendorRoute = matchRoute(nextUrl.pathname, filterRoutes(vendorRoutes));
 
-    // Allow API routes to pass through
+    console.log("Middleware - Auth:", JSON.stringify(req.auth, null, 2));
+    console.log("Middleware - Is logged in:", isLoggedIn);
+    console.log("Middleware - Requested path:", nextUrl.pathname);
+    console.log("Middleware - User role:", req.auth?.user?.role);
+
+    const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+    const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+    const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+    const isAdminRoute = adminRoutes.some(route => nextUrl.pathname.startsWith(route));
+    const isVendorRoute = vendorRoutes.some(route => nextUrl.pathname.startsWith(route));
+
     if (isApiAuthRoute) {
         return null;
     }
 
-    // Handle auth routes
     if (isAuthRoute) {
         if (isLoggedIn) {
-            return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+            // Redirect based on user role
+            if (req.auth?.user?.role === "Admin") {
+                return Response.redirect(new URL(DEFAULT_ADMIN_REDIRECT, nextUrl));
+            } else if (req.auth?.user?.role === "Vendor") {
+                return Response.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
+            } else {
+                return Response.redirect(new URL('/', nextUrl));
+            }
         }
         return null;
     }
 
-    // // Handle protected routes
-    // if (!isLoggedIn && !isPublicRoute) {
-    //     let from = nextUrl.pathname;
-    //     if (nextUrl.search) {
-    //         from += nextUrl.search;
-    //     }
-    //     return NextResponse.redirect(new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl));
-    // }
+    if (!isLoggedIn && !isPublicRoute) {
+        let callbackUrl = nextUrl.pathname;
+        if (nextUrl.search) {
+            callbackUrl += nextUrl.search;
+        }
 
-    // For logged-in users, we'll handle specific role-based redirects in the component level
-    // This allows the application to load and then make decisions based on the user's role
+        const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+
+        return Response.redirect(new URL(
+            `/login?callbackUrl=${encodedCallbackUrl}`,
+            nextUrl
+        ));
+    }
+
+    if (isLoggedIn) {
+        if (isAdminRoute && req.auth?.user?.role !== "Admin") {
+            return Response.redirect(new URL("/", nextUrl));
+        }
+
+        if (isVendorRoute && req.auth?.user?.role !== "Vendor") {
+            return Response.redirect(new URL("/", nextUrl));
+        }
+
+        // If logged in and trying to access login page, redirect based on role
+        if (nextUrl.pathname === '/login') {
+            if (req.auth?.user?.role === "Admin") {
+                return Response.redirect(new URL(DEFAULT_ADMIN_REDIRECT, nextUrl));
+            } else if (req.auth?.user?.role === "Vendor") {
+                return Response.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
+            } else {
+                return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+            }
+        }
+    }
+
+    // Allow access to the default redirect paths
+    if (isLoggedIn && (
+        nextUrl.pathname === DEFAULT_LOGIN_REDIRECT ||
+        nextUrl.pathname === DEFAULT_ADMIN_REDIRECT ||
+        nextUrl.pathname === DEFAULT_VENDOR_REDIRECT
+    )) {
+        return null;
+    }
 
     return null;
-});
+})
 
 export const config = {
-    matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
-};
+    matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+}

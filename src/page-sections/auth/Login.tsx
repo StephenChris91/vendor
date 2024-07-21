@@ -18,14 +18,22 @@ import { H3, H5, H6, SemiSpan, Small, Span } from "@component/Typography";
 // STYLED COMPONENT
 import { StyledRoot } from "./styles";
 import { login } from "actions/login";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function Login() {
   const router = useRouter();
   const { passwordVisibility, togglePasswordVisibility } = useVisibility();
   const [isLoading, setIsLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>("");
 
   const initialValues = { email: "", password: "" };
+  const session = useSession();
+  useEffect(() => {
+    async function logUser() {
+      console.log(session);
+    }
+  }, []);
 
   const formSchema = yup.object().shape({
     email: yup.string().email("invalid email").required("${path} is required"),
@@ -40,9 +48,11 @@ export default function Login() {
         toast.error(result.error);
       } else if (result.success) {
         toast.success(result.success);
-        // The redirection is handled by the server action
-      } else if (result.redirect) {
-        router.push(result.redirect);
+        console.log(result);
+        // Handle client-side navigation based on user role
+        if (result.redirectTo) {
+          router.push(result.redirectTo);
+        }
       }
     } catch (error) {
       toast.error("An unexpected error occurred");
@@ -170,7 +180,7 @@ export default function Login() {
         </FlexBox>
 
         <FlexBox justifyContent="center" mb="1.25rem">
-          <SemiSpan>Don’t have account?</SemiSpan>
+          <SemiSpan>Don't have account?</SemiSpan>
           <Link href="/signup">
             <H6 ml="0.5rem" borderBottom="1px solid" borderColor="gray.900">
               Sign Up
@@ -178,6 +188,13 @@ export default function Login() {
           </Link>
         </FlexBox>
       </form>
+
+      <Box mt="1rem" p="1rem" bg="gray.100">
+        <H6>Debug Info:</H6>
+        <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+          {debugInfo}
+        </pre>
+      </Box>
 
       <FlexBox justifyContent="center" bg="gray.200" py="19px">
         <SemiSpan>Forgot your password?</SemiSpan>

@@ -1,37 +1,21 @@
-// app/admin/layout.tsx
-import { ReactNode } from "react";
-import { redirect } from "next/navigation";
-import { auth } from "auth";
-import Box from "@component/Box";
+import { PropsWithChildren } from "react";
 import FlexBox from "@component/FlexBox";
-import AdminSidebar from "@component/admin/adminSidebar";
 import AdminHeader from "@component/admin/adminHeader";
+import { useCurrentUser } from "@lib/use-session-server";
+import AdminSidebar from "@component/admin/adminSidebar";
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  const session = await auth();
-
-  if (!session || session.user.role !== "Admin") {
-    redirect("/admin/login");
-  }
-
+export default async function Layout({ children }: PropsWithChildren) {
+  const currentUser = await useCurrentUser();
   return (
-    <FlexBox height="100vh" width="100%">
+    <FlexBox
+      minHeight="100vh"
+      alignItems="center"
+      flexDirection="column"
+      justifyContent="center"
+    >
+      <AdminHeader user={currentUser} />
       <AdminSidebar />
-      <Box flex={1} display="flex" flexDirection="column" overflow="hidden">
-        <AdminHeader user={session.user} />
-        <Box
-          flex={1}
-          overflow="auto"
-          backgroundColor="body.paper"
-          padding="2rem"
-        >
-          {children}
-        </Box>
-      </Box>
+      {children}
     </FlexBox>
   );
 }

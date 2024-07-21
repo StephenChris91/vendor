@@ -26,7 +26,7 @@ export const adminLogin = async (values: z.infer<typeof adminLoginSchema>) => {
         await signIn('credentials', {
             email,
             password,
-            redirectTo: '/dashboard'
+            redirectTo: '/'
         });
 
         revalidatePath('/')

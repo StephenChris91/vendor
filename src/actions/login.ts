@@ -24,10 +24,6 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
         return { error: 'This user does not exist!' };
     }
 
-    if (existingUser.role === 'Admin') {
-        return { redirect: '/admin/login' };
-    }
-
     if (!existingUser.emailVerified) {
         const verificationToken = await generateVerificationToken(existingUser.email);
 
@@ -41,17 +37,22 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
 
     const vendorOnboard = existingUser.role === 'Vendor' && existingUser.isOnboardedVendor;
     const vendorNotOnboarded = existingUser.role === 'Vendor' && !existingUser.isOnboardedVendor;
+    const isAdmin = existingUser.role === "Admin";
 
     try {
         await signIn('credentials', {
             email,
             password,
-            redirectTo: vendorOnboard ? '/vendor/dashboard' : vendorNotOnboarded ? '/vendor/onboarding' : '/profile'
         });
 
         revalidatePath('/')
 
-        return { success: 'Logged in successfully' };
+        let redirectTo = '/profile'; // Default redirect
+        if (isAdmin) redirectTo = '/admin';
+        else if (vendorOnboard) redirectTo = '/vendor/dashboard';
+        else if (vendorNotOnboarded) redirectTo = '/onboarding';
+
+        return { success: 'Logged in successfully', redirectTo };
     } catch (error) {
         if ((error as Error).message.includes("CredentialsSignin")) {
             return { error: 'Invalid email or password' };

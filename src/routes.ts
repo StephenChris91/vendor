@@ -44,7 +44,7 @@ export const DEFAULT_LOGIN_REDIRECT = '/settings';
  * @description: A default redirect path for admin users
  * @type {string}
  */
-export const DEFAULT_ADMIN_REDIRECT = '';
+export const DEFAULT_ADMIN_REDIRECT = '/admin';
 
 /**
  * @description: A default redirect path for vendor users
