@@ -1,14 +1,8 @@
+import Providers from "@utils/providers";
+import SessionProviderServer from "@utils/session-provider-server";
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
 // THEME PROVIDER
-import StyledComponentsRegistry from "@lib/registry";
-// APP PROVIDER
-import { AppProvider } from "@context/app-context";
-import StyledContext from "@context/StyledContext";
-import { SessionProvider } from "next-auth/react";
-import { auth } from "auth";
-import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "@context/authContext";
 
 const openSans = Open_Sans({ subsets: ["latin"] });
 
@@ -25,20 +19,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
   return (
     <html lang="en">
       <body className={openSans.className}>
-        <SessionProvider session={session}>
-          <AppProvider>
-            <StyledComponentsRegistry>
-              <AuthProvider>
-                <StyledContext>{children}</StyledContext>
-              </AuthProvider>
-            </StyledComponentsRegistry>
-            <Toaster />
-          </AppProvider>
-        </SessionProvider>
+        <SessionProviderServer>
+          <Providers>{children}</Providers>
+        </SessionProviderServer>
       </body>
     </html>
   );

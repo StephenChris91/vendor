@@ -12,11 +12,11 @@ import { Button } from "@component/buttons";
 
 const adminNavItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: "dashboard" },
-  { href: "/admin/vendors", label: "Vendors", icon: "shop" },
-  { href: "/admin/products", label: "Products", icon: "products" },
-  { href: "/admin/orders", label: "Orders", icon: "order" },
-  { href: "/admin/customers", label: "Customers", icon: "buyer" },
-  { href: "/admin/settings", label: "Settings", icon: "settings" },
+  { href: "/admin/vendors", label: "Vendors", icon: "vendor" },
+  { href: "/admin/products", label: "Products", icon: "product" },
+  { href: "/admin/orders", label: "Orders", icon: "bag" },
+  { href: "/admin/customers", label: "Customers", icon: "users" },
+  { href: "/admin/settings", label: "Settings", icon: "gear" },
 ];
 
 export default function AdminSidebar() {
@@ -28,13 +28,13 @@ export default function AdminSidebar() {
   return (
     <Box
       width={isOpen ? "250px" : "70px"}
-      backgroundColor="primary.800"
+      backgroundColor="gray.200"
       height="100%"
       padding="1rem"
       transition="width 0.3s ease"
     >
       <FlexBox justifyContent="space-between" alignItems="center" mb="2rem">
-        {isOpen && <H6 color="white">Admin Panel</H6>}
+        {isOpen && <H6>Admin Panel</H6>}
         <Button p="6px" bg="gray.200" onClick={toggleSidebar}>
           <Icon size="20px">{isOpen ? "chevron-left" : "chevron-right"}</Icon>
         </Button>
@@ -49,7 +49,7 @@ export default function AdminSidebar() {
               backgroundColor={
                 pathname === item.href ? "primary.main" : "transparent"
               }
-              color={pathname === item.href ? "secondary.text" : "white"}
+              color={pathname === item.href ? "primary.text" : "text.primary"}
               alignItems="center"
             >
               <Icon
