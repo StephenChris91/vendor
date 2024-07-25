@@ -1,7 +1,7 @@
-import OrdersPage from "@component/admin/orders-page";
+import CustomersPage from "@component/admin/customers-page";
 
 const page = () => {
-  return <OrdersPage />;
+  return <CustomersPage />;
 };
 
 export default page;

@@ -45,7 +45,7 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, icon, trend }) => {
     <StyledCard>
       <FlexBox alignItems="center">
         <IconWrapper>
-          <Icon size="28px" color="primary.main">
+          <Icon size="28px" color="primary">
             {icon}
           </Icon>
         </IconWrapper>
@@ -56,10 +56,7 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, icon, trend }) => {
           <H3>{value}</H3>
           {trend && (
             <FlexBox alignItems="center" mt="0.5rem">
-              <Icon
-                size="16px"
-                color={trend.isPositive ? "success.main" : "error.main"}
-              >
+              <Icon size="16px" color={trend.isPositive ? "primary" : "error"}>
                 {trend.isPositive ? "arrow-up" : "arrow-down"}
               </Icon>
               <H6

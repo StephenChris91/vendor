@@ -8,6 +8,9 @@ import { Button } from "@component/buttons";
 import Pagination from "@component/pagination";
 import Checkbox from "@component/CheckBox";
 import Icon from "@component/icon/Icon";
+import Modal from "@component/Modal";
+import Select from "@component/Select";
+import TextField from "@component/text-field";
 
 const TableWrapper = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -73,14 +76,17 @@ interface CustomerListProps {
   customers: Customer[];
   onSelect: (customerId: string, isSelected: boolean) => void;
   selectedCustomers: string[];
+  onUpdateCustomer: (customer: Partial<Customer>) => void;
 }
 
 const CustomerList: React.FC<CustomerListProps> = ({
   customers,
   onSelect,
   selectedCustomers,
+  onUpdateCustomer,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const itemsPerPage = 10;
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -90,6 +96,27 @@ const CustomerList: React.FC<CustomerListProps> = ({
   const handleCheckboxChange = (customerId: string) => {
     const isSelected = selectedCustomers.includes(customerId);
     onSelect(customerId, !isSelected);
+  };
+
+  const handleEditClick = (customer: Customer) => {
+    setEditingCustomer(customer);
+  };
+
+  const handleEditClose = () => {
+    setEditingCustomer(null);
+  };
+
+  const handleEditSave = () => {
+    if (editingCustomer) {
+      onUpdateCustomer(editingCustomer);
+      setEditingCustomer(null);
+    }
+  };
+
+  const handleEditChange = (field: keyof Customer, value: string | number) => {
+    if (editingCustomer) {
+      setEditingCustomer({ ...editingCustomer, [field]: value });
+    }
   };
 
   if (!customers || customers.length === 0) {
@@ -173,14 +200,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
                     color="primary"
                     size="small"
                     mr={1}
-                  >
-                    View
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    size="small"
-                    mr={1}
+                    onClick={() => handleEditClick(customer)}
                   >
                     Edit
                   </Button>
@@ -188,6 +208,13 @@ const CustomerList: React.FC<CustomerListProps> = ({
                     variant="outlined"
                     color={customer.status === "Active" ? "error" : "success"}
                     size="small"
+                    onClick={() =>
+                      onUpdateCustomer({
+                        id: customer.id,
+                        status:
+                          customer.status === "Active" ? "Inactive" : "Active",
+                      })
+                    }
                   >
                     {customer.status === "Active" ? "Deactivate" : "Activate"}
                   </Button>
@@ -204,6 +231,55 @@ const CustomerList: React.FC<CustomerListProps> = ({
           page={currentPage}
         />
       </Box>
+
+      {editingCustomer && (
+        <Modal open={true} onClose={handleEditClose}>
+          <Box p={4}>
+            <H6 mb={3}>Edit Customer</H6>
+            <TextField
+              fullwidth
+              mb={2}
+              label="Name"
+              value={editingCustomer.name}
+              onChange={(e) => handleEditChange("name", e.target.value)}
+            />
+            <TextField
+              fullwidth
+              mb={2}
+              label="Email"
+              value={editingCustomer.email}
+              onChange={(e) => handleEditChange("email", e.target.value)}
+            />
+            <Select
+              fullwidth
+              mb={3}
+              label="Status"
+              value={editingCustomer.status}
+              onChange={(e) => handleEditChange("status", e.target.value)}
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </Select>
+            <FlexBox justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                color="secondary"
+                mr={2}
+                onClick={handleEditClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleEditSave}
+              >
+                Save Changes
+              </Button>
+            </FlexBox>
+          </Box>
+        </Modal>
+      )}
     </TableWrapper>
   );
 };

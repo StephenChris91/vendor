@@ -1,3 +1,4 @@
+import React from "react";
 import { SpaceProps } from "styled-system";
 import ReactSelect, { Props } from "react-select";
 
@@ -5,24 +6,28 @@ import Box from "@component/Box";
 import Typography from "@component/Typography";
 import { colors } from "@utils/themeColors";
 
-// ==============================================================
-type SelectOption = { label: any; value: any };
+export type SelectOption = { label: string; value: string };
 
-interface SelectProps extends Props, SpaceProps {
-  value?: any;
+interface SelectProps extends Omit<Props, "onChange">, SpaceProps {
+  value?: SelectOption | null;
   label?: string;
-  errorText?: any;
-  isMulti?: boolean;
-  defaultValue?: any;
+  errorText?: string;
   options: SelectOption[];
+  onChange: (option: SelectOption | null) => void;
 }
-// ==============================================================
 
-const Select = ({ options, isMulti = false, id, label, errorText, ...props }: SelectProps) => {
+const Select: React.FC<SelectProps> = ({
+  options,
+  label,
+  errorText,
+  onChange,
+  ...props
+}) => {
   // extract spacing props
   let spacingProps = {};
   for (const key in props) {
-    if (key.startsWith("m") || key.startsWith("p")) spacingProps[key] = props[key];
+    if (key.startsWith("m") || key.startsWith("p"))
+      spacingProps[key] = props[key];
   }
 
   return (
@@ -34,17 +39,17 @@ const Select = ({ options, isMulti = false, id, label, errorText, ...props }: Se
       )}
 
       <ReactSelect
-        isMulti={isMulti}
         options={options}
         styles={customStyles}
+        onChange={(option) => onChange(option as SelectOption | null)}
         theme={(theme) => ({
           ...theme,
           colors: {
             ...theme.colors,
             primary50: colors.gray[100],
             primary: colors.primary.main,
-            neutral20: colors.text.disabled
-          }
+            neutral20: colors.text.disabled,
+          },
         })}
         {...props}
       />
@@ -64,8 +69,8 @@ const customStyles = {
     ...provided,
     color: "inherit",
     cursor: "pointer",
-    backgroundColor: state.isFocused ? "rgba(0,0,0, 0.015)" : "inherit"
-  })
+    backgroundColor: state.isFocused ? "rgba(0,0,0, 0.015)" : "inherit",
+  }),
 };
 
 export default Select;

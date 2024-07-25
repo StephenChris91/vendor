@@ -1,4 +1,4 @@
-// components/admin/VendorStatistics.tsx
+// components/admin/vendor-statistics.tsx
 import React from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
@@ -17,6 +17,11 @@ const StatBox = styled(Box)`
 const StatItem = styled(FlexBox)`
   align-items: center;
   margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 interface VendorStatisticsProps {
@@ -37,7 +42,7 @@ const VendorStatistics: React.FC<VendorStatisticsProps> = ({
       <H4 mb={2}>Vendor Statistics</H4>
       <FlexBox flexWrap="wrap" justifyContent="space-between">
         <StatItem>
-          <Icon size="40px" color="primary.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             store
           </Icon>
           <Box>
@@ -46,7 +51,7 @@ const VendorStatistics: React.FC<VendorStatisticsProps> = ({
           </Box>
         </StatItem>
         <StatItem>
-          <Icon size="40px" color="success.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             trending-up
           </Icon>
           <Box>
@@ -55,7 +60,7 @@ const VendorStatistics: React.FC<VendorStatisticsProps> = ({
           </Box>
         </StatItem>
         <StatItem>
-          <Icon size="40px" color="warning.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             star
           </Icon>
           <Box>
@@ -64,7 +69,7 @@ const VendorStatistics: React.FC<VendorStatisticsProps> = ({
           </Box>
         </StatItem>
         <StatItem>
-          <Icon size="40px" color="error.main" mr={1}>
+          <Icon size="40px" color="error" mr={1}>
             alert-circle
           </Icon>
           <Box>

@@ -1,10 +1,10 @@
-// components/admin/VendorList.tsx
-import React, { useState } from "react";
+// components/admin/vendor-list.tsx
+import React from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
-import { Button } from "@component/buttons";
 import { H6 } from "@component/Typography";
+import { Button } from "@component/buttons";
 import Pagination from "@component/pagination";
 
 const TableWrapper = styled(Box)`
@@ -29,18 +29,10 @@ const TableRow = styled.tr`
   }
 `;
 
-const TableHeaderCell = styled.th<{ isSorted: boolean; isSortedDesc: boolean }>`
+const TableHeaderCell = styled.th`
   padding: 1rem;
   text-align: left;
   font-weight: 600;
-  cursor: pointer;
-
-  &:after {
-    content: "${(props) =>
-      props.isSorted ? (props.isSortedDesc ? " 🔽" : " 🔼") : ""}";
-    font-size: 0.8em;
-    margin-left: 5px;
-  }
 `;
 
 const TableCell = styled.td`
@@ -52,7 +44,7 @@ interface Vendor {
   name: string;
   email: string;
   registrationDate: string;
-  status: "active" | "inactive" | "pending";
+  status: string;
   totalSales: number;
   productCount: number;
   rating: number;
@@ -71,134 +63,23 @@ const VendorList: React.FC<VendorListProps> = ({
   onEditVendor,
   onToggleStatus,
 }) => {
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof Vendor;
-    direction: "ascending" | "descending";
-  } | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const sortedVendors = React.useMemo(() => {
-    let sortableVendors = [...vendors];
-    if (sortConfig !== null) {
-      sortableVendors.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === "ascending" ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === "ascending" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableVendors;
-  }, [vendors, sortConfig]);
-
-  const requestSort = (key: keyof Vendor) => {
-    let direction: "ascending" | "descending" = "ascending";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "ascending"
-    ) {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const getClassNamesFor = (name: string) => {
-    if (!sortConfig) {
-      return;
-    }
-    return sortConfig.key === name ? sortConfig.direction : undefined;
-  };
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedVendors.slice(indexOfFirstItem, indexOfLastItem);
-
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
   return (
     <TableWrapper>
       <StyledTable>
         <TableHead>
           <TableRow>
-            <TableHeaderCell
-              onClick={() => requestSort("name")}
-              isSorted={sortConfig?.key === "name"}
-              isSortedDesc={
-                sortConfig?.key === "name" &&
-                sortConfig.direction === "descending"
-              }
-            >
-              Name
-            </TableHeaderCell>
-            <TableHeaderCell
-              onClick={() => requestSort("email")}
-              isSorted={sortConfig?.key === "email"}
-              isSortedDesc={
-                sortConfig?.key === "email" &&
-                sortConfig.direction === "descending"
-              }
-            >
-              Email
-            </TableHeaderCell>
-            <TableHeaderCell
-              onClick={() => requestSort("registrationDate")}
-              isSorted={sortConfig?.key === "registrationDate"}
-              isSortedDesc={
-                sortConfig?.key === "registrationDate" &&
-                sortConfig.direction === "descending"
-              }
-            >
-              Registration Date
-            </TableHeaderCell>
-            <TableHeaderCell
-              onClick={() => requestSort("status")}
-              isSorted={sortConfig?.key === "status"}
-              isSortedDesc={
-                sortConfig?.key === "status" &&
-                sortConfig.direction === "descending"
-              }
-            >
-              Status
-            </TableHeaderCell>
-            <TableHeaderCell
-              onClick={() => requestSort("totalSales")}
-              isSorted={sortConfig?.key === "totalSales"}
-              isSortedDesc={
-                sortConfig?.key === "totalSales" &&
-                sortConfig.direction === "descending"
-              }
-            >
-              Total Sales
-            </TableHeaderCell>
-            <TableHeaderCell
-              onClick={() => requestSort("productCount")}
-              isSorted={sortConfig?.key === "productCount"}
-              isSortedDesc={
-                sortConfig?.key === "productCount" &&
-                sortConfig.direction === "descending"
-              }
-            >
-              Products
-            </TableHeaderCell>
-            <TableHeaderCell
-              onClick={() => requestSort("rating")}
-              isSorted={sortConfig?.key === "rating"}
-              isSortedDesc={
-                sortConfig?.key === "rating" &&
-                sortConfig.direction === "descending"
-              }
-            >
-              Rating
-            </TableHeaderCell>
+            <TableHeaderCell>Name</TableHeaderCell>
+            <TableHeaderCell>Email</TableHeaderCell>
+            <TableHeaderCell>Registration Date</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell>Total Sales</TableHeaderCell>
+            <TableHeaderCell>Products</TableHeaderCell>
+            <TableHeaderCell>Rating</TableHeaderCell>
             <TableHeaderCell>Actions</TableHeaderCell>
           </TableRow>
         </TableHead>
         <tbody>
-          {currentItems.map((vendor) => (
+          {vendors.map((vendor) => (
             <TableRow key={vendor.id}>
               <TableCell>{vendor.name}</TableCell>
               <TableCell>{vendor.email}</TableCell>
@@ -252,9 +133,9 @@ const VendorList: React.FC<VendorListProps> = ({
       </StyledTable>
       <Box p={2}>
         <Pagination
-          count={Math.ceil(vendors.length / itemsPerPage)}
-          onChange={(_, page) => paginate(page)}
-          page={currentPage}
+          count={Math.ceil(vendors.length / 10)}
+          onChange={(_, page) => console.log("Page changed to:", page)}
+          page={1}
         />
       </Box>
     </TableWrapper>

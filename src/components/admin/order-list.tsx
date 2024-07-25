@@ -1,3 +1,5 @@
+"use client";
+
 // components/admin/OrderList.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
@@ -8,6 +10,8 @@ import { Button } from "@component/buttons";
 import Pagination from "@component/pagination";
 import Checkbox from "@component/CheckBox";
 import Icon from "@component/icon/Icon";
+import Modal from "@component/Modal";
+import Select from "@component/Select";
 
 const TableWrapper = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -72,14 +76,17 @@ interface OrderListProps {
   orders: Order[];
   onSelect: (orderId: string, isSelected: boolean) => void;
   selectedOrders: string[];
+  onUpdateOrder: (order: Partial<Order>) => void;
 }
 
 const OrderList: React.FC<OrderListProps> = ({
   orders,
   onSelect,
   selectedOrders,
+  onUpdateOrder,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const itemsPerPage = 10;
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -91,6 +98,27 @@ const OrderList: React.FC<OrderListProps> = ({
     onSelect(orderId, !isSelected);
   };
 
+  const handleEditClick = (order: Order) => {
+    setEditingOrder(order);
+  };
+
+  const handleEditClose = () => {
+    setEditingOrder(null);
+  };
+
+  const handleEditSave = () => {
+    if (editingOrder) {
+      onUpdateOrder(editingOrder);
+      setEditingOrder(null);
+    }
+  };
+
+  const handleEditChange = (field: keyof Order, value: string | number) => {
+    if (editingOrder) {
+      setEditingOrder({ ...editingOrder, [field]: value });
+    }
+  };
+
   if (!orders || orders.length === 0) {
     return (
       <NoOrdersWrapper
@@ -99,7 +127,7 @@ const OrderList: React.FC<OrderListProps> = ({
         alignItems="center"
       >
         <IconWrapper>
-          <Icon size="40px" color="text.muted">
+          <Icon size="40px" color="primary">
             shopping-bag
           </Icon>
         </IconWrapper>
@@ -191,11 +219,12 @@ const OrderList: React.FC<OrderListProps> = ({
                     color="primary"
                     size="small"
                     mr={1}
+                    onClick={() => handleEditClick(order)}
                   >
-                    View
+                    Edit
                   </Button>
                   <Button variant="outlined" color="secondary" size="small">
-                    Update
+                    View
                   </Button>
                 </FlexBox>
               </TableCell>
@@ -210,6 +239,59 @@ const OrderList: React.FC<OrderListProps> = ({
           page={currentPage}
         />
       </Box>
+
+      {editingOrder && (
+        <Modal open={true} onClose={handleEditClose}>
+          <Box p={4}>
+            <H6 mb={3}>Edit Order</H6>
+            <Select
+              fullwidth
+              mb={2}
+              label="Payment Status"
+              value={editingOrder.paymentStatus}
+              onChange={(e) =>
+                handleEditChange("paymentStatus", e.target.value)
+              }
+            >
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+              <option value="Failed">Failed</option>
+            </Select>
+            <Select
+              fullwidth
+              mb={3}
+              label="Fulfillment Status"
+              value={editingOrder.fulfillmentStatus}
+              onChange={(e) =>
+                handleEditChange("fulfillmentStatus", e.target.value)
+              }
+            >
+              <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </Select>
+            <FlexBox justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                color="secondary"
+                mr={2}
+                onClick={handleEditClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleEditSave}
+              >
+                Save Changes
+              </Button>
+            </FlexBox>
+          </Box>
+        </Modal>
+      )}
     </TableWrapper>
   );
 };

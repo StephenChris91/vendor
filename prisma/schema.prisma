@@ -60,13 +60,15 @@ model user {
   accounts          account[]
   avatar            avatar?
   name              String?
-  isOnboardedVendor Boolean?
+  isOnboardedVendor Boolean?  @default(false)
   hasPaid           Boolean?
   products          product[] @relation("UserProducts")
   shop              shop?     @relation("UserShop")
   orders            order[]
   cart              cart?
   paymentReference  String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
 }
 
 model account {
@@ -157,6 +159,7 @@ model product {
   author        user?         @relation("UserProducts", fields: [author_id], references: [id])
   gallery       String[]
   shop_name     String?
+  stock         Int?
 }
 
 model image {

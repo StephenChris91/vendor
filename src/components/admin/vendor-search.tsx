@@ -1,11 +1,10 @@
-// components/admin/VendorSearchFilter.tsx
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import TextField from "@component/text-field";
 import { Button } from "@component/buttons";
-import Select from "@component/Select";
+import Select, { SelectOption } from "@component/Select";
 
 const FilterBox = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -13,6 +12,12 @@ const FilterBox = styled(Box)`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
   margin-bottom: 2rem;
+`;
+
+const ResponsiveFlexBox = styled(FlexBox)`
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 interface VendorSearchFilterProps {
@@ -24,20 +29,27 @@ const VendorSearchFilter: React.FC<VendorSearchFilterProps> = ({
   onSearch,
   onFilter,
 }) => {
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [status, setStatus] = React.useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [status, setStatus] = useState<SelectOption | null>(null);
 
   const handleSearch = () => {
     onSearch(searchQuery);
   };
 
   const handleFilter = () => {
-    onFilter({ status });
+    onFilter({ status: status ? status.value : "" });
   };
+
+  const statusOptions: SelectOption[] = [
+    { value: "", label: "All Statuses" },
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+    { value: "pending", label: "Pending" },
+  ];
 
   return (
     <FilterBox>
-      <FlexBox
+      <ResponsiveFlexBox
         flexWrap="wrap"
         justifyContent="space-between"
         alignItems="center"
@@ -46,21 +58,15 @@ const VendorSearchFilter: React.FC<VendorSearchFilterProps> = ({
           placeholder="Search vendors..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          mr={2}
           mb={2}
         />
         <Select
           placeholder="Filter by status"
           value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          mr={2}
+          onChange={(option) => setStatus(option)}
+          options={statusOptions}
           mb={2}
-        >
-          <option value="">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="pending">Pending</option>
-        </Select>
+        />
         <Button
           variant="contained"
           color="primary"
@@ -77,7 +83,7 @@ const VendorSearchFilter: React.FC<VendorSearchFilterProps> = ({
         >
           Search
         </Button>
-      </FlexBox>
+      </ResponsiveFlexBox>
     </FilterBox>
   );
 };

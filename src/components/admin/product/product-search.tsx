@@ -23,7 +23,7 @@ const ResponsiveFlexBox = styled(FlexBox)`
 
 interface ProductSearchFilterProps {
   onSearch: (query: string) => void;
-  onFilter: (filters: any) => void;
+  onFilter: (filters: { category: string; status: string }) => void;
 }
 
 const ProductSearchFilter: React.FC<ProductSearchFilterProps> = ({
@@ -42,6 +42,14 @@ const ProductSearchFilter: React.FC<ProductSearchFilterProps> = ({
     onFilter({ category, status });
   };
 
+  const handleReset = () => {
+    setSearchQuery("");
+    setCategory("");
+    setStatus("");
+    onSearch("");
+    onFilter({ category: "", status: "" });
+  };
+
   return (
     <FilterBox>
       <ResponsiveFlexBox
@@ -54,12 +62,14 @@ const ProductSearchFilter: React.FC<ProductSearchFilterProps> = ({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           mb={2}
+          mr={2}
         />
         <Select
           placeholder="Filter by category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           mb={2}
+          mr={2}
         >
           <option value="">All Categories</option>
           <option value="electronics">Electronics</option>
@@ -71,6 +81,7 @@ const ProductSearchFilter: React.FC<ProductSearchFilterProps> = ({
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           mb={2}
+          mr={2}
         >
           <option value="">All Statuses</option>
           <option value="active">Active</option>
@@ -82,6 +93,7 @@ const ProductSearchFilter: React.FC<ProductSearchFilterProps> = ({
           color="primary"
           onClick={handleFilter}
           mb={2}
+          mr={2}
         >
           Apply Filters
         </Button>
@@ -90,8 +102,17 @@ const ProductSearchFilter: React.FC<ProductSearchFilterProps> = ({
           color="primary"
           onClick={handleSearch}
           mb={2}
+          mr={2}
         >
           Search
+        </Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={handleReset}
+          mb={2}
+        >
+          Reset
         </Button>
       </ResponsiveFlexBox>
     </FilterBox>

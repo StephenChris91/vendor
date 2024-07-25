@@ -1,7 +1,8 @@
 // app/admin/orders/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
@@ -21,58 +22,101 @@ const ResponsiveFlexBox = styled(FlexBox)`
   }
 `;
 
-// Mock data - replace with actual API calls in production
-const mockOrders = [
-  {
-    id: "1",
-    customerName: "John Doe",
-    orderDate: "2023-07-15",
-    totalAmount: 150.0,
-    paymentStatus: "Paid",
-    fulfillmentStatus: "Shipped",
-  },
-  {
-    id: "2",
-    customerName: "Jane Smith",
-    orderDate: "2023-07-16",
-    totalAmount: 200.5,
-    paymentStatus: "Pending",
-    fulfillmentStatus: "Processing",
-  },
-  // Add more mock orders as needed
-];
+interface Order {
+  id: string;
+  customerName: string;
+  orderDate: string;
+  totalAmount: number;
+  paymentStatus: string;
+  fulfillmentStatus: string;
+}
 
-const mockStats = {
-  totalOrders: 1000,
-  pendingOrders: 50,
-  totalRevenue: 15000,
-  averageOrderValue: 150,
+interface OrderStats {
+  totalOrders: number;
+  pendingOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+}
+
+const fetchOrders = async (filters: any): Promise<Order[]> => {
+  const response = await fetch(
+    "/api/admin/orders?" + new URLSearchParams(filters)
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch orders");
+  }
+  return response.json();
+};
+
+const fetchOrderStats = async (): Promise<OrderStats> => {
+  const response = await fetch("/api/admin/orders/order-stats");
+  if (!response.ok) {
+    throw new Error("Failed to fetch order stats");
+  }
+  return response.json();
 };
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState(mockOrders);
-  const [stats, setStats] = useState(mockStats);
+  const [filters, setFilters] = useState({});
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
 
-  // useEffect(() => {
-  //   // Fetch orders and stats data
-  //   // setOrders(fetchedOrders);
-  //   // setStats(fetchedStats);
-  // }, []);
+  const queryClient = useQueryClient();
+
+  const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
+    queryKey: ["orders", filters],
+    queryFn: () => fetchOrders(filters),
+  });
+
+  const { data: stats, isLoading: isLoadingStats } = useQuery<OrderStats>({
+    queryKey: ["orderStats"],
+    queryFn: fetchOrderStats,
+  });
+
+  const updateOrderMutation = useMutation({
+    mutationFn: (updatedOrder: Partial<Order>) =>
+      fetch(`/api/admin/orders/${updatedOrder.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedOrder),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["orderStats"] });
+    },
+  });
 
   const handleSearch = (query: string) => {
-    // Implement search logic
-    console.log("Searching for:", query);
+    setFilters((prev) => ({ ...prev, search: query }));
   };
 
-  const handleFilter = (filters: any) => {
-    // Implement filter logic
-    console.log("Applying filters:", filters);
+  const handleFilter = (newFilters: any) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  const handleBulkAction = (action: string) => {
-    // Implement bulk action logic
-    console.log("Bulk action:", action, "on orders:", selectedOrders);
+  const handleBulkAction = async (action: string) => {
+    for (const orderId of selectedOrders) {
+      switch (action) {
+        case "markAsPaid":
+          await updateOrderMutation.mutateAsync({
+            id: orderId,
+            paymentStatus: "Paid",
+          });
+          break;
+        case "markAsShipped":
+          await updateOrderMutation.mutateAsync({
+            id: orderId,
+            fulfillmentStatus: "Shipped",
+          });
+          break;
+        case "cancel":
+          await updateOrderMutation.mutateAsync({
+            id: orderId,
+            fulfillmentStatus: "Cancelled",
+          });
+          break;
+      }
+    }
+    setSelectedOrders([]);
   };
 
   const handleOrderSelection = (orderId: string, isSelected: boolean) => {
@@ -80,6 +124,10 @@ export default function OrdersPage() {
       isSelected ? [...prev, orderId] : prev.filter((id) => id !== orderId)
     );
   };
+
+  if (isLoadingOrders || isLoadingStats) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <PageWrapper>
@@ -91,7 +139,16 @@ export default function OrdersPage() {
         <H3>Order Management</H3>
       </ResponsiveFlexBox>
 
-      <OrderStatistics stats={stats} />
+      <OrderStatistics
+        stats={
+          stats || {
+            totalOrders: 0,
+            pendingOrders: 0,
+            totalRevenue: 0,
+            averageOrderValue: 0,
+          }
+        }
+      />
 
       <OrderSearchFilter onSearch={handleSearch} onFilter={handleFilter} />
 
@@ -104,6 +161,7 @@ export default function OrdersPage() {
         orders={orders}
         onSelect={handleOrderSelection}
         selectedOrders={selectedOrders}
+        onUpdateOrder={updateOrderMutation.mutate}
       />
     </PageWrapper>
   );

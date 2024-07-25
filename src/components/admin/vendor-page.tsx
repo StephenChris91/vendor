@@ -1,7 +1,7 @@
 // app/admin/vendors/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
@@ -10,93 +10,154 @@ import { Button } from "@component/buttons";
 import VendorList from "@component/admin/vendor-list";
 import VendorSearchFilter from "@component/admin/vendor-search";
 import VendorStatistics from "@component/admin/vendor-statistics";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 
 const PageWrapper = styled(Box)`
   padding: 2rem;
 `;
 
-// Mock data - replace with actual API calls in production
-const mockVendors = [
-  {
-    id: "1",
-    name: "Vendor 1",
-    email: "vendor1@example.com",
-    registrationDate: "2023-01-15",
-    status: "active",
-    totalSales: 50000,
-    productCount: 100,
-    rating: 4.5,
-  },
-  {
-    id: "2",
-    name: "Vendor 2",
-    email: "vendor2@example.com",
-    registrationDate: "2023-02-20",
-    status: "inactive",
-    totalSales: 30000,
-    productCount: 75,
-    rating: 3.8,
-  },
-  {
-    id: "3",
-    name: "Vendor 3",
-    email: "vendor3@example.com",
-    registrationDate: "2023-03-10",
-    status: "pending",
-    totalSales: 0,
-    productCount: 50,
-    rating: 0,
-  },
-  // Add more mock vendors as needed
-];
+interface Vendor {
+  id: string;
+  name: string;
+  email: string;
+  registrationDate: string;
+  status: string;
+  totalSales: number;
+  productCount: number;
+  rating: number;
+}
 
-const mockStats = {
-  totalVendors: 100,
-  newVendors: 15,
-  averageRating: 4.2,
-  pendingApprovals: 5,
-};
+interface VendorStats {
+  totalVendors: number;
+  newVendors: number;
+  averageRating: number;
+  pendingApprovals: number;
+}
 
 export default function VendorsPage() {
-  const [vendors, setVendors] = useState(mockVendors);
-  const [stats, setStats] = useState(mockStats);
+  console.log("VendorsPage rendered");
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({});
 
-  // useEffect(() => {
-  //   // Fetch vendors and stats data
-  //   // setVendors(fetchedVendors);
-  //   // setStats(fetchedStats);
-  // }, []);
+  const {
+    data: vendors,
+    isLoading: vendorsLoading,
+    error: vendorsError,
+  } = useQuery({
+    queryKey: ["vendors", searchTerm, filters],
+    queryFn: async () => {
+      console.log("Fetching vendors...");
+      try {
+        const response = await axios.get("/api/admin/vendors", {
+          params: { search: searchTerm, ...filters },
+          timeout: 5000, // 5 seconds timeout
+        });
+        console.log("Vendors fetched:", response.data);
+        return response.data as Vendor[];
+      } catch (error) {
+        console.error("Error fetching vendors:", error);
+        if (axios.isAxiosError(error)) {
+          console.error("Axios error details:", {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status,
+            config: error.config,
+          });
+        }
+        throw error;
+      }
+    },
+    retry: 1,
+    staleTime: 60000, // 1 minute
+  });
+
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useQuery({
+    queryKey: ["vendorStats"],
+    queryFn: async () => {
+      console.log("Fetching vendor stats...");
+      try {
+        const response = await axios.get("/api/admin/vendor-stats", {
+          timeout: 5000,
+        });
+        console.log("Vendor stats fetched:", response.data);
+        return response.data as VendorStats;
+      } catch (error) {
+        console.error("Error fetching vendor stats:", error);
+        throw error;
+      }
+    },
+    retry: 1,
+    staleTime: 60000, // 1 minute
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async (data: { id: string; status: string }) => {
+      console.log("Toggling vendor status...", data);
+      const response = await axios.patch(
+        `/api/admin/vendors/${data.id}/status`,
+        { status: data.status }
+      );
+      console.log("Vendor status updated:", response.data);
+      return response.data;
+    },
+    onSuccess: () => {
+      console.log("Status updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["vendorStats"] });
+    },
+    onError: (error) => {
+      console.error("Error updating vendor status:", error);
+    },
+  });
 
   const handleSearch = (query: string) => {
-    // Implement search logic
-    console.log("Searching for:", query);
+    console.log("Search query:", query);
+    setSearchTerm(query);
   };
 
-  const handleFilter = (filters: any) => {
-    // Implement filter logic
-    console.log("Applying filters:", filters);
+  const handleFilter = (newFilters: any) => {
+    console.log("New filters:", newFilters);
+    setFilters(newFilters);
   };
 
   const handleViewProfile = (id: string) => {
-    // Implement view profile logic
     console.log("Viewing profile:", id);
+    // Implement view profile logic
   };
 
   const handleEditVendor = (id: string) => {
-    // Implement edit vendor logic
     console.log("Editing vendor:", id);
+    // Implement edit vendor logic
   };
 
   const handleToggleStatus = (id: string, currentStatus: string) => {
-    // Implement toggle status logic
     console.log("Toggling status for:", id, "Current status:", currentStatus);
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+    toggleStatusMutation.mutate({ id, status: newStatus });
   };
 
   const handleAddVendor = () => {
-    // Implement add vendor logic
     console.log("Adding new vendor");
+    // Implement add vendor logic
   };
 
+  if (vendorsLoading) {
+    console.log("Rendering loading state");
+    return <div>Loading...</div>;
+  }
+
+  if (vendorsError) {
+    console.error("Error loading vendors:", vendorsError);
+    return <div>Error loading vendors. Please try again.</div>;
+  }
+
+  console.log("Rendering VendorsPage with data");
   return (
     <PageWrapper>
       <FlexBox justifyContent="space-between" alignItems="center" mb={4}>
@@ -106,16 +167,18 @@ export default function VendorsPage() {
         </Button>
       </FlexBox>
 
-      <VendorStatistics {...stats} />
+      {stats && <VendorStatistics {...stats} />}
 
       <VendorSearchFilter onSearch={handleSearch} onFilter={handleFilter} />
 
-      <VendorList
-        vendors={vendors}
-        onViewProfile={handleViewProfile}
-        onEditVendor={handleEditVendor}
-        onToggleStatus={handleToggleStatus}
-      />
+      {vendors && (
+        <VendorList
+          vendors={vendors}
+          onViewProfile={handleViewProfile}
+          onEditVendor={handleEditVendor}
+          onToggleStatus={handleToggleStatus}
+        />
+      )}
     </PageWrapper>
   );
 }

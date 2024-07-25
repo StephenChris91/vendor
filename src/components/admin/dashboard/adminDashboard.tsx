@@ -199,25 +199,25 @@ export default function AdminDashboard() {
         <KPICard
           title="Total Sales"
           value={`$${data.totalSales.toLocaleString()}`}
-          icon="dollar-sign"
+          icon="sales"
           trend={{ value: 0, isPositive: true }}
         />
         <KPICard
           title="Total Orders"
           value={data.totalOrders.toString()}
-          icon="shopping-bag"
+          icon="order"
           trend={{ value: 0, isPositive: true }}
         />
         <KPICard
           title="Active Users"
           value={data.activeUsers.toString()}
-          icon="users"
+          icon="buyer"
           trend={{ value: 0, isPositive: true }}
         />
         <KPICard
           title="Active Vendors"
           value={data.activeVendors.toString()}
-          icon="store"
+          icon="sellers"
           trend={{ value: 0, isPositive: true }}
         />
       </KPIWrapper>

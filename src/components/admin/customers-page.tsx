@@ -1,7 +1,8 @@
 // app/admin/customers/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
@@ -21,59 +22,97 @@ const ResponsiveFlexBox = styled(FlexBox)`
   }
 `;
 
-// Mock data - replace with actual API calls in production
-const mockCustomers = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    registrationDate: "2023-01-15",
-    totalOrders: 5,
-    totalSpent: 500,
-    status: "Active",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    registrationDate: "2023-02-20",
-    totalOrders: 3,
-    totalSpent: 300,
-    status: "Active",
-  },
-  // Add more mock customers as needed
-];
+interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  registrationDate: string;
+  totalOrders: number;
+  totalSpent: number;
+  status: string;
+}
 
-const mockStats = {
-  totalCustomers: 1000,
-  newCustomers: 50,
-  averageSpend: 250,
+interface CustomerStats {
+  totalCustomers: number;
+  newCustomers: number;
+  averageSpend: number;
+}
+
+const fetchCustomers = async (filters: any): Promise<Customer[]> => {
+  const response = await fetch(
+    "/api/admin/customers?" + new URLSearchParams(filters)
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch customers");
+  }
+  return response.json();
+};
+
+const fetchCustomerStats = async (): Promise<CustomerStats> => {
+  const response = await fetch("/api/admin/customers/customer-stats");
+  if (!response.ok) {
+    throw new Error("Failed to fetch customer stats");
+  }
+  return response.json();
 };
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState(mockCustomers);
-  const [stats, setStats] = useState(mockStats);
+  const [filters, setFilters] = useState({});
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
 
-  // useEffect(() => {
-  //   // Fetch customers and stats data
-  //   // setCustomers(fetchedCustomers);
-  //   // setStats(fetchedStats);
-  // }, []);
+  const queryClient = useQueryClient();
+
+  const { data: customers = [], isLoading: isLoadingCustomers } = useQuery<
+    Customer[]
+  >({
+    queryKey: ["customers", filters],
+    queryFn: () => fetchCustomers(filters),
+  });
+
+  const { data: stats, isLoading: isLoadingStats } = useQuery<CustomerStats>({
+    queryKey: ["customerStats"],
+    queryFn: fetchCustomerStats,
+  });
+
+  const updateCustomerMutation = useMutation({
+    mutationFn: (updatedCustomer: Partial<Customer>) =>
+      fetch(`/api/admin/customers/${updatedCustomer.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedCustomer),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["customerStats"] });
+    },
+  });
 
   const handleSearch = (query: string) => {
-    // Implement search logic
-    console.log("Searching for:", query);
+    setFilters((prev) => ({ ...prev, search: query }));
   };
 
-  const handleFilter = (filters: any) => {
-    // Implement filter logic
-    console.log("Applying filters:", filters);
+  const handleFilter = (newFilters: any) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  const handleBulkAction = (action: string) => {
-    // Implement bulk action logic
-    console.log("Bulk action:", action, "on customers:", selectedCustomers);
+  const handleBulkAction = async (action: string) => {
+    for (const customerId of selectedCustomers) {
+      switch (action) {
+        case "activate":
+          await updateCustomerMutation.mutateAsync({
+            id: customerId,
+            status: "Active",
+          });
+          break;
+        case "deactivate":
+          await updateCustomerMutation.mutateAsync({
+            id: customerId,
+            status: "Inactive",
+          });
+          break;
+      }
+    }
+    setSelectedCustomers([]);
   };
 
   const handleCustomerSelection = (customerId: string, isSelected: boolean) => {
@@ -83,6 +122,10 @@ export default function CustomersPage() {
         : prev.filter((id) => id !== customerId)
     );
   };
+
+  if (isLoadingCustomers || isLoadingStats) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <PageWrapper>
@@ -94,7 +137,9 @@ export default function CustomersPage() {
         <H3>Customer Management</H3>
       </ResponsiveFlexBox>
 
-      <CustomerStatistics stats={stats} />
+      <CustomerStatistics
+        stats={stats || { totalCustomers: 0, newCustomers: 0, averageSpend: 0 }}
+      />
 
       <CustomerSearchFilter onSearch={handleSearch} onFilter={handleFilter} />
 
@@ -107,6 +152,7 @@ export default function CustomersPage() {
         customers={customers}
         onSelect={handleCustomerSelection}
         selectedCustomers={selectedCustomers}
+        onUpdateCustomer={updateCustomerMutation.mutate}
       />
     </PageWrapper>
   );

@@ -1,11 +1,11 @@
 "use server";
-import { s3Client } from "@/lib/utils";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { s3Client } from "@lib/utils";
 import sharp from "sharp";
 
 
 
-export async function uploadProductToS3(base64: string, fileName: string, userName: string, ) {
+export async function uploadProductToS3(base64: string, fileName: string, userName: string,) {
   const buffer = Buffer.from(base64, "base64");
   const fileBuffer = await sharp(buffer)
     .jpeg({ quality: 50 })

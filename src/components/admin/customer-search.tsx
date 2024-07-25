@@ -51,6 +51,15 @@ const CustomerSearchFilter: React.FC<CustomerSearchFilterProps> = ({
     onFilter({ status, startDate, endDate });
   };
 
+  const handleReset = () => {
+    setSearchQuery("");
+    setStatus("");
+    setStartDate("");
+    setEndDate("");
+    onSearch("");
+    onFilter({});
+  };
+
   return (
     <FilterBox>
       <ResponsiveFlexBox
@@ -101,6 +110,14 @@ const CustomerSearchFilter: React.FC<CustomerSearchFilterProps> = ({
           mb={2}
         >
           Search
+        </Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={handleReset}
+          mb={2}
+        >
+          Reset
         </Button>
       </ResponsiveFlexBox>
     </FilterBox>

@@ -1,5 +1,5 @@
 // components/admin/BulkActions.tsx
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
@@ -29,7 +29,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
   selectedCount,
   onAction,
 }) => {
-  const [selectedAction, setSelectedAction] = React.useState("");
+  const [selectedAction, setSelectedAction] = useState("");
 
   const handleActionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedAction(e.target.value);
@@ -38,13 +38,16 @@ const BulkActions: React.FC<BulkActionsProps> = ({
   const handleApplyAction = () => {
     if (selectedAction) {
       onAction(selectedAction);
+      setSelectedAction(""); // Reset the action after applying
     }
   };
 
   return (
     <BulkActionBox>
       <ResponsiveFlexBox alignItems="center" justifyContent="space-between">
-        <Box mb={{ xs: 2, sm: 0 }}>{selectedCount} products selected</Box>
+        <Box mb={{ xs: 2, sm: 0 }}>
+          {selectedCount} product{selectedCount !== 1 ? "s" : ""} selected
+        </Box>
         <ResponsiveFlexBox alignItems="center">
           <Select
             value={selectedAction}

@@ -1,6 +1,7 @@
 // components/admin/CustomerStatistics.tsx
 import React from "react";
 import styled from "styled-components";
+import { useQuery } from "@tanstack/react-query";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H4, H6 } from "@component/Typography";
@@ -24,44 +25,80 @@ const StatItem = styled(FlexBox)`
   }
 `;
 
-interface CustomerStatisticsProps {
-  stats: {
-    totalCustomers: number;
-    newCustomers: number;
-    averageSpend: number;
-  };
+const LoadingText = styled.span`
+  color: ${(props) => props.theme.colors.text.muted};
+  font-style: italic;
+`;
+
+interface CustomerStats {
+  totalCustomers: number;
+  newCustomers: number;
+  averageSpend: number;
 }
 
-const CustomerStatistics: React.FC<CustomerStatisticsProps> = ({ stats }) => {
+const fetchCustomerStats = async (): Promise<CustomerStats> => {
+  const response = await fetch("/api/admin/customer-stats");
+  if (!response.ok) {
+    throw new Error("Failed to fetch customer stats");
+  }
+  return response.json();
+};
+
+const CustomerStatistics: React.FC = () => {
+  const {
+    data: stats,
+    isLoading,
+    isError,
+  } = useQuery<CustomerStats>({
+    queryKey: ["customerStats"],
+    queryFn: fetchCustomerStats,
+  });
+
+  if (isError) {
+    return <StatBox>Error loading customer statistics.</StatBox>;
+  }
+
   return (
     <StatBox>
       <H4 mb={2}>Customer Statistics</H4>
       <FlexBox flexWrap="wrap" justifyContent="space-between">
         <StatItem>
-          <Icon size="40px" color="primary.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             users
           </Icon>
           <Box>
             <H6 color="text.muted">Total Customers</H6>
-            <H4>{stats.totalCustomers}</H4>
+            {isLoading ? (
+              <LoadingText>Loading...</LoadingText>
+            ) : (
+              <H4>{stats?.totalCustomers}</H4>
+            )}
           </Box>
         </StatItem>
         <StatItem>
-          <Icon size="40px" color="success.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             user-plus
           </Icon>
           <Box>
             <H6 color="text.muted">New Customers (Last 30 days)</H6>
-            <H4>{stats.newCustomers}</H4>
+            {isLoading ? (
+              <LoadingText>Loading...</LoadingText>
+            ) : (
+              <H4>{stats?.newCustomers}</H4>
+            )}
           </Box>
         </StatItem>
         <StatItem>
-          <Icon size="40px" color="warning.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             dollar-sign
           </Icon>
           <Box>
             <H6 color="text.muted">Average Spend</H6>
-            <H4>${stats.averageSpend.toFixed(2)}</H4>
+            {isLoading ? (
+              <LoadingText>Loading...</LoadingText>
+            ) : (
+              <H4>${stats?.averageSpend.toFixed(2)}</H4>
+            )}
           </Box>
         </StatItem>
       </FlexBox>
