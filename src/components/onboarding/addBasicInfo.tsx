@@ -1,10 +1,11 @@
 "use client";
 
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
-
 import { StyledRoot } from "@sections/auth/styles";
 import TextField from "@component/text-field";
+import TextArea from "@component/textarea";
 import { H3, H5 } from "@component/Typography";
 
 const AddBasicInfo = ({
@@ -18,18 +19,28 @@ const AddBasicInfo = ({
     slug: yup
       .string()
       .matches(
-        /^[a-z0-9-]+$/,
-        "Slug must contain only lowercase letters, numbers, and hyphens"
+        /^[a-z0-9_]+$/,
+        "Slug must contain only lowercase letters, numbers, and underscores"
       )
       .required("Slug is required"),
-    description: yup.string().required("Description is required"),
+    description: yup
+      .string()
+      .max(120, "Description must be at most 120 characters")
+      .required("Description is required"),
   });
+
+  const generateSlug = (shopName: string) => {
+    return shopName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  };
 
   const formik = useFormik({
     initialValues: {
-      shopName: initialShopName,
-      slug: initialSlug,
-      description: initialDescription,
+      shopName: initialShopName || "",
+      slug: initialSlug || "",
+      description: initialDescription || "",
     },
     validationSchema: formSchema,
     onSubmit: (values) => {
@@ -41,14 +52,19 @@ const AddBasicInfo = ({
     },
   });
 
-  const handleBlur = (e) => {
+  useEffect(() => {
+    const newSlug = generateSlug(formik.values.shopName);
+    formik.setFieldValue("slug", newSlug);
+  }, [formik.values.shopName]);
+
+  const handleBlur = (e: React.FocusEvent<any>) => {
     formik.handleBlur(e);
-    formik.submitForm(); // This will trigger onSubmit and update the parent form data
+    formik.submitForm();
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<any>) => {
     formik.handleChange(e);
-    formik.submitForm(); // This will trigger onSubmit and update the parent form data
+    formik.submitForm();
   };
 
   return (
@@ -79,13 +95,13 @@ const AddBasicInfo = ({
         mb="0.75rem"
         name="slug"
         label="Slug"
-        onBlur={handleBlur}
         value={formik.values.slug}
         onChange={handleChange}
         errorText={formik.touched.slug && formik.errors.slug}
+        disabled
       />
 
-      <TextField
+      <TextArea
         fullwidth
         mb="0.75rem"
         name="description"
@@ -94,9 +110,10 @@ const AddBasicInfo = ({
         value={formik.values.description}
         onChange={handleChange}
         errorText={formik.touched.description && formik.errors.description}
-        multiline
-        rows={4}
+        maxLength={120}
       />
+
+      <small>{formik.values.description.length}/120 characters</small>
     </form>
   );
 };

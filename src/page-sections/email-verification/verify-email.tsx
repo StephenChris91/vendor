@@ -2,8 +2,41 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import styled, { keyframes } from "styled-components";
 import { newVerification } from "actions/new-verification";
 import { useCurrentUser } from "@lib/use-session-client";
+import Box from "@component/Box";
+import Card from "@component/Card";
+import { H4, Paragraph } from "@component/Typography";
+import FlexBox from "@component/FlexBox";
+import Icon from "@component/icon/Icon";
+
+const StyledCard = styled(Card)`
+  padding: 2rem;
+  background: ${(props) => props.theme.colors.body.paper};
+  border-radius: 10px;
+  box-shadow: ${(props) => props.theme.shadows.large};
+  width: 100%;
+  max-width: 400px;
+`;
+
+const StatusMessage = styled(Paragraph)<{ $error?: boolean }>`
+  color: ${(props) =>
+    props.$error
+      ? props.theme.colors.error.main
+      : props.theme.colors.success.main};
+  text-align: center;
+  margin-bottom: 1rem;
+`;
+
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
+const LoadingIcon = styled(Icon)`
+  animation: ${spin} 1s linear infinite;
+`;
 
 const VerifyEmail = () => {
   const searchParams = useSearchParams();
@@ -41,25 +74,29 @@ const VerifyEmail = () => {
   }, [onSubmit]);
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="p-8 bg-white shadow-md rounded-lg">
-        {error && (
-          <div className="text-red-500 text-center mb-4">
-            <p>{error}</p>
-          </div>
-        )}
-        {success && (
-          <div className="text-green-500 text-center mb-4">
-            <p>{success}</p>
-          </div>
-        )}
-        {!error && !success && (
-          <div className="text-center">
-            <p>Verifying your email...</p>
-          </div>
-        )}
-      </div>
-    </div>
+    <Box height="100vh">
+      <FlexBox justifyContent="center" alignItems="center" height="100%">
+        <StyledCard>
+          <H4 textAlign="center" mb={3}>
+            Email Verification
+          </H4>
+          {error && <StatusMessage $error>{error}</StatusMessage>}
+          {success && <StatusMessage>{success}</StatusMessage>}
+          {isLoading && (
+            <FlexBox
+              justifyContent="center"
+              alignItems="center"
+              flexDirection="column"
+            >
+              <LoadingIcon size="40px" color="primary">
+                refresh-ccw
+              </LoadingIcon>
+              <Paragraph mt={2}>Verifying your email...</Paragraph>
+            </FlexBox>
+          )}
+        </StyledCard>
+      </FlexBox>
+    </Box>
   );
 };
 

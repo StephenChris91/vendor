@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { PaystackConsumer } from "react-paystack";
 import toast from "react-hot-toast";
-import { initializePayment, verifyPayment } from "actions/payment";
 import { Button } from "@component/buttons";
 import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
@@ -11,54 +11,34 @@ interface ProcessPaymentProps {
   setPaymentProcessed: (status: boolean) => void;
   userEmail: string;
   userId: string;
+  formData: any; // Replace 'any' with your actual form data type
+  onNextStep: () => void;
 }
 
 const ProcessPayment: React.FC<ProcessPaymentProps> = ({
   setPaymentProcessed,
   userEmail,
   userId,
+  formData,
+  onNextStep,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handlePayment = async () => {
+  const handleSuccess = () => {
     setIsLoading(true);
-    try {
-      const reference = `REF-${userId}-${Date.now()}`;
-      const result = await initializePayment({
-        email: userEmail,
-        amount: 2000 * 100, // 2000 Naira
-        reference,
-      });
-
-      if (result.status && result.data?.authorization_url) {
-        window.location.href = result.data.authorization_url;
-      } else {
-        toast.error(result.message || "Failed to initialize payment");
-      }
-    } catch (error) {
-      console.error("Payment error:", error);
-      toast.error("An error occurred. Please try again.");
-    } finally {
+    // Here you would typically verify the payment on your server
+    // For now, we'll just simulate a successful verification
+    setTimeout(() => {
+      setPaymentProcessed(true);
+      toast.success("Payment successful!");
+      onNextStep();
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
-  // This function would be called when the user returns from Paystack
-  const handlePaymentVerification = async (reference: string) => {
-    try {
-      const isVerified = await verifyPayment(reference);
-      if (isVerified) {
-        setPaymentProcessed(true);
-        toast.success("Payment successful! 😄");
-      } else {
-        toast.error("Payment verification failed. Please contact support.");
-      }
-    } catch (error) {
-      console.error("Verification error:", error);
-      toast.error(
-        "An error occurred while verifying your payment. Please contact support."
-      );
-    }
+  const handleClose = () => {
+    toast.error("Payment cancelled. Please try again.");
+    setIsLoading(false);
   };
 
   return (
@@ -74,19 +54,30 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
       </H5>
 
       <Small color="text.secondary" mb="1rem" display="block">
-        You will be redirected to Paystack to complete your payment of 2000
-        Naira.
+        You will be prompted to complete your payment of 2000 Naira via
+        Paystack.
       </Small>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handlePayment}
-        disabled={isLoading}
-        fullwidth
+      <PaystackConsumer
+        reference={`REF-${userId}-${Date.now()}`}
+        email={userEmail}
+        amount={200000} // 2000 Naira in kobo
+        publicKey={process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!}
+        onSuccess={handleSuccess}
+        onClose={handleClose}
       >
-        {isLoading ? "Processing..." : "Proceed to Payment"}
-      </Button>
+        {({ initializePayment }) => (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => initializePayment()}
+            disabled={isLoading}
+            fullwidth
+          >
+            {isLoading ? "Processing..." : "Proceed to Payment"}
+          </Button>
+        )}
+      </PaystackConsumer>
 
       <Small color="text.secondary" mt="1rem" display="block">
         By clicking "Proceed to Payment", you agree to our terms of service.

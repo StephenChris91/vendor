@@ -73,9 +73,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
       isActive: initialShopSettings?.isActive ?? true,
     },
     validationSchema: formSchema,
-    onSubmit: (values) => {
-      updateFormData({ shopSettings: values });
-    },
+    onSubmit: () => {}, // Empty onSubmit as we're not submitting the form here
   });
 
   useEffect(() => {
@@ -84,14 +82,38 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
     }
   }, [initialShopSettings]);
 
-  const handleBlur = (e: React.FocusEvent<any>) => {
-    formik.handleBlur(e);
-    formik.submitForm();
-  };
-
   const handleChange = (e: React.ChangeEvent<any>) => {
     formik.handleChange(e);
-    formik.submitForm();
+    updateFormData({
+      shopSettings: { ...formik.values, [e.target.name]: e.target.value },
+    });
+  };
+
+  const handleCategoryChange = (selectedOption: CategoryOption | null) => {
+    if (selectedOption) {
+      formik.setFieldValue("category", selectedOption.value);
+      updateFormData({
+        shopSettings: { ...formik.values, category: selectedOption.value },
+      });
+    }
+  };
+
+  const handleDeliveryOptionsChange = (optionValue: string) => {
+    const updatedOptions = formik.values.deliveryOptions.includes(optionValue)
+      ? formik.values.deliveryOptions.filter((val) => val !== optionValue)
+      : [...formik.values.deliveryOptions, optionValue];
+    formik.setFieldValue("deliveryOptions", updatedOptions);
+    updateFormData({
+      shopSettings: { ...formik.values, deliveryOptions: updatedOptions },
+    });
+  };
+
+  const handleIsActiveChange = () => {
+    const newIsActive = !formik.values.isActive;
+    formik.setFieldValue("isActive", newIsActive);
+    updateFormData({
+      shopSettings: { ...formik.values, isActive: newIsActive },
+    });
   };
 
   return (
@@ -111,7 +133,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
         mb="0.75rem"
         name="phoneNumber"
         label="Phone Number"
-        onBlur={handleBlur}
+        onBlur={formik.handleBlur}
         onChange={handleChange}
         value={formik.values.phoneNumber}
         errorText={formik.touched.phoneNumber && formik.errors.phoneNumber}
@@ -122,7 +144,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
         mb="0.75rem"
         name="website"
         label="Website (optional)"
-        onBlur={handleBlur}
+        onBlur={formik.handleBlur}
         onChange={handleChange}
         value={formik.values.website}
         errorText={formik.touched.website && formik.errors.website}
@@ -133,7 +155,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
         mb="0.75rem"
         name="businessHours"
         label="Business Hours"
-        onBlur={handleBlur}
+        onBlur={formik.handleBlur}
         onChange={handleChange}
         value={formik.values.businessHours}
         errorText={formik.touched.businessHours && formik.errors.businessHours}
@@ -145,12 +167,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
         value={categoryOptions.find(
           (option) => option.value === formik.values.category
         )}
-        onChange={(selectedOption: CategoryOption | null) => {
-          if (selectedOption) {
-            formik.setFieldValue("category", selectedOption.value);
-            formik.submitForm();
-          }
-        }}
+        onChange={handleCategoryChange}
         label="Shop Category"
         errorText={formik.touched.category && formik.errors.category}
       />
@@ -163,17 +180,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
             name="deliveryOptions"
             label={option.label}
             checked={formik.values.deliveryOptions.includes(option.value)}
-            onChange={() => {
-              const updatedOptions = formik.values.deliveryOptions.includes(
-                option.value
-              )
-                ? formik.values.deliveryOptions.filter(
-                    (val) => val !== option.value
-                  )
-                : [...formik.values.deliveryOptions, option.value];
-              formik.setFieldValue("deliveryOptions", updatedOptions);
-              formik.submitForm();
-            }}
+            onChange={() => handleDeliveryOptionsChange(option.value)}
           />
         ))}
         {formik.touched.deliveryOptions && formik.errors.deliveryOptions && (
@@ -185,10 +192,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
         name="isActive"
         label="Shop is active and ready for business"
         checked={formik.values.isActive}
-        onChange={() => {
-          formik.setFieldValue("isActive", !formik.values.isActive);
-          formik.submitForm();
-        }}
+        onChange={handleIsActiveChange}
       />
 
       {Object.keys(formik.errors).length > 0 && (

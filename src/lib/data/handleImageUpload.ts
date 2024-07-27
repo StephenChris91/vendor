@@ -1,6 +1,6 @@
+import { useCurrentUser } from "@lib/use-session-client";
 import { useCallback, Dispatch, SetStateAction } from "react";
-import { ProductType } from "@/app/types/types";
-import { useCurrentUser } from "@/lib/use-session-client";
+import { ProductType } from "types";
 
 export type FormDataType = ProductType;
 
@@ -8,8 +8,8 @@ export const handleImageUpload = (
   formData: FormDataType,
   setFormData: Dispatch<SetStateAction<FormDataType>>
 ) => {
-  const user = useCurrentUser();
-  
+  const user = useCurrentUser()
+
   return useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
@@ -26,7 +26,7 @@ export const handleImageUpload = (
             body: JSON.stringify({
               base64: base64.split(",")[1],
               fileName: file.name,
-              userName: user?.name, // Assuming user has a 'name' property
+              userName: user?.firstname, // Assuming user has a 'name' property
             }),
           });
 

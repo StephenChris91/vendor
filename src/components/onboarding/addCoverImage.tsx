@@ -1,23 +1,26 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import Image from "next/image";
 import { useFormik } from "formik";
-import * as yup from "yup";
+import * as Yup from "yup";
 import { toast } from "react-hot-toast";
-
 import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
 import DropZone from "@component/DropZone";
 import { Button } from "@component/buttons";
+import Image from "@component/Image";
 import { uploadFileToS3 } from "actions/upload-signUrl";
 
 interface AddCoverImageProps {
-  updateFormData: (data: { coverImage: string }) => void;
+  updateFormData: (data: { banner: string }) => void;
   initialCoverImage: string;
   userName: string;
   userId: string;
 }
+
+const validationSchema = Yup.object().shape({
+  coverImage: Yup.string().required("Shop cover image is required"),
+});
 
 const AddCoverImage: React.FC<AddCoverImageProps> = ({
   updateFormData,
@@ -27,17 +30,13 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
 }) => {
   const [isUploading, setIsUploading] = useState(false);
 
-  const formSchema = yup.object().shape({
-    coverImage: yup.string().required("Cover image is required"),
-  });
-
   const formik = useFormik({
     initialValues: {
       coverImage: initialCoverImage || "",
     },
-    validationSchema: formSchema,
+    validationSchema,
     onSubmit: (values) => {
-      updateFormData({ coverImage: values.coverImage });
+      updateFormData({ banner: values.coverImage });
     },
   });
 
@@ -47,33 +46,68 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
     }
   }, [initialCoverImage]);
 
-  const handleImageChange = useCallback(
+  const compressImage = async (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = document.createElement("img");
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          const scaleFactor = 0.7; // Adjust this value to change compression level
+          canvas.width = img.width * scaleFactor;
+          canvas.height = img.height * scaleFactor;
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error("Canvas to Blob conversion failed"));
+              }
+            },
+            "image/jpeg",
+            0.8 // Adjust this value to change compression quality
+          );
+        };
+        img.onerror = () => reject(new Error("Image loading failed"));
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const handleImageUpload = useCallback(
     async (files: File[]) => {
-      if (files && files.length > 0) {
-        const file = files[0];
-        setIsUploading(true);
+      if (files.length === 0) return;
 
-        try {
-          const base64 = await fileToBase64(file);
-          const fileName = `cover-image-${userId}-${Date.now()}.${file.name
-            .split(".")
-            .pop()}`;
-          const uploadedUrl = await uploadFileToS3(base64, fileName, userName);
+      const file = files[0];
+      setIsUploading(true);
 
-          formik.setFieldValue("coverImage", uploadedUrl);
-          await formik.submitForm();
+      try {
+        const compressedBlob = await compressImage(file);
+        const base64 = await blobToBase64(compressedBlob);
+        const fileName = `shop-cover-${userId}-${Date.now()}.jpg`;
+        const uploadedUrl = await uploadFileToS3(base64, fileName, userName);
 
-          toast.success("Cover image uploaded successfully!");
-        } catch (error) {
-          console.error("Error uploading image:", error);
-          toast.error("Failed to upload image. Please try again.");
-        } finally {
-          setIsUploading(false);
-        }
+        formik.setFieldValue("coverImage", uploadedUrl);
+        updateFormData({ banner: uploadedUrl });
+        toast.success("Shop cover image uploaded successfully!");
+      } catch (error) {
+        console.error("Error uploading cover image:", error);
+        toast.error("Failed to upload cover image. Please try again.");
+      } finally {
+        setIsUploading(false);
       }
     },
-    [formik, userName, userId]
+    [formik, userId, userName, updateFormData]
   );
+
+  const handleRemoveCoverImage = () => {
+    formik.setFieldValue("coverImage", "");
+    updateFormData({ banner: "" });
+  };
 
   return (
     <Box className="content" width="auto" height="auto" paddingBottom={6}>
@@ -87,7 +121,7 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
         Upload a cover image for your shop
       </H5>
 
-      <DropZone onChange={handleImageChange} />
+      <DropZone onChange={handleImageUpload} />
 
       {formik.touched.coverImage && formik.errors.coverImage && (
         <Small color="error.main" mt="0.5rem">
@@ -97,7 +131,7 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
 
       {isUploading && (
         <Small color="text.muted" mt="1rem">
-          Uploading image...
+          Uploading cover image...
         </Small>
       )}
 
@@ -106,21 +140,18 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
           <H5 mb="0.5rem">Preview:</H5>
           <Image
             src={formik.values.coverImage}
-            alt="Cover Image Preview"
+            alt="Shop Cover Image Preview"
             width={300}
             height={150}
-            objectFit="cover"
+            style={{ objectFit: "cover" }}
           />
           <Button
             mt="1rem"
             variant="outlined"
             color="primary"
-            onClick={() => {
-              formik.setFieldValue("coverImage", "");
-              formik.submitForm();
-            }}
+            onClick={handleRemoveCoverImage}
           >
-            Remove Image
+            Remove Cover Image
           </Button>
         </Box>
       )}
@@ -128,18 +159,12 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
   );
 };
 
-const fileToBase64 = (file: File): Promise<string> => {
+const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result.split(",")[1]);
-      } else {
-        reject(new Error("Failed to convert file to base64"));
-      }
-    };
-    reader.onerror = (error) => reject(error);
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
   });
 };
 

@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -37,38 +34,40 @@ enum orderStatus {
   Complete
 }
 
-model avatar {
-  id        String   @id @default(uuid())
-  original  String
-  thumbnail String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  userId    String   @unique
-  user      user     @relation(fields: [userId], references: [id])
+enum VerificationStatus {
+  Pending
+  Processing
+  Complete
+}
+
+enum ShopStatus {
+  Pending
+  Approved
+  Rejected
 }
 
 model user {
-  id                String    @id @default(uuid())
-  email             String    @unique
-  password          String?
-  firstname         String?
-  lastname          String?
-  role              userRole? @default(Customer)
-  profile           profile?
-  emailVerified     DateTime?
-  image             String?
-  accounts          account[]
-  avatar            avatar?
-  name              String?
-  isOnboardedVendor Boolean?  @default(false)
-  hasPaid           Boolean?
-  products          product[] @relation("UserProducts")
-  shop              shop?     @relation("UserShop")
-  orders            order[]
-  cart              cart?
-  paymentReference  String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @default(now()) @updatedAt
+  id                 String             @id @default(uuid())
+  email              String             @unique
+  password           String?
+  firstname          String?
+  lastname           String?
+  role               userRole?          @default(Customer)
+  emailVerified      DateTime?
+  image              String?
+  accounts           account[]
+  avatar             avatar?
+  name               String?
+  isOnboardedVendor  Boolean            @default(false)
+  hasPaid            Boolean            @default(false)
+  products           product[]          @relation("UserProducts")
+  shop               shop?
+  orders             order[]
+  cart               cart?
+  paymentReference   String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  verificationStatus VerificationStatus @default(Pending)
 }
 
 model account {
@@ -89,46 +88,66 @@ model account {
   @@unique([provider, providerAccountId])
 }
 
-model profile {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  name      String
-  role      userRole? @default(Customer)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
-  deletedAt DateTime?
-  shop      shop?     @relation("ProfileShop")
-  userId    String    @unique
-  user      user      @relation(fields: [userId], references: [id])
+model avatar {
+  id        String   @id @default(uuid())
+  original  String
+  thumbnail String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @unique
+  user      user     @relation(fields: [userId], references: [id])
 }
 
 model shop {
-  id          String    @id @default(cuid())
-  shopname    String?
-  description String?
-  address     String?
-  logo        String?
-  banner      String?
-  slug        String?
-  bankName    String?
-  accountNo   String?
-  country     String?
-  city        String?
-  state       String?
-  zip         String?
-  phoneNumber String?
-  website     String?
-  accountName String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
-  deletedAt   DateTime?
-  profileId   String?   @unique
-  profile     profile?  @relation("ProfileShop", fields: [profileId], references: [id])
-  products    product[] @relation("ShopProducts")
-  userId      String?   @unique
-  user        user?     @relation("UserShop", fields: [userId], references: [id])
-  orders      order[]
+  id           String        @id @default(cuid())
+  shopName     String        @default("My Shop")
+  description  String        @default("")
+  logo         String?       @default("")
+  banner       String?       @default("")
+  slug         String        @unique
+  status       ShopStatus    @default(Pending)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  userId       String        @unique
+  user         user          @relation(fields: [userId], references: [id])
+  products     product[]     @relation("ShopProducts")
+  orders       order[]
+  address      Address?
+  paymentInfo  PaymentInfo?
+  shopSettings ShopSettings?
+}
+
+model Address {
+  id         String @id @default(cuid())
+  street     String
+  city       String
+  state      String
+  postalCode String
+  country    String
+  shop       shop   @relation(fields: [shopId], references: [id])
+  shopId     String @unique
+}
+
+model PaymentInfo {
+  id          String @id @default(cuid())
+  accountName String
+  accountNo   String
+  bankName    String
+  shop        shop   @relation(fields: [shopId], references: [id])
+  shopId      String @unique
+}
+
+model ShopSettings {
+  id              String   @id @default(cuid())
+  phoneNumber     String
+  website         String
+  businessHours   String?
+  category        String?
+  deliveryOptions String[]
+  isActive        Boolean  @default(true)
+  shop            shop     @relation(fields: [shopId], references: [id])
+  shopId          String   @unique
 }
 
 model product {
@@ -145,9 +164,7 @@ model product {
   status        ProductStatus @default(Draft)
   product_type  ProductType   @default(Simple)
   video         String?
-  image_id      String?
   image         String?
-  gallery_id    Int?
   author_id     String?
   ratings       Float?
   total_reviews Int?
@@ -162,15 +179,6 @@ model product {
   stock         Int?
 }
 
-model image {
-  id        String  @id @default(uuid())
-  url       String
-  productId String? @unique
-  galleryId String?
-  // gallery   gallery? @relation(fields: [galleryId], references: [id])
-  imageId   String?
-}
-
 model category {
   id       String    @id @unique @default(uuid())
   name     String
@@ -179,15 +187,6 @@ model category {
 
   @@unique([name, slug])
 }
-
-// model gallery {
-//   id        String   @id @default(uuid())
-//   productId String?
-//   product   product? @relation(fields: [productId], references: [id])
-//   Image     image[]
-
-//   @@unique([productId])
-// }
 
 model verificationToken {
   id      String   @id @default(uuid())
@@ -227,7 +226,7 @@ model order {
   status     orderStatus
   totalPrice Float
 
-  orderItems orderItem[] // [Order] one-to-many [OrderItem]
+  orderItems orderItem[]
 
   userId String
   user   user    @relation(fields: [userId], references: [id], onDelete: Cascade)

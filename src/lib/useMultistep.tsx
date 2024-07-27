@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 import { Button } from "@component/buttons";
 import AddBasicInfo from "@component/onboarding/addBasicInfo";
 import AddLogo from "@component/onboarding/addLogo";
@@ -10,13 +11,16 @@ import AddPaymentInfo from "@component/onboarding/addPaymentInfo";
 import AddShopAddress from "@component/onboarding/addShopAddress";
 import AddShopSettings from "@component/onboarding/addShopSettings";
 import ProcessPayment from "@component/onboarding/processPayment";
+import UploadVerificationDocuments from "@component/onboarding/uploadVerificationDocuments";
 import { useFormContext } from "@context/formcontext";
 import { useCurrentUser } from "./use-session-client";
-import { createShop } from "actions/createshop";
 import { OnboardingStyledRoot } from "@sections/auth/styles";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H3 } from "@component/Typography";
+import { LogoutButton } from "@component/logout-button";
+import { createShop } from "actions/createshop";
+import { ShopStatus } from "@prisma/client";
 
 const steps = [
   { component: AddLogo, label: "Shop Logo" },
@@ -26,6 +30,10 @@ const steps = [
   { component: AddShopAddress, label: "Shop Address" },
   { component: AddShopSettings, label: "Shop Settings" },
   { component: ProcessPayment, label: "Make Payment" },
+  {
+    component: UploadVerificationDocuments,
+    label: "Upload Verification Documents",
+  },
 ];
 
 const MultiStepForm = () => {
@@ -33,48 +41,9 @@ const MultiStepForm = () => {
   const { formData, updateFormData } = useFormContext();
   const user = useCurrentUser();
   const [isPaymentProcessed, setPaymentProcessed] = useState(false);
-  const StepComponent = steps[currentStep].component;
+  const router = useRouter();
 
-  const getStepProps = (step: number) => {
-    const commonProps = {
-      updateFormData,
-      userName: user?.firstname || "",
-      userEmail: user?.email || "",
-      userId: user?.id || "",
-    };
-
-    switch (step) {
-      case 0:
-        return { ...commonProps, initialLogo: formData.logo || "" };
-      case 1:
-        return {
-          ...commonProps,
-          initialShopName: formData.shopName || "",
-          initialSlug: formData.slug || "",
-          initialDescription: formData.description || "",
-        };
-      case 2:
-        return { ...commonProps, initialCoverImage: formData.coverImage || "" };
-      case 3:
-        return {
-          ...commonProps,
-          initialPaymentInfo: formData.paymentInfo || {},
-        };
-      case 4:
-        return { ...commonProps, initialAddress: formData.address || {} };
-      case 5:
-        return {
-          ...commonProps,
-          initialShopSettings: formData.shopSettings || {},
-        };
-      case 6:
-        return { ...commonProps, setPaymentProcessed };
-      default:
-        return commonProps;
-    }
-  };
-
-  const handleNext = () => {
+  const handleNextStep = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -88,19 +57,99 @@ const MultiStepForm = () => {
 
   const handleFinish = async () => {
     try {
-      const addshop = await createShop(formData);
-      if (addshop.status === "success") {
-        updateFormData({});
-        toast.success(`${addshop.message} 😄`);
-        window.location.href = "/";
+      const shopData = {
+        shopName: formData.shopName,
+        description: formData.description,
+        logo: formData.logo,
+        banner: formData.coverImage,
+        slug: formData.slug,
+        status: ShopStatus.Pending,
+        hasPaid: isPaymentProcessed,
+        address: {
+          street: formData.address.street,
+          city: formData.address.city,
+          state: formData.address.state,
+          postalCode: formData.address.postalCode,
+          country: formData.address.country,
+        },
+        paymentInfo: {
+          accountName: formData.paymentInfo.accountName,
+          accountNumber: formData.paymentInfo.accountNumber,
+          bankName: formData.paymentInfo.bankName,
+        },
+        shopSettings: {
+          phoneNumber: formData.shopSettings.phoneNumber,
+          website: formData.shopSettings.website,
+          businessHours: formData.shopSettings.businessHours,
+          category: formData.shopSettings.category,
+          deliveryOptions: formData.shopSettings.deliveryOptions,
+          isActive: formData.shopSettings.isActive,
+        },
+      };
+
+      console.log(
+        "Shop data being submitted:",
+        JSON.stringify(shopData, null, 2)
+      );
+
+      const result = await createShop(shopData);
+
+      if (result.status === "success") {
+        router.push("/onboarding/confirmation");
       } else {
-        toast.error(addshop.error || addshop.message || "An error occurred");
+        console.error("Error details:", result.error);
+        throw new Error(
+          result.error || result.message || "Failed to create shop"
+        );
       }
-      console.log("Submitted data:", formData);
     } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      console.error("Error creating shop:", error);
+      if (error instanceof Error) {
+        toast.error(`Failed to create shop: ${error.message}`);
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     }
+  };
+
+  const StepComponent = steps[currentStep].component;
+
+  const getStepProps = () => {
+    return {
+      updateFormData,
+      userName: user?.firstname || "",
+      userEmail: user?.email || "",
+      userId: user?.id || "",
+      initialLogo: formData.logo || "",
+      initialShopName: formData.shopName || "",
+      initialSlug: formData.slug || "",
+      initialDescription: formData.description || "",
+      initialCoverImage: formData.coverImage || "",
+      initialPaymentInfo: formData.paymentInfo || {
+        accountName: formData.paymentInfo.accountName || "",
+        accountNumber: formData.paymentInfo.accountNumber || "",
+        bankName: formData.paymentInfo.bankName || "",
+      },
+      initialAddress: formData.address || {
+        street: formData.address.street || "",
+        city: formData.address.city || "",
+        state: formData.address.state || "",
+        postalCode: formData.address.postalCode || "",
+        country: formData.address.country || "",
+      },
+      initialShopSettings: formData.shopSettings || {
+        phoneNumber: formData.shopSettings.phoneNumber || "",
+        website: formData.shopSettings.website || "",
+        businessHours: formData.shopSettings.businessHours || "",
+        category: formData.shopSettings.category || "",
+        deliveryOptions: formData.shopSettings.deliveryOptions || [],
+        isActive: formData.shopSettings.isActive || false,
+      },
+      setPaymentProcessed,
+      formData,
+      onNextStep: handleNextStep,
+      onComplete: handleFinish,
+    };
   };
 
   return (
@@ -111,7 +160,7 @@ const MultiStepForm = () => {
         </H3>
 
         <Box mb="2rem">
-          <StepComponent {...getStepProps(currentStep)} />
+          <StepComponent {...getStepProps()} />
         </Box>
 
         <FlexBox justifyContent="space-between" mt="2rem">
@@ -123,21 +172,22 @@ const MultiStepForm = () => {
           >
             Previous
           </Button>
-          {currentStep === steps.length - 1 ? (
+          {currentStep < steps.length - 2 && (
             <Button
               variant="contained"
               color="primary"
-              onClick={handleFinish}
-              disabled={!isPaymentProcessed}
+              onClick={handleNextStep}
             >
-              Finish
-            </Button>
-          ) : (
-            <Button variant="contained" color="primary" onClick={handleNext}>
               Next
             </Button>
           )}
+          {currentStep === steps.length - 1 && (
+            <Button variant="contained" color="primary" onClick={handleFinish}>
+              Finish
+            </Button>
+          )}
         </FlexBox>
+        <LogoutButton>Logout</LogoutButton>
       </Box>
     </OnboardingStyledRoot>
   );

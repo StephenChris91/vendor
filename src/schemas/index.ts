@@ -53,58 +53,65 @@ export const addPaymentSchema = z.object({
     }),
 });
 
-export const shopSettingsSchema = z.object({
-  phoneNumber: z.string().min(1, {
-    message: "Phone number is required.",
-  }),
-  website: z.string().min(2, {
-    message: "website must be at least 2 characters.",
-  }),
-});
 
 
 export const shopAddressSchema = z.object({
-  country: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  city: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  state: z.string().min(10, {
-    message: "Please provide your bank name.",
-  }),
-  zip: z
-    .string()
-    .min(2, {
-      message: "Provided accound number is not a valid account number.",
-    })
-    .max(6, {
-      message: "Provided account number exceeds the maximum length.",
-    }),
-  address: z.string().min(2, {
-    message: "Please provide your physical address.",
-  }),
+  street: z.string().min(1, "Street address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  postalCode: z.string().min(1, "Postal code is required"),
+  country: z.string().min(1, "Country is required"),
 });
 
 
+
+// Address sub-schema
+export const addressSchema = z.object({
+  street: z.string(),
+  city: z.string(),
+  state: z.string(),
+  postalCode: z.string(),
+  country: z.string(),
+});
+
+// Payment info sub-schema
+export const paymentInfoSchema = z.object({
+  accountName: z.string().min(1, "Account name is required"),
+  accountNumber: z.string().min(1, "Account number is required"),
+  bankName: z.string().min(1, "Bank name is required"),
+});
+
+// Shop settings sub-schema
+export const shopSettingsSchema = z.object({
+  phoneNumber: z.string(),
+  website: z.string(),
+  businessHours: z.string().optional(),
+  category: z.string().optional(),
+  deliveryOptions: z.array(z.string()).optional(),
+  isActive: z.boolean().optional(),
+});
+
+// Main shop schema
 export const shopSchema = z.object({
   id: z.string().optional(),
-  shopname: z.string(),
+  shopName: z.string(),
   description: z.string(),
-  address: z.string(),
   logo: z.string(),
   banner: z.string(),
   slug: z.string(),
-  bankName: z.string(),
-  accountNo: z.string(),
-  country: z.string(),
-  city: z.string(),
-  state: z.string(),
-  zip: z.string(),
-  phoneNumber: z.string(),
-  website: z.string(),
-  accountName: z.string(),
+  address: addressSchema,
+  paymentInfo: paymentInfoSchema,
+  shopSettings: shopSettingsSchema,
+  status: z.enum(["pending", "approved", "rejected"]).optional(),
+  hasPaid: z.boolean().optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+  deletedAt: z.date().optional(),
+  userId: z.string().optional(),
 });
+
+// You can also export the sub-schemas if you need to use them separately
+// export { addressSchema, paymentInfoSchema, shopSettingsSchema };
 
 export const searchInputSchema = z.object({
   search: z.string().min(2, {

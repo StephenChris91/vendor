@@ -1,3 +1,7 @@
+'use server'
+
+// actions/payment.ts
+
 import { auth } from "auth";
 import axios from "axios";
 import { db } from "../../prisma/prisma";
@@ -8,29 +12,20 @@ interface PaymentConfig {
     reference: string;
 }
 
-interface PaymentResponse {
-    status: boolean;
-    message: string;
-    data?: {
-        authorization_url: string;
-        access_code: string;
-        reference: string;
-    };
+interface PaymentProps {
+    config: PaymentConfig;
 }
 
-export async function initializePayment(config: PaymentConfig): Promise<PaymentResponse> {
+export const initializePayment = async ({ config }: PaymentProps) => {
     const { email, amount, reference } = config;
     const session = await auth();
 
     if (!session?.user?.id) {
-        return {
-            status: false,
-            message: "User not authenticated",
-        };
+        throw new Error("User not authenticated");
     }
 
     try {
-        const response = await axios.post<PaymentResponse>(
+        const response = await axios.post(
             "https://api.paystack.co/transaction/initialize",
             {
                 email,
@@ -39,35 +34,33 @@ export async function initializePayment(config: PaymentConfig): Promise<PaymentR
             },
             {
                 headers: {
-                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}`,
+                    Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
                     'Content-Type': 'application/json',
                 },
             }
         );
 
-        if (!response.data.status) {
-            return {
-                status: false,
-                message: response.data.message || "Payment initialization failed",
-            };
+        if (response.data.status === false) {
+            throw new Error(response.data.message || "Payment initialization failed");
         }
 
-        // We'll update the user's payment status after successful verification, not here
         return response.data;
     } catch (error) {
-        console.error("Payment initialization error:", error);
-        return {
-            status: false,
-            message: "An error occurred while initializing payment",
-        };
+        if (axios.isAxiosError(error)) {
+            console.error("Paystack API error:", error.response?.data);
+            throw new Error(error.response?.data?.message || "Failed to initialize payment");
+        }
+        throw error;
     }
-}
+};
 
+export const verifyAndUpdatePayment = async (reference: string) => {
+    const session = await auth();
 
+    if (!session?.user?.id) {
+        throw new Error("User not authenticated");
+    }
 
-
-
-export async function verifyPayment(reference: string): Promise<boolean> {
     try {
         const response = await axios.get(
             `https://api.paystack.co/transaction/verify/${reference}`,
@@ -78,25 +71,28 @@ export async function verifyPayment(reference: string): Promise<boolean> {
             }
         );
 
-        if (response.data.status && response.data.data.status === 'success') {
-            // Extract the user ID from the reference
-            const userId = reference.split('-')[1]; // Assuming the reference format is REF-userId-timestamp
+        if (response.data.status === false) {
+            throw new Error(response.data.message || "Payment verification failed");
+        }
 
-            // Update the user's payment status and reference
+        if (response.data.data.status === "success") {
             await db.user.update({
-                where: { id: userId },
+                where: {
+                    id: session.user.id,
+                },
                 data: {
                     hasPaid: true,
-                    paymentReference: reference,
                 },
             });
-
             return true;
         } else {
             return false;
         }
     } catch (error) {
-        console.error("Payment verification error:", error);
-        throw new Error("An error occurred while verifying payment");
+        if (axios.isAxiosError(error)) {
+            console.error("Payment verification error:", error.response?.data);
+            throw new Error(error.response?.data?.message || "Failed to verify payment");
+        }
+        throw error;
     }
-}
+};

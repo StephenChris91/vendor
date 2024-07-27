@@ -11,7 +11,7 @@ import { H1 } from "@component/Typography";
 const Onboarding = () => {
   return (
     <OnboardingStyledRoot>
-      <FlexBox height="100vh">
+      <FlexBox height="100vh" width="100vw">
         <Box
           width="50%"
           height="100%"

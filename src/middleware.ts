@@ -17,11 +17,6 @@ export default auth((req) => {
     const { nextUrl } = req;
     const isLoggedIn = !!req.auth;
 
-    console.log("Middleware - Auth:", JSON.stringify(req.auth, null, 2));
-    console.log("Middleware - Is logged in:", isLoggedIn);
-    console.log("Middleware - Requested path:", nextUrl.pathname);
-    console.log("Middleware - User role:", req.auth?.user?.role);
-
     const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
     const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
     const isAuthRoute = authRoutes.includes(nextUrl.pathname);
@@ -34,13 +29,21 @@ export default auth((req) => {
 
     if (isAuthRoute) {
         if (isLoggedIn) {
+            // Special case for onboarding
+            if (nextUrl.pathname === '/onboarding' && req.auth?.user?.role === "Vendor" && !req.auth?.user?.isOnboardedVendor) {
+                return null; // Allow access to onboarding for non-onboarded vendors
+            }
+
             // Redirect based on user role
             if (req.auth?.user?.role === "Admin") {
                 return Response.redirect(new URL(DEFAULT_ADMIN_REDIRECT, nextUrl));
             } else if (req.auth?.user?.role === "Vendor") {
+                if (!req.auth?.user?.isOnboardedVendor) {
+                    return Response.redirect(new URL('/onboarding', nextUrl));
+                }
                 return Response.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
             } else {
-                return Response.redirect(new URL('/', nextUrl));
+                return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
             }
         }
         return null;
@@ -69,25 +72,10 @@ export default auth((req) => {
             return Response.redirect(new URL("/", nextUrl));
         }
 
-        // If logged in and trying to access login page, redirect based on role
-        if (nextUrl.pathname === '/login') {
-            if (req.auth?.user?.role === "Admin") {
-                return Response.redirect(new URL(DEFAULT_ADMIN_REDIRECT, nextUrl));
-            } else if (req.auth?.user?.role === "Vendor") {
-                return Response.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
-            } else {
-                return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
-            }
+        // Vendor onboarding check
+        if (req.auth?.user?.role === "Vendor" && !req.auth?.user?.isOnboardedVendor && nextUrl.pathname !== '/onboarding') {
+            return Response.redirect(new URL('/onboarding', nextUrl));
         }
-    }
-
-    // Allow access to the default redirect paths
-    if (isLoggedIn && (
-        nextUrl.pathname === DEFAULT_LOGIN_REDIRECT ||
-        nextUrl.pathname === DEFAULT_ADMIN_REDIRECT ||
-        nextUrl.pathname === DEFAULT_VENDOR_REDIRECT
-    )) {
-        return null;
     }
 
     return null;

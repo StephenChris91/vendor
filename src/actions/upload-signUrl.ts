@@ -16,7 +16,7 @@ export async function uploadFileToS3(base64: string, fileName: string, userName:
     Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
     Key: `${userName}/${fileName}`, // User-specific folder
     Body: fileBuffer,
-    ContentType: "image/jpg",
+    ContentType: "image/*",
   };
 
   const command = new PutObjectCommand(params);

@@ -25,15 +25,15 @@ export default function Login() {
   const router = useRouter();
   const { passwordVisibility, togglePasswordVisibility } = useVisibility();
   const [isLoading, setIsLoading] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>("");
+  // const [debugInfo, setDebugInfo] = useState<string>("");
 
   const initialValues = { email: "", password: "" };
-  const session = useSession();
-  useEffect(() => {
-    async function logUser() {
-      console.log(session);
-    }
-  }, []);
+  // const session = useSession();
+  // useEffect(() => {
+  //   async function logUser() {
+  //     console.log(session);
+  //   }
+  // }, []);
 
   const formSchema = yup.object().shape({
     email: yup.string().email("invalid email").required("${path} is required"),
@@ -189,12 +189,12 @@ export default function Login() {
         </FlexBox>
       </form>
 
-      <Box mt="1rem" p="1rem" bg="gray.100">
+      {/* <Box mt="1rem" p="1rem" bg="gray.100">
         <H6>Debug Info:</H6>
         <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
           {debugInfo}
         </pre>
-      </Box>
+      </Box> */}
 
       <FlexBox justifyContent="center" bg="gray.200" py="19px">
         <SemiSpan>Forgot your password?</SemiSpan>

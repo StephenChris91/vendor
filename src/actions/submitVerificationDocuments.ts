@@ -1,44 +1,56 @@
 "use server"
 
-import { db } from "prisma";
 import { Resend } from "resend";
+import { db } from "../../prisma/prisma";
+import { VerificationStatus } from '@prisma/client'
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_VERIFICATION_KEY);
 
 export async function submitVerificationDocuments(
   userId: string,
   userEmail: string,
-  documentUrl: string,
-  documentType: string
+  documents: { name: string; content: string; type: string }[]
 ) {
   try {
-    // Update user's profile with the document URL
+    // Update user's profile to indicate documents have been submitted
+    // await db.user.update({
+    //   where: { id: userId },
+    //   data: {
+    //     verificationStatus: VerificationStatus.Pending,
+    //   },
+    // });
+
     await db.user.update({
       where: { id: userId },
       data: {
-        verificationDocumentUrl: documentUrl,
-        verificationStatus: "PENDING",
-      },
-    });
+        verificationStatus: VerificationStatus.Pending
+      }
+    })
+
+    // Prepare attachments for the email
+    const attachments = documents.map(doc => ({
+      filename: doc.name,
+      content: Buffer.from(doc.content, 'base64'),
+    }));
 
     // Send email to admin using Resend
     await resend.emails.send({
-      from: "Your App <onboarding@yourdomain.com>", // Replace with your verified domain
-      to: process.env.ADMIN_EMAIL!,
-      subject: "New Verification Document Submitted",
+      from: "Vendorspot Notification <admin@vendorspot.ng>", // Replace with your verified domain
+      to: userEmail,
+      subject: "New Verification Documents Submitted",
       html: `
-        <p>A new verification document has been submitted:</p>
+        <p>New verification documents have been submitted:</p>
         <p>User ID: ${userId}</p>
         <p>User Email: ${userEmail}</p>
-        <p>Document Type: ${documentType}</p>
-        <p>Document URL: <a href="${documentUrl}">${documentUrl}</a></p>
-        <p>Please review and update the user's verification status.</p>
+        <p>Number of Documents: ${documents.length}</p>
+        <p>Please review the attached documents and update the user's verification status.</p>
       `,
+      attachments: attachments,
     });
 
     return { success: true };
   } catch (error) {
-    console.error("Error submitting verification document:", error);
-    throw new Error("Failed to submit verification document");
+    console.error("Error submitting verification documents:", error);
+    throw new Error("Failed to submit verification documents");
   }
 }

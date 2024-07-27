@@ -21,7 +21,18 @@ export default function DropZone({ onChange }: DropZoneProps) {
     onDrop,
     maxFiles: 10,
     multiple: true,
-    accept: { "image/*": [".png", ".jpeg", ".jpg", ".gif"] }
+    accept: {
+      "image/*": [
+        ".png",
+        ".jpeg",
+        ".jpg",
+        ".gif",
+        ".pdf",
+        ".docx",
+        ".doc",
+        ".odt",
+      ],
+    },
   });
 
   return (
@@ -37,7 +48,8 @@ export default function DropZone({ onChange }: DropZoneProps) {
       bg={isDragActive && "gray.200"}
       transition="all 250ms ease-in-out"
       style={{ outline: "none" }}
-      {...getRootProps()}>
+      {...getRootProps()}
+    >
       <input {...getInputProps()} />
       <H5 mb="18px" color="text.muted">
         Drag & drop product image here
@@ -50,11 +62,18 @@ export default function DropZone({ onChange }: DropZoneProps) {
         mt="-10px"
         lineHeight="1"
         color="text.muted"
-        bg={isDragActive ? "gray.200" : "body.paper"}>
+        bg={isDragActive ? "gray.200" : "body.paper"}
+      >
         on
       </Typography>
 
-      <Button color="primary" bg="primary.light" px="2rem" mb="22px" type="button">
+      <Button
+        color="primary"
+        bg="primary.light"
+        px="2rem"
+        mb="22px"
+        type="button"
+      >
         Select files
       </Button>
 

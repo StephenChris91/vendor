@@ -2,35 +2,37 @@
 
 import { createContext, useContext, useState } from "react";
 
-interface FormContextType {
-  formData: {
-    logo: string;
-    shopName: string;
-    slug: string;
-    description: string;
-    coverImage: string;
-    paymentInfo: {
-      accountName: string;
-      accountNumber: string;
-      bankName: string;
-    };
-    address: {
-      street: string;
-      city: string;
-      state: string;
-      postalCode: string;
-      country: string;
-    };
-    shopSettings: {
-      phoneNumber: string;
-      website: string;
-      businessHours: string;
-      category: string;
-      deliveryOptions: string[];
-      isActive: boolean;
-    };
+interface FormData {
+  logo: string;
+  shopName: string;
+  slug: string;
+  description: string;
+  coverImage: string;
+  paymentInfo: {
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
   };
-  updateFormData: (data: Partial<FormContextType["formData"]>) => void;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  shopSettings: {
+    phoneNumber: string;
+    website: string;
+    businessHours: string;
+    category: string;
+    deliveryOptions: string[];
+    isActive: boolean;
+  };
+}
+
+interface FormContextType {
+  formData: FormData;
+  updateFormData: (data: Partial<FormData>) => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
@@ -46,7 +48,7 @@ export const useFormContext = () => {
 export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [formData, setFormData] = useState<FormContextType["formData"]>({
+  const [formData, setFormData] = useState<FormData>({
     logo: "",
     shopName: "",
     slug: "",
@@ -74,18 +76,14 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     },
   });
 
-  const updateFormData = (data: Partial<FormContextType["formData"]>) => {
-    setFormData((prev) => {
-      const newData = { ...prev };
-      Object.keys(data).forEach((key) => {
-        if (typeof data[key] === "object" && data[key] !== null) {
-          newData[key] = { ...newData[key], ...data[key] };
-        } else {
-          newData[key] = data[key];
-        }
-      });
-      return newData;
-    });
+  const updateFormData = (data: Partial<FormData>) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...data,
+      paymentInfo: { ...prev.paymentInfo, ...data.paymentInfo },
+      address: { ...prev.address, ...data.address },
+      shopSettings: { ...prev.shopSettings, ...data.shopSettings },
+    }));
     console.log("Form data updated:", data);
   };
 

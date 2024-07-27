@@ -61,8 +61,7 @@ const AddLogo: React.FC<AddLogoProps> = ({
         const uploadedUrl = await uploadFileToS3(base64, fileName, userName);
 
         formik.setFieldValue("logo", uploadedUrl);
-        await formik.submitForm();
-
+        updateFormData({ logo: uploadedUrl });
         toast.success("Shop logo uploaded successfully!");
       } catch (error) {
         console.error("Error uploading logo:", error);
@@ -71,12 +70,12 @@ const AddLogo: React.FC<AddLogoProps> = ({
         setIsUploading(false);
       }
     },
-    [formik, userId, userName]
+    [formik, userId, userName, updateFormData]
   );
 
   const handleRemoveLogo = () => {
     formik.setFieldValue("logo", "");
-    formik.submitForm();
+    updateFormData({ logo: "" });
   };
 
   return (
@@ -111,8 +110,8 @@ const AddLogo: React.FC<AddLogoProps> = ({
           <Image
             src={formik.values.logo}
             alt="Shop Logo Preview"
-            width={50}
-            height={50}
+            width={150}
+            height={150}
             objectFit="contain"
           />
           <Button

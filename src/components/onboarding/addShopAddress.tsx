@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
@@ -12,17 +12,20 @@ import { Button } from "@component/buttons";
 
 import { reverseGeocode } from "lib/geocode";
 
-interface AddShopAddressProps {
-  updateFormData: (data: { address: Address }) => void;
-  initialAddress: Address;
-}
-
 interface Address {
   street: string;
   city: string;
   state: string;
   postalCode: string;
   country: string;
+}
+
+interface AddShopAddressProps {
+  updateFormData: (data: { address: Address }) => void;
+  initialAddress: Address;
+  userName: string;
+  userEmail: string;
+  userId: string;
 }
 
 const formSchema = yup.object().shape({
@@ -36,16 +39,19 @@ const formSchema = yup.object().shape({
 const AddShopAddress: React.FC<AddShopAddressProps> = ({
   updateFormData,
   initialAddress,
+  userName,
+  userEmail,
+  userId,
 }) => {
-  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = React.useState(false);
 
   const formik = useFormik({
-    initialValues: {
-      street: initialAddress?.street || "",
-      city: initialAddress?.city || "",
-      state: initialAddress?.state || "",
-      postalCode: initialAddress?.postalCode || "",
-      country: initialAddress?.country || "",
+    initialValues: initialAddress || {
+      street: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      country: "",
     },
     validationSchema: formSchema,
     onSubmit: (values) => {
@@ -107,7 +113,13 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
   };
 
   return (
-    <Box className="content" width="auto" height="auto" paddingBottom={6}>
+    <Box
+      className="content"
+      width="auto"
+      height="auto"
+      paddingBottom={6}
+      padding={9}
+    >
       <H5
         fontWeight="600"
         fontSize="12px"
