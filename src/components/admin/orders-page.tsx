@@ -139,16 +139,7 @@ export default function OrdersPage() {
         <H3>Order Management</H3>
       </ResponsiveFlexBox>
 
-      <OrderStatistics
-        stats={
-          stats || {
-            totalOrders: 0,
-            pendingOrders: 0,
-            totalRevenue: 0,
-            averageOrderValue: 0,
-          }
-        }
-      />
+      <OrderStatistics stats={stats} />
 
       <OrderSearchFilter onSearch={handleSearch} onFilter={handleFilter} />
 
