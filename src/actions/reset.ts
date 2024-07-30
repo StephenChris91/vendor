@@ -2,26 +2,24 @@
 
 import * as z from 'zod';
 
-import { ResetSchema } from '@/app/schemas';
-import { DEFAULT_LOGIN_REDIRECT } from '@/routes';
-import { AuthError } from 'next-auth';
-import { getUserByEmail } from '@/lib/data/user';
-import { generatePasswordResetToken, generateVerificationToken } from '@/lib/data/tokens';
-import { sendResetPasswordEmail, sendVerificationEmail } from '@/lib/mail';
+import { ResetSchema } from 'schemas';
+import { getUserByEmail } from '@lib/data/user';
+import { generatePasswordResetToken } from '@lib/data/tokens';
+import { sendResetPasswordEmail } from '@lib/mail';
 
 export const reset = async (values: z.infer<typeof ResetSchema>) => {
     const validInput = ResetSchema.safeParse(values)
 
     if (!validInput.success) {
-        return { error: 'Invalid Credentials'}
+        return { error: 'Invalid Credentials' }
     }
 
     const { email } = validInput.data;
 
     const existingUser = await getUserByEmail(email);
 
-    if(!existingUser || !existingUser.email) {
-        return {error: 'Email does not exist!'}
+    if (!existingUser || !existingUser.email) {
+        return { error: 'Email does not exist!' }
     }
 
     const passwordResetToken = await generatePasswordResetToken(email)
@@ -30,6 +28,6 @@ export const reset = async (values: z.infer<typeof ResetSchema>) => {
 
     console.log(email)
 
-    return {success: 'Confirmation email sent'}
+    return { success: 'Confirmation email sent' }
 
 }
