@@ -12,7 +12,7 @@ export async function GET(
             where: { id: params.id },
             include: {
                 shop: true,
-                author: true,
+                user: true,
                 categories: true,
             },
         });
@@ -23,8 +23,8 @@ export async function GET(
 
         return NextResponse.json({
             ...product,
-            shop_name: product.shop?.shopname || null,
-            author_name: product.author?.name || null,
+            shop_name: product.shop?.shopName || null,
+            author_name: product.user?.name || null,
             categories: product.categories.map(category => category.name),
         });
     } catch (error) {
@@ -51,21 +51,21 @@ export async function PUT(
                 status: body.status,
                 product_type: body.product_type,
                 shop: body.shop_id ? { connect: { id: body.shop_id } } : undefined,
-                author: body.author_id ? { connect: { id: body.author_id } } : undefined,
+                user: body.author_id ? { connect: { id: body.author_id } } : undefined,
                 categories: {
                     set: body.category_ids?.map((id: string) => ({ id })) || [],
                 },
             },
             include: {
                 shop: true,
-                author: true,
+                user: true,
                 categories: true,
             },
         });
         return NextResponse.json({
             ...updatedProduct,
-            shop_name: updatedProduct.shop?.shopname || null,
-            author_name: updatedProduct.author?.name || null,
+            shop_name: updatedProduct.shop?.shopName || null,
+            author_name: updatedProduct.user?.name || null,
             categories: updatedProduct.categories.map(category => category.name),
         });
     } catch (error) {

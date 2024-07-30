@@ -1,12 +1,13 @@
 // app/api/admin/orders/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../../prisma/prisma';
+import { orderStatus } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const search = searchParams.get('search');
-    const paymentStatus = searchParams.get('paymentStatus');
-    const fulfillmentStatus = searchParams.get('fulfillmentStatus');
+    const paymentStatus = searchParams.get('paymentStatus') as orderStatus | null;
+    const fulfillmentStatus = searchParams.get('fulfillmentStatus') as orderStatus | null;
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
@@ -43,11 +44,11 @@ export async function GET(request: NextRequest) {
 
         const formattedOrders = orders.map((order) => ({
             id: order.id,
-            customerName: order.user.name,
+            customerName: order.user?.name ?? 'Unknown',
             orderDate: order.createdAt.toISOString(),
             totalAmount: order.totalPrice,
             paymentStatus: order.status,
-            fulfillmentStatus: order.status, // Assuming you have a separate field for this, adjust as needed
+            fulfillmentStatus: order.status, // Adjust this based on your schema
         }));
 
         return NextResponse.json(formattedOrders);

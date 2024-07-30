@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
             skip: (page - 1) * pageSize,
             include: {
                 shop: true,
-                author: true,
+                user: true,
                 categories: true,
             },
         });
@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             products: products.map(product => ({
                 ...product,
-                shop_name: product.shop?.shopname || null,
-                author_name: product.author?.name || null,
+                shop_name: product.shop?.shopName || null,
+                author_name: product.user?.name || null,
                 categories: product.categories.map(category => category.name),
             })),
             totalPages: Math.ceil(totalProducts / pageSize),
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
                 status: body.status,
                 product_type: body.product_type,
                 shop: body.shop_id ? { connect: { id: body.shop_id } } : undefined,
-                author: body.author_id ? { connect: { id: body.author_id } } : undefined,
+                user: body.author_id ? { connect: { id: body.author_id } } : undefined,
                 categories: {
                     connect: body.category_ids?.map((id: string) => ({ id })) || [],
                 },
