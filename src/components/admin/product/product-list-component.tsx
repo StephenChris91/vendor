@@ -1,4 +1,3 @@
-// components/admin/ProductList.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
@@ -9,7 +8,7 @@ import Pagination from "@component/pagination";
 import Checkbox from "@component/CheckBox";
 import Modal from "@component/Modal";
 import TextField from "@component/text-field";
-import Select from "@component/Select";
+import Select, { SelectOption } from "@component/Select"; // Ensure SelectOption is imported
 
 const TableWrapper = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -80,7 +79,8 @@ const ProductList: React.FC<ProductListProps> = ({
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const paginate = (data: { selected: number }) =>
+    setCurrentPage(data.selected + 1);
 
   const handleEditClick = (product: Product) => {
     setEditingProduct(product);
@@ -102,6 +102,18 @@ const ProductList: React.FC<ProductListProps> = ({
       setEditingProduct({ ...editingProduct, [field]: value });
     }
   };
+
+  const categoryOptions: SelectOption[] = [
+    { value: "Electronics", label: "Electronics" },
+    { value: "Clothing", label: "Clothing" },
+    // Add more categories as needed
+  ];
+
+  const statusOptions: SelectOption[] = [
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+    { value: "out-of-stock", label: "Out of Stock" },
+  ];
 
   return (
     <TableWrapper>
@@ -180,9 +192,9 @@ const ProductList: React.FC<ProductListProps> = ({
       </StyledTable>
       <Box p={2}>
         <Pagination
-          count={Math.ceil(products.length / itemsPerPage)}
-          onChange={(_, page) => paginate(page)}
-          page={currentPage}
+          pageCount={Math.ceil(products.length / itemsPerPage)}
+          onChange={paginate}
+          // page={currentPage - 1}
         />
       </Box>
 
@@ -225,16 +237,17 @@ const ProductList: React.FC<ProductListProps> = ({
               }
             />
             <Select
-              fullwidth
+              // fullwidth
               mb={2}
               label="Category"
-              value={editingProduct.category}
-              onChange={(e) => handleEditChange("category", e.target.value)}
-            >
-              <option value="Electronics">Electronics</option>
-              <option value="Clothing">Clothing</option>
-              {/* Add more categories as needed */}
-            </Select>
+              value={categoryOptions.find(
+                (option) => option.value === editingProduct.category
+              )}
+              onChange={(option) =>
+                handleEditChange("category", (option as SelectOption).value)
+              }
+              options={categoryOptions}
+            />
             <TextField
               fullwidth
               mb={2}
@@ -243,16 +256,17 @@ const ProductList: React.FC<ProductListProps> = ({
               onChange={(e) => handleEditChange("vendor", e.target.value)}
             />
             <Select
-              fullwidth
+              // fullwidth
               mb={3}
               label="Status"
-              value={editingProduct.status}
-              onChange={(e) => handleEditChange("status", e.target.value)}
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="out-of-stock">Out of Stock</option>
-            </Select>
+              value={statusOptions.find(
+                (option) => option.value === editingProduct.status
+              )}
+              onChange={(option) =>
+                handleEditChange("status", (option as SelectOption).value)
+              }
+              options={statusOptions}
+            />
             <FlexBox justifyContent="flex-end">
               <Button
                 variant="outlined"
