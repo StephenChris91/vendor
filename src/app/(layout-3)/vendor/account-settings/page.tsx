@@ -24,7 +24,7 @@ export default function AccountSettings() {
     country: "",
     city: "",
     email: "",
-    contact: ""
+    contact: "",
   };
 
   const accountSchema = yup.object().shape({
@@ -33,7 +33,7 @@ export default function AccountSettings() {
     country: yup.mixed().required("required"),
     city: yup.string().required("required"),
     email: yup.string().email("invalid email").required("required"),
-    contact: yup.string().required("required")
+    contact: yup.string().required("required"),
   });
 
   const handleFormSubmit = async (values: any) => {
@@ -51,8 +51,18 @@ export default function AccountSettings() {
           overflow="hidden"
           borderRadius="10px"
           position="relative"
-          style={{ background: "url(/assets/images/banners/banner-10.png) center/cover" }}>
-          <Box display="flex" alignItems="flex-end" position="absolute" bottom="20px" left="24px">
+          style={{
+            background:
+              "url(/assets/images/banners/banner-10.png) center/cover",
+          }}
+        >
+          <Box
+            display="flex"
+            alignItems="flex-end"
+            position="absolute"
+            bottom="20px"
+            left="24px"
+          >
             <Avatar
               size={80}
               border="4px solid"
@@ -69,7 +79,8 @@ export default function AccountSettings() {
                   height="auto"
                   bg="gray.300"
                   color="secondary"
-                  borderRadius="50%">
+                  borderRadius="50%"
+                >
                   <Icon>camera</Icon>
                 </Button>
               </label>
@@ -86,7 +97,13 @@ export default function AccountSettings() {
             </Hidden>
           </Box>
 
-          <Box display="flex" alignItems="flex-end" position="absolute" top="20px" right="24px">
+          <Box
+            display="flex"
+            alignItems="flex-end"
+            position="absolute"
+            top="20px"
+            right="24px"
+          >
             <label htmlFor="cover-image">
               <Button
                 as="span"
@@ -95,7 +112,8 @@ export default function AccountSettings() {
                 color="secondary"
                 height="auto"
                 p="6px"
-                borderRadius="50%">
+                borderRadius="50%"
+              >
                 <Icon color="primary">camera</Icon>
               </Button>
             </label>
@@ -115,8 +133,17 @@ export default function AccountSettings() {
         <Formik
           initialValues={initialValues}
           validationSchema={accountSchema}
-          onSubmit={handleFormSubmit}>
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, setFieldValue }) => (
+          onSubmit={handleFormSubmit}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            setFieldValue,
+          }) => (
             <form onSubmit={handleSubmit}>
               <Box mb="30px">
                 <Grid container horizontal_spacing={6} vertical_spacing={4}>
@@ -175,7 +202,7 @@ export default function AccountSettings() {
                       label="Country"
                       options={countryList}
                       value={values.country || "US"}
-                      errorText={touched.country && errors.country}
+                      errorText={touched.country && (errors.country as string)}
                       onChange={(country) => setFieldValue("country", country)}
                     />
                   </Grid>

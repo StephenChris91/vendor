@@ -5,7 +5,14 @@ import Box from "@component/Box";
 import Typography from "@component/Typography";
 import { colors } from "@utils/themeColors";
 
-export type SelectOption = { id: string; name: string; slug: string };
+export type SelectOption = {
+  id?: string;
+  name?: string;
+  slug?: string;
+  label?: string;
+  value?: string;
+  placeholder?: string;
+};
 
 interface SelectProps
   extends Omit<Props<SelectOption, boolean>, "onChange">,
@@ -15,7 +22,7 @@ interface SelectProps
   errorText?: string;
   options: SelectOption[];
   isMulti?: boolean;
-  onChange: (option: SelectOption | SelectOption[] | null) => void;
+  onChange?: (option: SelectOption | SelectOption[] | null) => void;
 }
 
 const Select: React.FC<SelectProps> = ({
