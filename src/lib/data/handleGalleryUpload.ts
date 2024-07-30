@@ -1,10 +1,10 @@
+import { useCurrentUser } from "@lib/use-session-client";
 import { useCallback, Dispatch, SetStateAction } from "react";
-import { ProductType } from "@/app/types/types";
-import { useCurrentUser } from "@/lib/use-session-client";
+import { ProductType } from "types";
 
 export type FormDataType = ProductType;
 
-export const handleGalleryUpload = (
+export const handleGalleryUpload = async (
   formData: FormDataType,
   setFormData: Dispatch<SetStateAction<FormDataType>>,
   setGalleryFiles: Dispatch<SetStateAction<string[]>>

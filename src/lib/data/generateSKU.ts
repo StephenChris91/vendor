@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { ProductType } from "@/app/types/types";
+import { ProductType } from "types";
 
 export type FormDataType = ProductType;
 
