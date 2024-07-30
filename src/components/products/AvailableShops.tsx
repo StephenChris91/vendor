@@ -19,7 +19,7 @@ export default function AvailableShops({ shops }: Props) {
 
       <Grid container spacing={8}>
         {shops.map((item) => (
-          <Grid item lg={2} md={4} sm={6} xs={12} key={item.name}>
+          <Grid item lg={2} md={4} sm={6} xs={12} key={item.shopName}>
             <Link href={`/shops/${item.slug}`}>
               <FlexBox
                 as={Card}
@@ -28,10 +28,17 @@ export default function AvailableShops({ shops }: Props) {
                 borderRadius={8}
                 alignItems="center"
                 flexDirection="column"
-                justifyContent="center">
-                <Avatar src={item.profilePicture} />
-                <H4 textAlign="center" width="inherit" mt="0.75rem" color="gray.800" ellipsis>
-                  {item.name}
+                justifyContent="center"
+              >
+                <Avatar src={item.logo} />
+                <H4
+                  textAlign="center"
+                  width="inherit"
+                  mt="0.75rem"
+                  color="gray.800"
+                  ellipsis
+                >
+                  {item.shopName}
                 </H4>
               </FlexBox>
             </Link>
