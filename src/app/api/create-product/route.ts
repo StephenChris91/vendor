@@ -8,7 +8,7 @@ import { getUserById } from "lib/data/user";
 import { Prisma } from "@prisma/client";
 import { db } from "../../../../prisma/prisma";
 
-export async function createProduct(values: z.infer<typeof productSchema>) {
+export async function POST(values: z.infer<typeof productSchema>) {
   const session = await auth();
 
   if (!session?.user) {
