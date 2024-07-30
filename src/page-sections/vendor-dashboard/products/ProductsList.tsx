@@ -29,7 +29,7 @@ export default function ProductsList({ meta, products }: Props) {
   const [page, setPage] = useState<number | null>(null);
 
   useEffect(() => {
-    if (page) {
+    if (page !== null) {
       push(`/vendor/products?page=${page}`);
       setPage(null);
     }
@@ -71,7 +71,7 @@ export default function ProductsList({ meta, products }: Props) {
       <FlexBox justifyContent="center" mt="2.5rem">
         <Pagination
           pageCount={meta?.totalPage || 1}
-          onChange={(data) => setPage(data + 1)}
+          onChange={({ selected }) => setPage(selected + 1)}
         />
       </FlexBox>
     </>

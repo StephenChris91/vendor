@@ -22,7 +22,7 @@ const ResponsiveFlexBox = styled(FlexBox)`
 
 interface VendorSearchFilterProps {
   onSearch: (query: string) => void;
-  onFilter: (filters: any) => void;
+  onFilter: (filters: { status: string }) => void;
 }
 
 const VendorSearchFilter: React.FC<VendorSearchFilterProps> = ({
@@ -37,9 +37,10 @@ const VendorSearchFilter: React.FC<VendorSearchFilterProps> = ({
   };
 
   const handleFilter = () => {
-    onFilter({ status: status ? status.value : "" });
+    onFilter({ status: status?.value || "" });
   };
 
+  // Define status options for the Select component
   const statusOptions: SelectOption[] = [
     { value: "", label: "All Statuses" },
     { value: "active", label: "Active" },
@@ -63,7 +64,7 @@ const VendorSearchFilter: React.FC<VendorSearchFilterProps> = ({
         <Select
           placeholder="Filter by status"
           value={status}
-          onChange={(option) => setStatus(option)}
+          onChange={(option) => setStatus(option as SelectOption | null)}
           options={statusOptions}
           mb={2}
         />

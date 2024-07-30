@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import styled from "styled-components";
 import * as yup from "yup";
@@ -49,28 +47,30 @@ interface FormValues {
 }
 
 export default function ProductUpdateForm({ product, categoryOptions }: Props) {
+  // Convert product categories to SelectOption format
+  const initialCategories: SelectOption[] =
+    product?.categories?.map((cat) => ({
+      value: cat.id,
+      label: cat.name,
+    })) || null;
+
   const initialValues: FormValues = {
     name: product?.name || "",
     price: product?.price || 0,
     stock: product?.stock || 0,
     sale_price: product?.sale_price || 0,
     description: product?.description || "",
-    category:
-      product?.categories?.map((cat) => ({
-        id: cat.id,
-        name: cat.name,
-        slug: cat.slug,
-      })) || null,
+    category: initialCategories,
   };
+
   const validationSchema = yup.object().shape({
     name: yup.string().required("Name is required"),
     category: yup
       .array()
       .of(
         yup.object().shape({
-          id: yup.string().required(),
-          name: yup.string().required(),
-          slug: yup.string().required(),
+          value: yup.string().required(),
+          label: yup.string().required(),
         })
       )
       .min(1, "At least one category is required"),
@@ -99,7 +99,6 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
       toast.error("Failed to create product");
     }
 
-    // Here you would typically send the data to your API
     setSubmitting(false);
   };
 

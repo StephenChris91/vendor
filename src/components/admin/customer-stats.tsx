@@ -1,7 +1,6 @@
 // components/admin/CustomerStatistics.tsx
 import React from "react";
 import styled from "styled-components";
-import { useQuery } from "@tanstack/react-query";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H4, H6 } from "@component/Typography";
@@ -36,25 +35,16 @@ interface CustomerStats {
   averageSpend: number;
 }
 
-const fetchCustomerStats = async (): Promise<CustomerStats> => {
-  const response = await fetch("/api/admin/customer-stats");
-  if (!response.ok) {
-    throw new Error("Failed to fetch customer stats");
-  }
-  return response.json();
-};
+interface CustomerStatisticsProps {
+  stats: CustomerStats | null;
+  isLoading: boolean;
+}
 
-const CustomerStatistics: React.FC = () => {
-  const {
-    data: stats,
-    isLoading,
-    isError,
-  } = useQuery<CustomerStats>({
-    queryKey: ["customerStats"],
-    queryFn: fetchCustomerStats,
-  });
-
-  if (isError) {
+const CustomerStatistics: React.FC<CustomerStatisticsProps> = ({
+  stats,
+  isLoading,
+}) => {
+  if (!stats) {
     return <StatBox>Error loading customer statistics.</StatBox>;
   }
 
@@ -71,7 +61,7 @@ const CustomerStatistics: React.FC = () => {
             {isLoading ? (
               <LoadingText>Loading...</LoadingText>
             ) : (
-              <H4>{stats?.totalCustomers}</H4>
+              <H4>{stats.totalCustomers}</H4>
             )}
           </Box>
         </StatItem>
@@ -84,7 +74,7 @@ const CustomerStatistics: React.FC = () => {
             {isLoading ? (
               <LoadingText>Loading...</LoadingText>
             ) : (
-              <H4>{stats?.newCustomers}</H4>
+              <H4>{stats.newCustomers}</H4>
             )}
           </Box>
         </StatItem>
@@ -97,7 +87,7 @@ const CustomerStatistics: React.FC = () => {
             {isLoading ? (
               <LoadingText>Loading...</LoadingText>
             ) : (
-              <H4>${stats?.averageSpend.toFixed(2)}</H4>
+              <H4>${stats.averageSpend.toFixed(2)}</H4>
             )}
           </Box>
         </StatItem>

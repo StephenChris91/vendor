@@ -1,7 +1,6 @@
 // components/admin/ProductStatistics.tsx
 import React from "react";
 import styled from "styled-components";
-import { useQuery } from "@tanstack/react-query";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H4, H6 } from "@component/Typography";
@@ -36,28 +35,11 @@ interface ProductStats {
   lowStock: number;
 }
 
-const fetchProductStats = async (): Promise<ProductStats> => {
-  const response = await fetch("/api/products/product-stats");
-  if (!response.ok) {
-    throw new Error("Failed to fetch product stats");
-  }
-  return response.json();
-};
+interface ProductStatisticsProps {
+  stats: ProductStats;
+}
 
-const ProductStatistics: React.FC = () => {
-  const {
-    data: stats,
-    isLoading,
-    isError,
-  } = useQuery<ProductStats>({
-    queryKey: ["productStats"],
-    queryFn: fetchProductStats,
-  });
-
-  if (isError) {
-    return <StatBox>Error loading product statistics.</StatBox>;
-  }
-
+const ProductStatistics: React.FC<ProductStatisticsProps> = ({ stats }) => {
   return (
     <StatBox>
       <H4 mb={2}>Product Statistics</H4>
@@ -68,11 +50,7 @@ const ProductStatistics: React.FC = () => {
           </Icon>
           <Box>
             <H6 color="text.muted">Total Products</H6>
-            {isLoading ? (
-              <LoadingText>Loading...</LoadingText>
-            ) : (
-              <H4>{stats?.totalProducts}</H4>
-            )}
+            <H4>{stats.totalProducts}</H4>
           </Box>
         </StatItem>
         <StatItem>
@@ -81,11 +59,7 @@ const ProductStatistics: React.FC = () => {
           </Icon>
           <Box>
             <H6 color="text.muted">Out of Stock</H6>
-            {isLoading ? (
-              <LoadingText>Loading...</LoadingText>
-            ) : (
-              <H4>{stats?.outOfStock}</H4>
-            )}
+            <H4>{stats.outOfStock}</H4>
           </Box>
         </StatItem>
         <StatItem>
@@ -94,11 +68,7 @@ const ProductStatistics: React.FC = () => {
           </Icon>
           <Box>
             <H6 color="text.muted">Low Stock</H6>
-            {isLoading ? (
-              <LoadingText>Loading...</LoadingText>
-            ) : (
-              <H4>{stats?.lowStock}</H4>
-            )}
+            <H4>{stats.lowStock}</H4>
           </Box>
         </StatItem>
       </FlexBox>

@@ -9,9 +9,11 @@ export type SelectOption = {
   id?: string;
   name?: string;
   slug?: string;
-  label?: string;
-  value?: string;
+  label: string;
+  value: string;
   placeholder?: string;
+  fullwidth?: boolean;
+  onChange?: () => void;
 };
 
 interface SelectProps
@@ -33,7 +35,6 @@ const Select: React.FC<SelectProps> = ({
   isMulti,
   ...props
 }) => {
-  // extract spacing props
   const spacingProps: SpaceProps = {};
   for (const key in props) {
     if (key.startsWith("m") || key.startsWith("p")) {
@@ -103,8 +104,8 @@ const Select: React.FC<SelectProps> = ({
               : (option as SelectOption | null)
           )
         }
-        getOptionLabel={(option: SelectOption) => option.name}
-        getOptionValue={(option: SelectOption) => option.id}
+        getOptionLabel={(option: SelectOption) => option.label}
+        getOptionValue={(option: SelectOption) => option.value}
         theme={(theme) => ({
           ...theme,
           colors: {

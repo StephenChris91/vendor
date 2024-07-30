@@ -1,10 +1,9 @@
-// components/admin/BulkActions.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { Button } from "@component/buttons";
-import Select from "@component/Select";
+import Select, { SelectOption } from "@component/Select";
 
 const BulkActionBox = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -29,16 +28,18 @@ const BulkActions: React.FC<BulkActionsProps> = ({
   selectedCount,
   onAction,
 }) => {
-  const [selectedAction, setSelectedAction] = useState("");
+  const [selectedAction, setSelectedAction] = useState<SelectOption | null>(
+    null
+  );
 
-  const handleActionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedAction(e.target.value);
+  const handleActionChange = (option: SelectOption | null) => {
+    setSelectedAction(option);
   };
 
   const handleApplyAction = () => {
     if (selectedAction) {
-      onAction(selectedAction);
-      setSelectedAction(""); // Reset the action after applying
+      onAction(selectedAction.value);
+      setSelectedAction(null); // Reset the action after applying
     }
   };
 
@@ -55,12 +56,12 @@ const BulkActions: React.FC<BulkActionsProps> = ({
             placeholder="Choose action"
             mr={{ xs: 0, sm: 2 }}
             mb={{ xs: 2, sm: 0 }}
-          >
-            <option value="">Choose action</option>
-            <option value="delete">Delete</option>
-            <option value="activate">Activate</option>
-            <option value="deactivate">Deactivate</option>
-          </Select>
+            options={[
+              { label: "Delete", value: "delete" },
+              { label: "Activate", value: "activate" },
+              { label: "Deactivate", value: "deactivate" },
+            ]}
+          />
           <Button
             variant="contained"
             color="primary"

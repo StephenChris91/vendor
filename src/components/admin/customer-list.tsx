@@ -1,4 +1,3 @@
-// components/admin/CustomerList.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
@@ -9,7 +8,7 @@ import Pagination from "@component/pagination";
 import Checkbox from "@component/CheckBox";
 import Icon from "@component/icon/Icon";
 import Modal from "@component/Modal";
-import Select from "@component/Select";
+import Select, { SelectOption } from "@component/Select";
 import TextField from "@component/text-field";
 
 const TableWrapper = styled(Box)`
@@ -127,7 +126,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
         alignItems="center"
       >
         <IconWrapper>
-          <Icon size="40px" color="text.muted">
+          <Icon size="40px" color="primary">
             users
           </Icon>
         </IconWrapper>
@@ -206,7 +205,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
                   </Button>
                   <Button
                     variant="outlined"
-                    color={customer.status === "Active" ? "error" : "success"}
+                    color={customer.status === "Active" ? "primary" : "primary"}
                     size="small"
                     onClick={() =>
                       onUpdateCustomer({
@@ -226,9 +225,9 @@ const CustomerList: React.FC<CustomerListProps> = ({
       </StyledTable>
       <Box p={2}>
         <Pagination
-          count={Math.ceil(customers.length / itemsPerPage)}
-          onChange={(_, page) => setCurrentPage(page)}
-          page={currentPage}
+          pageCount={Math.ceil(customers.length / itemsPerPage)}
+          onChange={(data) => setCurrentPage(data.selected + 1)}
+          // page={currentPage}
         />
       </Box>
 
@@ -251,15 +250,20 @@ const CustomerList: React.FC<CustomerListProps> = ({
               onChange={(e) => handleEditChange("email", e.target.value)}
             />
             <Select
-              fullwidth
               mb={3}
               label="Status"
-              value={editingCustomer.status}
-              onChange={(e) => handleEditChange("status", e.target.value)}
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </Select>
+              value={{
+                label: editingCustomer.status,
+                value: editingCustomer.status,
+              }}
+              onChange={(option) =>
+                handleEditChange("status", (option as SelectOption).value)
+              }
+              options={[
+                { label: "Active", value: "Active" },
+                { label: "Inactive", value: "Inactive" },
+              ]}
+            />
             <FlexBox justifyContent="flex-end">
               <Button
                 variant="outlined"

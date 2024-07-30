@@ -5,7 +5,7 @@ import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import TextField from "@component/text-field";
 import { Button } from "@component/buttons";
-import Select from "@component/Select";
+import Select, { SelectOption } from "@component/Select";
 
 const FilterBox = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -21,6 +21,20 @@ const ResponsiveFlexBox = styled(FlexBox)`
   }
 `;
 
+const categoryOptions: SelectOption[] = [
+  { label: "All Categories", value: "" },
+  { label: "Electronics", value: "electronics" },
+  { label: "Clothing", value: "clothing" },
+  // Add more categories as needed
+];
+
+const statusOptions: SelectOption[] = [
+  { label: "All Statuses", value: "" },
+  { label: "Active", value: "active" },
+  { label: "Inactive", value: "inactive" },
+  { label: "Out of Stock", value: "out-of-stock" },
+];
+
 interface ProductSearchFilterProps {
   onSearch: (query: string) => void;
   onFilter: (filters: { category: string; status: string }) => void;
@@ -31,21 +45,21 @@ const ProductSearchFilter: React.FC<ProductSearchFilterProps> = ({
   onFilter,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [category, setCategory] = useState("");
-  const [status, setStatus] = useState("");
+  const [category, setCategory] = useState<SelectOption | null>(null);
+  const [status, setStatus] = useState<SelectOption | null>(null);
 
   const handleSearch = () => {
     onSearch(searchQuery);
   };
 
   const handleFilter = () => {
-    onFilter({ category, status });
+    onFilter({ category: category?.value || "", status: status?.value || "" });
   };
 
   const handleReset = () => {
     setSearchQuery("");
-    setCategory("");
-    setStatus("");
+    setCategory(null);
+    setStatus(null);
     onSearch("");
     onFilter({ category: "", status: "" });
   };
@@ -67,27 +81,19 @@ const ProductSearchFilter: React.FC<ProductSearchFilterProps> = ({
         <Select
           placeholder="Filter by category"
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          onChange={(option) => setCategory(option as SelectOption)}
+          options={categoryOptions}
           mb={2}
           mr={2}
-        >
-          <option value="">All Categories</option>
-          <option value="electronics">Electronics</option>
-          <option value="clothing">Clothing</option>
-          {/* Add more categories as needed */}
-        </Select>
+        />
         <Select
           placeholder="Filter by status"
           value={status}
-          onChange={(e) => setStatus(e.target.value)}
+          onChange={(option) => setStatus(option as SelectOption)}
+          options={statusOptions}
           mb={2}
           mr={2}
-        >
-          <option value="">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="out-of-stock">Out of Stock</option>
-        </Select>
+        />
         <Button
           variant="contained"
           color="primary"

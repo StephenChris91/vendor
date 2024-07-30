@@ -12,8 +12,9 @@ export interface PaginationProps extends SpaceProps {
   pageCount: number;
   pageRangeDisplayed?: number;
   marginPagesDisplayed?: number;
-  onChange?: (data: number) => void;
+  onChange?: (data: { selected: number }) => void;
 }
+
 // ==============================================================
 
 export default function Pagination({
@@ -34,7 +35,8 @@ export default function Pagination({
       color="primary"
       overflow="hidden"
       borderRadius="50%"
-      className="control-button">
+      className="control-button"
+    >
       <Icon defaultcolor="currentColor" variant="small">
         chevron-left
       </Icon>
@@ -48,7 +50,8 @@ export default function Pagination({
       color="primary"
       overflow="hidden"
       borderRadius="50%"
-      className="control-button">
+      className="control-button"
+    >
       <Icon defaultcolor="currentColor" variant="small">
         chevron-right
       </Icon>

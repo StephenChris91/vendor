@@ -11,7 +11,7 @@ import Pagination from "@component/pagination";
 import Checkbox from "@component/CheckBox";
 import Icon from "@component/icon/Icon";
 import Modal from "@component/Modal";
-import Select from "@component/Select";
+import Select, { SelectOption } from "@component/Select";
 
 const TableWrapper = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -119,6 +119,11 @@ const OrderList: React.FC<OrderListProps> = ({
     }
   };
 
+  // Convert a string to SelectOption
+  const getSelectOption = (value: string, options: SelectOption[]) => {
+    return options.find((option) => option.value === value) || null;
+  };
+
   if (!orders || orders.length === 0) {
     return (
       <NoOrdersWrapper
@@ -140,6 +145,21 @@ const OrderList: React.FC<OrderListProps> = ({
       </NoOrdersWrapper>
     );
   }
+
+  // Define the options for payment and fulfillment status
+  const paymentStatusOptions: SelectOption[] = [
+    { label: "Paid", value: "Paid" },
+    { label: "Pending", value: "Pending" },
+    { label: "Failed", value: "Failed" },
+  ];
+
+  const fulfillmentStatusOptions: SelectOption[] = [
+    { label: "Pending", value: "Pending" },
+    { label: "Processing", value: "Processing" },
+    { label: "Shipped", value: "Shipped" },
+    { label: "Delivered", value: "Delivered" },
+    { label: "Cancelled", value: "Cancelled" },
+  ];
 
   return (
     <TableWrapper>
@@ -234,9 +254,8 @@ const OrderList: React.FC<OrderListProps> = ({
       </StyledTable>
       <Box p={2}>
         <Pagination
-          count={Math.ceil(orders.length / itemsPerPage)}
-          onChange={(_, page) => setCurrentPage(page)}
-          page={currentPage}
+          pageCount={Math.ceil(orders.length / itemsPerPage)}
+          onChange={({ selected }) => setCurrentPage(selected + 1)}
         />
       </Box>
 
@@ -245,33 +264,37 @@ const OrderList: React.FC<OrderListProps> = ({
           <Box p={4}>
             <H6 mb={3}>Edit Order</H6>
             <Select
-              fullwidth
+              // fullwidth
               mb={2}
               label="Payment Status"
-              value={editingOrder.paymentStatus}
-              onChange={(e) =>
-                handleEditChange("paymentStatus", e.target.value)
+              value={getSelectOption(
+                editingOrder.paymentStatus,
+                paymentStatusOptions
+              )}
+              onChange={(option) =>
+                handleEditChange(
+                  "paymentStatus",
+                  (option as SelectOption).value
+                )
               }
-            >
-              <option value="Paid">Paid</option>
-              <option value="Pending">Pending</option>
-              <option value="Failed">Failed</option>
-            </Select>
+              options={paymentStatusOptions}
+            />
             <Select
-              fullwidth
+              // fullwidth
               mb={3}
               label="Fulfillment Status"
-              value={editingOrder.fulfillmentStatus}
-              onChange={(e) =>
-                handleEditChange("fulfillmentStatus", e.target.value)
+              value={getSelectOption(
+                editingOrder.fulfillmentStatus,
+                fulfillmentStatusOptions
+              )}
+              onChange={(option) =>
+                handleEditChange(
+                  "fulfillmentStatus",
+                  (option as SelectOption).value
+                )
               }
-            >
-              <option value="Pending">Pending</option>
-              <option value="Processing">Processing</option>
-              <option value="Shipped">Shipped</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Cancelled">Cancelled</option>
-            </Select>
+              options={fulfillmentStatusOptions}
+            />
             <FlexBox justifyContent="flex-end">
               <Button
                 variant="outlined"

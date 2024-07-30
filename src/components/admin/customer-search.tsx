@@ -1,11 +1,10 @@
-// components/admin/CustomerSearchFilter.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import TextField from "@component/text-field";
 import { Button } from "@component/buttons";
-import Select from "@component/Select";
+import Select, { SelectOption } from "@component/Select";
 
 const FilterBox = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -39,7 +38,7 @@ const CustomerSearchFilter: React.FC<CustomerSearchFilterProps> = ({
   onFilter,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<SelectOption | null>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -48,12 +47,12 @@ const CustomerSearchFilter: React.FC<CustomerSearchFilterProps> = ({
   };
 
   const handleFilter = () => {
-    onFilter({ status, startDate, endDate });
+    onFilter({ status: status?.value || "", startDate, endDate });
   };
 
   const handleReset = () => {
     setSearchQuery("");
-    setStatus("");
+    setStatus(null);
     setStartDate("");
     setEndDate("");
     onSearch("");
@@ -76,13 +75,14 @@ const CustomerSearchFilter: React.FC<CustomerSearchFilterProps> = ({
         <Select
           placeholder="Status"
           value={status}
-          onChange={(e) => setStatus(e.target.value)}
+          onChange={(option) => setStatus(option as SelectOption)}
           mb={2}
-        >
-          <option value="">All Statuses</option>
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </Select>
+          options={[
+            { label: "All Statuses", value: "" },
+            { label: "Active", value: "Active" },
+            { label: "Inactive", value: "Inactive" },
+          ]}
+        />
         <StyledInput
           type="date"
           placeholder="Start Date"

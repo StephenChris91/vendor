@@ -137,9 +137,7 @@ export default function CustomersPage() {
         <H3>Customer Management</H3>
       </ResponsiveFlexBox>
 
-      <CustomerStatistics
-        stats={stats || { totalCustomers: 0, newCustomers: 0, averageSpend: 0 }}
-      />
+      <CustomerStatistics stats={stats} isLoading={isLoadingStats} />
 
       <CustomerSearchFilter onSearch={handleSearch} onFilter={handleFilter} />
 

@@ -1,5 +1,4 @@
-// components/admin/vendor-list.tsx
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
@@ -63,6 +62,20 @@ const VendorList: React.FC<VendorListProps> = ({
   onEditVendor,
   onToggleStatus,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const vendorsPerPage = 10; // Set number of items per page
+
+  const handlePageChange = (data: { selected: number }) => {
+    setCurrentPage(data.selected + 1); // ReactPaginate is 0-indexed
+    console.log("Page changed to:", data.selected + 1);
+  };
+
+  // Slice vendors to show only those on the current page
+  const displayedVendors = vendors.slice(
+    (currentPage - 1) * vendorsPerPage,
+    currentPage * vendorsPerPage
+  );
+
   return (
     <TableWrapper>
       <StyledTable>
@@ -79,7 +92,7 @@ const VendorList: React.FC<VendorListProps> = ({
           </TableRow>
         </TableHead>
         <tbody>
-          {vendors.map((vendor) => (
+          {displayedVendors.map((vendor) => (
             <TableRow key={vendor.id}>
               <TableCell>{vendor.name}</TableCell>
               <TableCell>{vendor.email}</TableCell>
@@ -120,7 +133,7 @@ const VendorList: React.FC<VendorListProps> = ({
                   </Button>
                   <Button
                     variant="outlined"
-                    color={vendor.status === "active" ? "error" : "success"}
+                    color={vendor.status === "active" ? "primary" : "secondary"}
                     onClick={() => onToggleStatus(vendor.id, vendor.status)}
                   >
                     {vendor.status === "active" ? "Deactivate" : "Activate"}
@@ -133,9 +146,11 @@ const VendorList: React.FC<VendorListProps> = ({
       </StyledTable>
       <Box p={2}>
         <Pagination
-          count={Math.ceil(vendors.length / 10)}
-          onChange={(_, page) => console.log("Page changed to:", page)}
-          page={1}
+          pageCount={Math.ceil(vendors.length / vendorsPerPage)}
+          onChange={handlePageChange}
+          pageRangeDisplayed={5}
+          marginPagesDisplayed={2}
+          // page={currentPage - 1} // ReactPaginate uses 0-based index
         />
       </Box>
     </TableWrapper>

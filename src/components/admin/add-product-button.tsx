@@ -13,7 +13,7 @@ const AddProductButton: React.FC<AddProductButtonProps> = ({ onClick }) => {
       variant="contained"
       color="primary"
       onClick={onClick}
-      startIcon={<Icon>plus</Icon>}
+      // startIcon={<Icon>plus</Icon>}
     >
       Add New Product
     </Button>
