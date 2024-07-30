@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Fragment } from "react";
 import axios from "@lib/axios";
@@ -11,12 +13,12 @@ import { SlugParams } from "interfaces";
 
 const categoryOptions = [
   { label: "Fashion", value: "fashion" },
-  { label: "Gadget", value: "gadget" }
+  { label: "Gadget", value: "gadget" },
 ];
 
 export default async function ProductDetails({ params }: SlugParams) {
   const { data } = await axios.get("/api/products/slug", {
-    params: { slug: params.slug as string }
+    params: { slug: params.slug as string },
   });
 
   return (
