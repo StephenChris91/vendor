@@ -8,17 +8,23 @@ import { getUserById } from "lib/data/user";
 import { Prisma } from "@prisma/client";
 import { db } from "../../../../prisma/prisma";
 
-export async function POST(values: z.infer<typeof productSchema>) {
+export async function POST(request: Request) {
   const session = await auth();
 
   if (!session?.user) {
-    return { status: 'error', message: 'User not authenticated' };
+    return new Response(JSON.stringify({ status: 'error', message: 'User not authenticated' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const user = await getUserById(session.user.id as string);
 
   if (!user || (user.role !== 'Vendor' && user.role !== 'Admin')) {
-    return { status: 'error', message: 'User not authorized to create a product' };
+    return new Response(JSON.stringify({ status: 'error', message: 'User not authorized to create a product' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const shop = await db.shop.findUnique({
@@ -28,14 +34,21 @@ export async function POST(values: z.infer<typeof productSchema>) {
   });
 
   if (!shop) {
-    return { status: 'error', message: 'No shop found for the user' };
+    return new Response(JSON.stringify({ status: 'error', message: 'No shop found for the user' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
-  const validInput = productSchema.safeParse(values);
+  const body = await request.json();
+  const validInput = productSchema.safeParse(body);
 
   if (!validInput.success) {
     console.error("Invalid product data:", validInput.error.errors);
-    return { status: 'error', message: 'Invalid product data' };
+    return new Response(JSON.stringify({ status: 'error', message: 'Invalid product data' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const categoryIds = validInput.data.categories ?? [];
@@ -45,7 +58,10 @@ export async function POST(values: z.infer<typeof productSchema>) {
 
   if (categories.length !== categoryIds.length) {
     console.error("Some categories not found:", { expected: categoryIds.length, found: categories.length });
-    return { status: 'error', message: 'Some categories not found' };
+    return new Response(JSON.stringify({ status: 'error', message: 'Some categories not found' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
@@ -85,9 +101,16 @@ export async function POST(values: z.infer<typeof productSchema>) {
     });
 
     revalidatePath('/');
-    return { status: 'success', product };
+
+    return new Response(JSON.stringify({ status: 'success', product }), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error) {
     console.error(error);
-    return { status: 'error', message: 'Failed to create product' };
+    return new Response(JSON.stringify({ status: 'error', message: 'Failed to create product' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
