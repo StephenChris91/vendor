@@ -1,94 +1,93 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { productSchema } from '@/app/schemas';
-import { db } from '@/prisma/prisma';
-import { z } from 'zod';
-import { getUserByEmail, getUserById } from '@/lib/data/user';
-import { useCurrentSession } from '@/lib/use-session-server';
-import { revalidatePath } from 'next/cache';
+'use server'
 
-export async function POST(req: NextRequest) {
+import { productSchema } from "schemas";
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
+import { auth } from "auth";
+import { getUserById } from "lib/data/user";
+import { Prisma } from "@prisma/client";
+import { db } from "../../../../prisma/prisma";
+
+export async function createProduct(values: z.infer<typeof productSchema>) {
+  const session = await auth();
+
+  if (!session?.user) {
+    return { status: 'error', message: 'User not authenticated' };
+  }
+
+  const user = await getUserById(session.user.id as string);
+
+  if (!user || (user.role !== 'Vendor' && user.role !== 'Admin')) {
+    return { status: 'error', message: 'User not authorized to create a product' };
+  }
+
+  const shop = await db.shop.findUnique({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  if (!shop) {
+    return { status: 'error', message: 'No shop found for the user' };
+  }
+
+  const validInput = productSchema.safeParse(values);
+
+  if (!validInput.success) {
+    console.error("Invalid product data:", validInput.error.errors);
+    return { status: 'error', message: 'Invalid product data' };
+  }
+
+  const categoryIds = validInput.data.categories ?? [];
+  const categories = await db.category.findMany({
+    where: { id: { in: categoryIds } }
+  });
+
+  if (categories.length !== categoryIds.length) {
+    console.error("Some categories not found:", { expected: categoryIds.length, found: categories.length });
+    return { status: 'error', message: 'Some categories not found' };
+  }
+
   try {
-    const session = await useCurrentSession();
-    // const vendor = getUserById(session?.user.id)
-    if (!session?.user) {
-      return NextResponse.json({ status: 'error', message: 'User not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserById(session.user.id as string);
-
-    if (!user || (user.role !== 'Vendor' && user.role !== 'Admin')) {
-      return NextResponse.json({ status: 'error', message: 'User not authorized to create a product' }, { status: 403 });
-    }
-
-    const shop = await db.shop.findUnique({
-      where: {
-        userId: user.id,
-      },
-    });
-
-    if (!shop) {
-      return NextResponse.json({ status: 'error', message: 'No shop found for the user' }, { status: 404 });
-    }
-
-    const body = await req.json();
-    const validInput = productSchema.safeParse(body);
-
-    if (!validInput.success) {
-      return NextResponse.json({ status: 'error', message: 'Invalid product data', errors: validInput.error.errors }, { status: 400 });
-    }
-
-    const productData = {
-      ...validInput.data,
-    //   user: user,
-    //   author_id: user.id,
-    // user: {
-    //     connect: { user: user.id}
-    // },
+    const productData: Prisma.productCreateInput = {
+      name: validInput.data.name,
+      slug: validInput.data.slug,
+      description: validInput.data.description,
+      price: validInput.data.price,
+      sale_price: validInput.data.sale_price,
+      sku: validInput.data.sku,
+      quantity: validInput.data.quantity,
+      in_stock: validInput.data.in_stock,
+      is_taxable: validInput.data.is_taxable,
+      status: validInput.data.status,
+      product_type: validInput.data.product_type,
+      image: validInput.data.image,
+      video: validInput.data.video,
+      gallery: validInput.data.gallery,
+      ratings: validInput.data.ratings,
+      total_reviews: validInput.data.total_reviews,
+      my_review: validInput.data.my_review,
+      in_wishlist: validInput.data.in_wishlist,
+      shop_name: validInput.data.shop_name,
       shop: {
         connect: { id: shop.id },
       },
       categories: {
-        connect: validInput.data.categories?.map(id => ({ id })) ?? [],
+        connect: categoryIds.map(id => ({ id })),
       },
-      image: validInput.data.image ?? undefined, // Ensure image is either provided or explicitly set to undefined
+      user: {
+        connect: { id: session.user.id },
+      },
     };
 
     const product = await db.product.create({
       data: productData,
     });
 
-    if(product){
-      revalidatePath('/dashboard/all-products')
-    }
-
-    // if (validInput.data.image) {
-    //   await db.image.create({
-    //     data: {
-    //       url: validInput.data.image,
-    //       product: {
-    //         connect: { id: product.id },
-    //       },
-    //     },
-    //   });
-    // }
-
-    // if (validInput.data.gallery && validInput.data.gallery.length > 0) {
-    //   const galleryImages = validInput.data.gallery.map(url => ({ url }));
-    //   await db.gallery.create({
-    //     data: {
-    //       product: {
-    //         connect: { id: product.id },
-    //       },
-    //       Image: {
-    //         create: galleryImages,
-    //       },
-    //     },
-    //   });
-    // }
-
-    return NextResponse.json({ status: 'success', product }, { status: 200 });
+    revalidatePath('/');
+    return { status: 'success', product };
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ status: 'error', message: 'Failed to create product' }, { status: 500 });
+    return { status: 'error', message: 'Failed to create product' };
   }
 }

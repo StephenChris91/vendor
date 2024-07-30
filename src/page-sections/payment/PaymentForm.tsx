@@ -6,7 +6,6 @@ import { ChangeEvent, Fragment, useState } from "react";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { usePaystackPayment } from "react-paystack";
-import { useFlutterwave, closePaymentModal } from "flutterwave-react-v3";
 
 import Box from "@component/Box";
 import Radio from "@component/radio";
@@ -61,7 +60,6 @@ export default function PaymentForm() {
   };
 
   const initializePaystackPayment = usePaystackPayment(paystackConfig);
-  const handleFlutterPayment = useFlutterwave(flutterwaveConfig);
 
   const handleFormSubmit = async (values: any) => {
     console.log(values);
@@ -88,23 +86,6 @@ export default function PaymentForm() {
         onClose: () => {
           setLoading(false);
           console.log("Payment failed or was closed");
-        },
-      });
-    } else if (paymentMethod === "flutterwave") {
-      handleFlutterPayment({
-        callback: (response) => {
-          console.log(response);
-          setLoading(false);
-          // Handle successful payment
-          router.push("/orders");
-          console.log("Flutterwave payment successful");
-          closePaymentModal();
-          // Clear cart and redirect
-        },
-        onClose: () => {
-          setLoading(false);
-          console.log("Payment failed or was closed");
-          router.push("/orders");
         },
       });
     }
