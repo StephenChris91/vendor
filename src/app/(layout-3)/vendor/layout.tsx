@@ -4,9 +4,5 @@ import VendorDashboardLayout from "@component/layout/vendor-dashboard";
 import Providers from "@utils/providers";
 
 export default function Layout({ children }: PropsWithChildren) {
-  return (
-    <VendorDashboardLayout>
-      <Providers>{children}</Providers>
-    </VendorDashboardLayout>
-  );
+  return <VendorDashboardLayout>{children}</VendorDashboardLayout>;
 }
