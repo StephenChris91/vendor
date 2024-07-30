@@ -49,9 +49,9 @@ export default function FrequentlyBought({ products }: Props) {
               id={item.id}
               slug={item.slug}
               price={item.price}
-              title={item.title}
-              off={item.discount}
-              imgUrl={item.thumbnail}
+              title={item.name}
+              off={item.sale_price}
+              imgUrl={item.image}
             />
 
             {ind < products.length - 1 && (
@@ -80,7 +80,8 @@ export default function FrequentlyBought({ products }: Props) {
           className="gray-box"
           flexDirection="column"
           borderColor="gray.400"
-          justifyContent="center">
+          justifyContent="center"
+        >
           <H3 color="primary.main">$2500</H3>
           <SemiSpan mb="1rem">Save $500</SemiSpan>
 

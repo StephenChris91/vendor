@@ -21,8 +21,8 @@ export default async function ProductDetails({ params }: Props) {
       <ProductIntro
         id={product.id}
         price={product.price}
-        title={product.title}
-        images={product.images}
+        title={product.name}
+        images={product.gallery}
       />
 
       <ProductView

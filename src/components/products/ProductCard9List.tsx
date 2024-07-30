@@ -1,38 +1,44 @@
-import { Fragment } from "react";
-
+// components/products/ProductCard1List.tsx
 import FlexBox from "@component/FlexBox";
+import Grid from "@component/grid/Grid";
 import Pagination from "@component/pagination";
+import { ProductCard1 } from "@component/product-cards";
 import { SemiSpan } from "@component/Typography";
-import { ProductCard9 } from "@component/product-cards";
 import Product from "@models/product.model";
 
 // ==========================================================
 type Props = { products: Product[] };
 // ==========================================================
 
-export default function ProductListView({ products }: Props) {
+export default function ProductGridView({ products }: Props) {
   return (
-    <Fragment>
-      {products.map((item) => (
-        <ProductCard9
-          mb="1.25rem"
-          id={item.id}
-          key={item.id}
-          slug={item.slug}
-          price={item.price}
-          title={item.title}
-          off={item.discount}
-          rating={item.rating}
-          images={item.images}
-          imgUrl={item.thumbnail}
-          categories={item.categories}
-        />
-      ))}
+    <div>
+      <Grid container spacing={6}>
+        {products.map((item) => (
+          <Grid item lg={4} sm={6} xs={12} key={item.id}>
+            <ProductCard1
+              id={item.id}
+              slug={item.slug}
+              price={item.price}
+              title={item.name}
+              off={item.sale_price}
+              images={item.gallery}
+              imgUrl={item.image}
+              rating={item.ratings || 4}
+            />
+          </Grid>
+        ))}
+      </Grid>
 
-      <FlexBox flexWrap="wrap" justifyContent="space-between" alignItems="center" mt="32px">
+      <FlexBox
+        flexWrap="wrap"
+        justifyContent="space-between"
+        alignItems="center"
+        mt="32px"
+      >
         <SemiSpan>Showing 1-9 of 1.3k Products</SemiSpan>
-        <Pagination pageCount={10} />
+        <Pagination pageCount={products.length} />
       </FlexBox>
-    </Fragment>
+    </div>
   );
 }

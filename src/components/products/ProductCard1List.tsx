@@ -1,3 +1,4 @@
+// components/products/ProductCard1List.tsx
 import FlexBox from "@component/FlexBox";
 import Grid from "@component/grid/Grid";
 import Pagination from "@component/pagination";
@@ -19,17 +20,22 @@ export default function ProductGridView({ products }: Props) {
               id={item.id}
               slug={item.slug}
               price={item.price}
-              title={item.title}
-              off={item.discount}
-              images={item.images}
-              imgUrl={item.thumbnail}
-              rating={item.rating || 4}
+              title={item.name}
+              off={item.sale_price}
+              images={item.gallery}
+              imgUrl={item.image}
+              rating={item.ratings || 4}
             />
           </Grid>
         ))}
       </Grid>
 
-      <FlexBox flexWrap="wrap" justifyContent="space-between" alignItems="center" mt="32px">
+      <FlexBox
+        flexWrap="wrap"
+        justifyContent="space-between"
+        alignItems="center"
+        mt="32px"
+      >
         <SemiSpan>Showing 1-9 of 1.3k Products</SemiSpan>
         <Pagination pageCount={products.length} />
       </FlexBox>

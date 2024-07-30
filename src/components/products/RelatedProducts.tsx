@@ -21,11 +21,11 @@ export default function RelatedProducts({ products }: Props) {
               id={item.id}
               slug={item.slug}
               price={item.price}
-              title={item.title}
-              off={item.discount}
-              images={item.images}
-              imgUrl={item.thumbnail}
-              rating={item.rating || 4}
+              title={item.name}
+              off={item.sale_price}
+              images={item.gallery}
+              imgUrl={item.image}
+              rating={item.ratings || 4}
             />
           </Grid>
         ))}

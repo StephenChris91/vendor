@@ -25,7 +25,7 @@ interface Product {
   gallery: string[];
   shop_name?: string;
   stock?: number;
-  categories: Category[];
+  categories?: Category[];
   shop?: Shop;
   user?: User;
 }
