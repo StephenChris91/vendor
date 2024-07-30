@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { signIn } from '@/auth';
+import { signIn } from 'auth';
 import { AuthError } from 'next-auth';
-import { getUserByEmail } from '@/lib/data/user';
-import { generateVerificationToken } from '@/lib/data/tokens';
-import { sendVerificationEmail } from '@/lib/mail';
+import { getUserByEmail } from '@lib/data/user';
+import { sendVerificationEmail } from '@lib/mail';
+import { generateVerificationToken } from '@lib/data/tokens';
 
 export async function POST(request: NextRequest) {
   try {

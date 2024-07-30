@@ -3,7 +3,6 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
 import { s3Client } from 'lib/utils';
 import { auth } from 'auth';
-import { getShopById } from 'actions/createshop';
 
 
 export async function POST(request: NextRequest) {
