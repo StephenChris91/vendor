@@ -24,13 +24,15 @@ export default function Section12({ serviceList }: Props) {
               borderRadius={8}
               boxShadow="border"
               alignItems="center"
-              flexDirection="column">
+              flexDirection="column"
+            >
               <FlexBox
                 size="64px"
                 bg="gray.200"
                 alignItems="center"
                 borderRadius="300px"
-                justifyContent="center">
+                justifyContent="center"
+              >
                 <Icon color="secondary" size="1.75rem">
                   {item.icon}
                 </Icon>

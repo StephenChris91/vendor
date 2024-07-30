@@ -12,7 +12,7 @@ import Product from "@models/product.model";
 
 const ARROW_BUTTON_STYLE = {
   boxShadow: "none",
-  background: "transparent"
+  background: "transparent",
 };
 
 // =================================================================
@@ -33,14 +33,15 @@ export default function Section1({ topPickList, mainCarousel }: Props) {
             visibleSlides={1}
             arrowButtonColor="inherit"
             leftButtonStyle={{ ...ARROW_BUTTON_STYLE, left: 8 }}
-            rightButtonStyle={{ ...ARROW_BUTTON_STYLE, right: 8 }}>
+            rightButtonStyle={{ ...ARROW_BUTTON_STYLE, right: 8 }}
+          >
             {mainCarousel.map((item) => (
               <Card1
                 key={item.id}
-                title={item.title}
+                title={item.name}
                 price={item.price}
-                imgUrl={item.thumbnail}
-                discount={item.discount}
+                imgUrl={item.image}
+                discount={item.sale_price}
               />
             ))}
           </Carousel>
@@ -54,16 +55,17 @@ export default function Section1({ topPickList, mainCarousel }: Props) {
             <Carousel
               arrowButtonColor="inherit"
               totalSlides={TOTAL_SLIDES}
-              visibleSlides={visibleSlides}>
+              visibleSlides={visibleSlides}
+            >
               {topPickList.map((item) => (
                 <ProductCard11
                   key={item.id}
                   slug={item.slug}
                   price={item.price}
-                  title={item.title}
-                  off={item.discount}
-                  rating={item.rating}
-                  imgUrl={item.thumbnail}
+                  title={item.name}
+                  off={item.sale_price}
+                  rating={5}
+                  imgUrl={item.image}
                 />
               ))}
             </Carousel>
@@ -76,16 +78,17 @@ export default function Section1({ topPickList, mainCarousel }: Props) {
           <Carousel
             arrowButtonColor="inherit"
             totalSlides={TOTAL_SLIDES}
-            visibleSlides={visibleSlides}>
+            visibleSlides={visibleSlides}
+          >
             {topPickList.map((item) => (
               <ProductCard11
                 key={item.id}
                 slug={item.slug}
                 price={item.price}
-                title={item.title}
-                off={item.discount}
-                rating={item.rating}
-                imgUrl={item.thumbnail}
+                title={item.name}
+                off={item.sale_price}
+                rating={5}
+                imgUrl={item.image}
               />
             ))}
           </Carousel>

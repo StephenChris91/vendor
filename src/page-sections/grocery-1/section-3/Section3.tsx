@@ -36,19 +36,20 @@ export default function Section3({ title, products }: Props) {
           showArrowOnHover={true}
           arrowButtonColor="inherit"
           totalSlides={products.length}
-          visibleSlides={visibleSlides}>
+          visibleSlides={visibleSlides}
+        >
           {products.map((item, ind) => (
             <Box py="0.25rem" key={ind}>
               <ProductCard10
                 id={item.id}
                 slug={item.slug}
-                unit={item.unit}
-                title={item.title}
+                unit={item.name}
+                title={item.name}
                 price={item.price}
-                off={item.discount}
-                rating={item.rating}
-                images={item.images}
-                imgUrl={item.thumbnail}
+                off={item.sale_price}
+                rating={5}
+                images={item.gallery}
+                imgUrl={item.image}
               />
             </Box>
           ))}

@@ -39,9 +39,15 @@ export default function Section6({ carList, carBrands }: Props) {
                 title={brand.name}
                 onClick={handleCategoryClick(brand)}
                 shadow={selected === brand.slug ? 4 : null}
-                bg={selected === brand.slug ? "white" : "gray.100"}>
+                bg={selected === brand.slug ? "white" : "gray.100"}
+              >
                 <Box width={20} height={20}>
-                  <NextImage width={20} height={20} alt="apple" src={brand.image} />
+                  <NextImage
+                    width={20}
+                    height={20}
+                    alt="apple"
+                    src={brand.image}
+                  />
                 </Box>
 
                 <span className="product-category-title">{brand.name}</span>
@@ -52,7 +58,8 @@ export default function Section6({ carList, carBrands }: Props) {
               id="all"
               mt="4rem"
               shadow={selected.match("all") ? 4 : null}
-              bg={selected.match("all") ? "white" : "gray.100"}>
+              bg={selected.match("all") ? "white" : "gray.100"}
+            >
               <span id="all" className="product-category-title show-all">
                 View All Brands
               </span>
@@ -70,12 +77,12 @@ export default function Section6({ carList, carBrands }: Props) {
                   hoverEffect
                   id={item.id}
                   slug={item.slug}
-                  title={item.title}
+                  title={item.name}
                   price={item.price}
-                  off={item.discount}
-                  rating={item.rating}
-                  images={item.images}
-                  imgUrl={item.thumbnail}
+                  off={item.sale_price}
+                  rating={4}
+                  images={item.gallery}
+                  imgUrl={item.image}
                 />
               </Grid>
             ))}

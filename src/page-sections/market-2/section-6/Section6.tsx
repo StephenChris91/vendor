@@ -21,7 +21,7 @@ export default function Section6({ data }: Props) {
     xs: 1,
     sm: 2,
     lg: 3,
-    initialSlide: 4
+    initialSlide: 4,
   });
 
   return (
@@ -34,8 +34,9 @@ export default function Section6({ data }: Props) {
               border: 0,
               height: "100%",
               borderRadius: "3px",
-              padding: "1rem 2rem"
-            }}>
+              padding: "1rem 2rem",
+            }}
+          >
             {/* MAIN CATEGORY NAME/TITLE */}
             <H3>{data.category.title}</H3>
 
@@ -53,17 +54,20 @@ export default function Section6({ data }: Props) {
         {/* CATEGORY BASED PRODUCTS CAROUSEL */}
         <Grid item md={9} xs={12}>
           <CarouselWrapper color="dark">
-            <Carousel totalSlides={data.products.length} visibleSlides={visibleSlides}>
+            <Carousel
+              totalSlides={data.products.length}
+              visibleSlides={visibleSlides}
+            >
               {data.products.map((product) => (
                 <ProductCard19
                   id={product.id}
                   key={product.id}
                   slug={product.slug}
-                  name={product.title}
+                  name={product.name}
                   price={product.price}
-                  img={product.thumbnail}
-                  images={product.images as string[]}
-                  reviews={product.reviews?.length || 14}
+                  img={product.image}
+                  images={product.gallery as string[]}
+                  reviews={14}
                 />
               ))}
             </Carousel>

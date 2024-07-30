@@ -22,13 +22,13 @@ export default function Section4({ products }: Props) {
             <ProductCard10
               id={item.id}
               slug={item.slug}
-              unit={item.unit}
-              title={item.title}
+              unit={item.name}
+              title={item.name}
               price={item.price}
-              off={item.discount}
-              rating={item.rating}
-              imgUrl={item.thumbnail}
-              images={item.images as string[]}
+              off={item.sale_price}
+              rating={5}
+              imgUrl={item.image}
+              images={item.gallery as string[]}
             />
           </Grid>
         ))}

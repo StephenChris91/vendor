@@ -31,24 +31,41 @@ export default function Section13({ bigDiscountList }: Props) {
   }, [width]);
 
   return (
-    <CategorySectionCreator iconName="gift" title="Big Discounts" seeMoreLink="#">
+    <CategorySectionCreator
+      iconName="gift"
+      title="Big Discounts"
+      seeMoreLink="#"
+    >
       <Box my="-0.25rem">
-        <Carousel totalSlides={bigDiscountList.length} visibleSlides={visibleSlides}>
+        <Carousel
+          totalSlides={bigDiscountList.length}
+          visibleSlides={visibleSlides}
+        >
           {bigDiscountList.map((item) => (
             <Box py="0.25rem" key={item.id}>
               <Card p="1rem" borderRadius={8}>
                 <Link href={`/product/${item.slug}`}>
                   <HoverBox borderRadius={8} mb="0.5rem" display="flex">
-                    <NextImage width={500} height={500} alt={item.title} src={item.thumbnail} />
+                    <NextImage
+                      width={500}
+                      height={500}
+                      alt={item.name}
+                      src={item.image}
+                    />
                   </HoverBox>
 
                   <H4 fontWeight="600" fontSize="14px" mb="0.25rem">
-                    {item.title}
+                    {item.name}
                   </H4>
 
                   <FlexBox>
-                    <H4 fontWeight="600" fontSize="14px" color="primary.main" mr="0.5rem">
-                      {calculateDiscount(item.price, item.discount)}
+                    <H4
+                      fontWeight="600"
+                      fontSize="14px"
+                      color="primary.main"
+                      mr="0.5rem"
+                    >
+                      {calculateDiscount(item.price, item.sale_price)}
                     </H4>
 
                     <H4 fontWeight="600" fontSize="14px" color="text.muted">

@@ -12,7 +12,7 @@ import {
   AddButton,
   AnimatedText,
   CategoryCard,
-  CategoryTitle
+  CategoryTitle,
 } from "./styles";
 
 // ===========================================================
@@ -26,7 +26,12 @@ export default function Section3({ categories }: Props) {
         {categories.map((item) => (
           <Grid item lg={2} md={3} sm={4} xs={6} key={item.id}>
             <CategoryCard>
-              <NextImage width={300} height={300} alt="category" src={item.image as string} />
+              <NextImage
+                width={300}
+                height={300}
+                alt="category"
+                src={item.name as string}
+              />
 
               <CategoryTitle className="category-title">
                 <H4>{item.name}</H4>
@@ -46,7 +51,8 @@ export default function Section3({ categories }: Props) {
                   fontWeight={700}
                   fontSize="inherit"
                   textTransform="uppercase"
-                  sx={{ textOverflow: "hidden", whiteSpace: "nowrap" }}>
+                  sx={{ textOverflow: "hidden", whiteSpace: "nowrap" }}
+                >
                   your loving electronics
                 </Span>
               </AnimatedText>

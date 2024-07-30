@@ -36,12 +36,16 @@ export default function Section4({ products }: Section4Props) {
               id={product.id}
               key={product.id}
               slug={product.slug}
-              title={product.title}
+              title={product.name}
               price={product.price}
-              images={product.images}
-              imgUrl={product.thumbnail}
-              category={product.categories[0]}
-              reviews={product.reviews?.length || 4}
+              images={product.gallery}
+              imgUrl={product.image}
+              category={
+                product.categories.map(
+                  (category) => category[0].name
+                ) as unknown as string
+              }
+              reviews={4}
             />
           ))}
         </Carousel>

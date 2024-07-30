@@ -59,7 +59,8 @@ export default function Section7({ shops, brands, title, productList }: Props) {
                 padding="0.5rem 1rem"
                 style={{ cursor: "pointer" }}
                 color={type === "brands" ? "gray.900" : "gray.600"}
-                onClick={handleChangeType("brands")}>
+                onClick={handleChangeType("brands")}
+              >
                 Brands
               </Typography>
 
@@ -68,7 +69,8 @@ export default function Section7({ shops, brands, title, productList }: Props) {
                 fontWeight="600"
                 lineHeight="1.3"
                 color="gray.400"
-                paddingTop="0.5rem">
+                paddingTop="0.5rem"
+              >
                 |
               </Typography>
 
@@ -78,7 +80,8 @@ export default function Section7({ shops, brands, title, productList }: Props) {
                 padding="0.5rem 1rem"
                 style={{ cursor: "pointer" }}
                 onClick={handleChangeType("shops")}
-                color={type === "shops" ? "gray.900" : "gray.600"}>
+                color={type === "shops" ? "gray.900" : "gray.600"}
+              >
                 Shops
               </Typography>
             </FlexBox>
@@ -89,14 +92,17 @@ export default function Section7({ shops, brands, title, productList }: Props) {
                 mb="0.75rem"
                 onClick={handleCategoryClick(brand.slug)}
                 shadow={selected.match(brand.slug) ? 4 : null}
-                bg={selected.match(brand.slug) ? "white" : "gray.100"}>
+                bg={selected.match(brand.slug) ? "white" : "gray.100"}
+              >
                 <Box width={20} height={20}>
                   <NextImage
                     width={20}
                     height={20}
                     alt="apple"
                     src={
-                      type === "shops" ? `/assets/images/shops/${brand.thumbnail}.png` : brand.image
+                      type === "shops"
+                        ? `/assets/images/shops/${brand.thumbnail}.png`
+                        : brand.image
                     }
                   />
                 </Box>
@@ -109,8 +115,11 @@ export default function Section7({ shops, brands, title, productList }: Props) {
               mt="4rem"
               onClick={handleCategoryClick(`all-${type}`)}
               shadow={selected.match(`all-${type}`) ? 4 : null}
-              bg={selected.match(`all-${type}`) ? "white" : "gray.100"}>
-              <span className="product-category-title show-all">View All {type}</span>
+              bg={selected.match(`all-${type}`) ? "white" : "gray.100"}
+            >
+              <span className="product-category-title show-all">
+                View All {type}
+              </span>
             </StyledProductCategory>
           </Box>
         </Hidden>
@@ -125,12 +134,12 @@ export default function Section7({ shops, brands, title, productList }: Props) {
                   hoverEffect
                   id={item.id}
                   slug={item.slug}
-                  title={item.title}
+                  title={item.name}
                   price={item.price}
-                  off={item.discount}
-                  rating={item.rating}
-                  images={item.images}
-                  imgUrl={item.thumbnail}
+                  off={item.sale_price}
+                  rating={4}
+                  images={item.gallery}
+                  imgUrl={item.image}
                 />
               </Grid>
             ))}

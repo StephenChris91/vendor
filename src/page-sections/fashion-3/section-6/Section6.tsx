@@ -23,12 +23,16 @@ export default function Section6({ products }: Section6Props) {
             <ProductCard17
               id={product.id}
               slug={product.slug}
-              title={product.title}
+              title={product.name}
               price={product.price}
-              images={product.images}
-              imgUrl={product.thumbnail}
-              category={product.categories[0]}
-              reviews={product.reviews?.length || 5}
+              images={product.gallery}
+              imgUrl={product.image}
+              category={
+                product.categories.map(
+                  (category) => category[0].name
+                ) as unknown as string
+              }
+              reviews={5}
             />
           </Grid>
         ))}

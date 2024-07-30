@@ -25,7 +25,11 @@ export default function Section2({ products }: Props) {
   }, [width]);
 
   return (
-    <CategorySectionCreator iconName="light" title="Flash Deals" seeMoreLink="#">
+    <CategorySectionCreator
+      iconName="light"
+      title="Flash Deals"
+      seeMoreLink="#"
+    >
       <Box mt="-0.25rem" mb="-0.25rem">
         <Carousel totalSlides={products.length} visibleSlides={visibleSlides}>
           {products.map((item, ind) => (
@@ -35,11 +39,11 @@ export default function Section2({ products }: Props) {
                 id={item.id}
                 slug={item.slug}
                 price={item.price}
-                title={item.title}
-                off={item.discount}
-                images={item.images}
-                imgUrl={item.thumbnail}
-                rating={item.rating || 4}
+                title={item.name}
+                off={item.sale_price}
+                images={item.gallery}
+                imgUrl={item.image}
+                rating={4}
               />
             </Box>
           ))}

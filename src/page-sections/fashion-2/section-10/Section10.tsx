@@ -14,7 +14,8 @@ type Section10Props = {
 // ======================================================================
 
 export default function Section10(props: Section10Props) {
-  const { saleProducts, popularProducts, bestWeekProducts, latestProducts } = props;
+  const { saleProducts, popularProducts, bestWeekProducts, latestProducts } =
+    props;
 
   return (
     <Container py="5rem">
@@ -38,9 +39,9 @@ const Block = ({ title, products }: { title: string; products: Product[] }) => {
           rating={4}
           key={product.id}
           slug={product.slug}
-          title={product.title}
+          title={product.name}
           price={product.price}
-          image={product.thumbnail}
+          image={product.image}
         />
       ))}
     </Grid>

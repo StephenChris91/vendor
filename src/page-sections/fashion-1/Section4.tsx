@@ -24,7 +24,11 @@ export default function Section4({ products }: Props) {
   }, [width]);
 
   return (
-    <CategorySectionCreator iconName="new-product-1" title="New Arrivals" seeMoreLink="#">
+    <CategorySectionCreator
+      iconName="new-product-1"
+      title="New Arrivals"
+      seeMoreLink="#"
+    >
       <Box mt="-0.25rem" mb="-0.25rem">
         <Carousel totalSlides={products.length} visibleSlides={visibleSlides}>
           {products.map((item) => (
@@ -32,8 +36,8 @@ export default function Section4({ products }: Props) {
               <ProductCard2
                 slug={item.slug}
                 price={item.price}
-                title={item.title}
-                imgUrl={item.thumbnail}
+                title={item.name}
+                imgUrl={item.image}
               />
             </Box>
           ))}

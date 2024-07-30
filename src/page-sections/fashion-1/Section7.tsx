@@ -10,7 +10,7 @@ import Product from "@models/product.model";
 
 // STYLED COMPONENT
 const GridOne = styled(Grid)({
-  ".image-holder > a > span": { height: "100% !important" }
+  ".image-holder > a > span": { height: "100% !important" },
 });
 
 // ==========================================================
@@ -27,14 +27,14 @@ export default function Section7({ products }: Props) {
       <Grid container spacing={6}>
         <GridOne item md={4} xs={12}>
           <ProductCard1
-            id={products[0].title}
+            id={products[0].name}
             slug={products[0].slug}
-            title={products[0].title}
+            title={products[0].name}
             price={products[0].price}
-            off={products[0].discount}
-            rating={products[0].rating}
-            images={products[0].images}
-            imgUrl={products[0].thumbnail}
+            off={products[0].sale_price}
+            rating={4}
+            images={products[0].gallery}
+            imgUrl={products[0].image}
           />
         </GridOne>
 
@@ -46,11 +46,11 @@ export default function Section7({ products }: Props) {
                   id={item.id}
                   off={ind * 10}
                   slug={item.slug}
-                  title={item.title}
+                  title={item.name}
                   price={item.price}
-                  rating={item.rating}
-                  images={item.images}
-                  imgUrl={item.thumbnail}
+                  rating={4}
+                  images={item.gallery}
+                  imgUrl={item.image}
                 />
               </Grid>
             ))}

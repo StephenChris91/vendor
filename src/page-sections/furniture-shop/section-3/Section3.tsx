@@ -26,7 +26,9 @@ export default function Section3({ products, title }: Props) {
     <Box mt={5}>
       <Box mb={4}>
         <H1 mb="4px">{title}</H1>
-        <Paragraph color="grey.600">Tall blind but were, been folks not the expand</Paragraph>
+        <Paragraph color="grey.600">
+          Tall blind but were, been folks not the expand
+        </Paragraph>
       </Box>
 
       <Box my="-0.25rem">
@@ -34,19 +36,20 @@ export default function Section3({ products, title }: Props) {
           showArrowOnHover={true}
           arrowButtonColor="inherit"
           totalSlides={products.length}
-          visibleSlides={visibleSlides}>
+          visibleSlides={visibleSlides}
+        >
           {products.map((item, ind) => (
             <Box py="0.25rem" key={ind}>
               <ProductCard13
                 id={item.id}
                 slug={item.slug}
-                title={item.title}
+                title={item.name}
                 price={item.price}
-                off={item.discount}
+                off={item.sale_price}
                 status={item.status}
-                rating={item.rating}
-                imgUrl={item.thumbnail}
-                productColors={item.colors}
+                rating={4}
+                imgUrl={item.image}
+                // productColors={item.name as string}
               />
             </Box>
           ))}

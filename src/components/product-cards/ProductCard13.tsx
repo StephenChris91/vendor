@@ -26,12 +26,12 @@ const StyledCard = styled("div")(({ theme }) => ({
   outline: `2px solid ${theme.colors.gray[200]}`,
   "&:hover": {
     boxShadow: theme.shadows[4],
-    "& .controlBox": { display: "block" }
-  }
+    "& .controlBox": { display: "block" },
+  },
 }));
 
 const ImgBox = styled("div")(({ theme }) => ({
-  background: theme.colors.primary[50]
+  background: theme.colors.primary[50],
 }));
 
 const ContentWrapper = styled("div")({
@@ -39,8 +39,8 @@ const ContentWrapper = styled("div")({
   "& .title, & .categories": {
     overflow: "hidden",
     whiteSpace: "nowrap",
-    textOverflow: "ellipsis"
-  }
+    textOverflow: "ellipsis",
+  },
 });
 
 const StatusChipBox = styled("div")(({ theme }) => ({
@@ -57,15 +57,15 @@ const StatusChipBox = styled("div")(({ theme }) => ({
     height: 0,
     borderTop: "0px solid transparent",
     borderBottom: "10px solid transparent",
-    borderLeft: `20px solid ${theme.colors.primary.main}`
+    borderLeft: `20px solid ${theme.colors.primary.main}`,
   },
   "& .triangle-right": {
     width: 0,
     height: 0,
     borderTop: "0px solid transparent",
     borderBottom: "10px solid transparent",
-    borderRight: `20px solid ${theme.colors.primary.main}`
-  }
+    borderRight: `20px solid ${theme.colors.primary.main}`,
+  },
 }));
 
 const StatusChip = styled(Span)({
@@ -73,7 +73,7 @@ const StatusChip = styled(Span)({
   height: "100%",
   display: "flex",
   alignItems: "center",
-  justifyContent: "center"
+  justifyContent: "center",
 });
 
 const ColorBox = styled("div")(({ theme }) => ({
@@ -86,9 +86,9 @@ const ColorBox = styled("div")(({ theme }) => ({
     borderRadius: 8,
     "&:hover": {
       cursor: "pointer",
-      outline: `2px solid ${theme.colors.gray[200]}`
-    }
-  }
+      outline: `2px solid ${theme.colors.gray[200]}`,
+    },
+  },
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
@@ -103,8 +103,8 @@ const StyledButton = styled(Button)(({ theme }) => ({
     color: "#fff",
     background: theme.colors.primary.main,
     border: `1px solid ${theme.colors.primary.main}`,
-    "& svg path": { fill: `white !important` }
-  }
+    "& svg path": { fill: `white !important` },
+  },
 }));
 
 // =====================================================================
@@ -117,12 +117,13 @@ interface Props {
   status: string;
   rating?: number;
   id: string | number;
-  productColors: string[];
+  productColors?: string[];
 }
 // =====================================================================
 
 export default function ProductCard13(props: Props) {
-  const { off, status, id, title, price, imgUrl, rating, productColors, slug } = props;
+  const { off, status, id, title, price, imgUrl, rating, productColors, slug } =
+    props;
 
   const { state, dispatch } = useAppContext();
   const cartItem = state.cart.find((item) => item.slug === slug);
@@ -130,7 +131,7 @@ export default function ProductCard13(props: Props) {
   const handleCartAmountChange = (qty: number) => () => {
     dispatch({
       type: "CHANGE_CART_AMOUNT",
-      payload: { price, imgUrl, id, qty, slug, name: title }
+      payload: { price, imgUrl, id, qty, slug, name: title },
     });
   };
 
@@ -158,12 +159,19 @@ export default function ProductCard13(props: Props) {
               fontWeight="600"
               bg="primary.main"
               position="absolute"
-              color="primary.text">
+              color="primary.text"
+            >
               {off}% off
             </Chip>
           )}
 
-          <Image width={400} height={400} src={imgUrl} id="productImg" alt="bonik" />
+          <Image
+            width={400}
+            height={400}
+            src={imgUrl}
+            id="productImg"
+            alt="bonik"
+          />
         </ImgBox>
       </Link>
 
@@ -177,7 +185,8 @@ export default function ProductCard13(props: Props) {
                 fontSize="24px"
                 fontWeight="700"
                 className="title"
-                color="text.secondary">
+                color="text.secondary"
+              >
                 {title}
               </H3>
             </Link>
@@ -213,10 +222,12 @@ export default function ProductCard13(props: Props) {
             alignItems="center"
             className="add-cart"
             flexDirection="column-reverse"
-            justifyContent={cartItem?.qty ? "space-between" : "flex-start"}>
+            justifyContent={cartItem?.qty ? "space-between" : "flex-start"}
+          >
             <StyledButton
               variant="outlined"
-              onClick={handleCartAmountChange((cartItem?.qty || 0) + 1)}>
+              onClick={handleCartAmountChange((cartItem?.qty || 0) + 1)}
+            >
               <Icon variant="small">plus</Icon>
             </StyledButton>
 
@@ -226,7 +237,10 @@ export default function ProductCard13(props: Props) {
                   {cartItem.qty}
                 </Box>
 
-                <StyledButton variant="outlined" onClick={handleCartAmountChange(cartItem.qty - 1)}>
+                <StyledButton
+                  variant="outlined"
+                  onClick={handleCartAmountChange(cartItem.qty - 1)}
+                >
                   <Icon variant="small">minus</Icon>
                 </StyledButton>
               </Fragment>

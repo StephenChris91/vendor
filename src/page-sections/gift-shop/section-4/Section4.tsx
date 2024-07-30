@@ -21,10 +21,18 @@ export default function Section4({ categoryList }: Props) {
     <Wrapper className="categories">
       <H1 mb={3}>Top Categories</H1>
 
-      <Carousel infinite={true} visibleSlides={visibleSlides} totalSlides={categoryList.length}>
+      <Carousel
+        infinite={true}
+        visibleSlides={visibleSlides}
+        totalSlides={categoryList.length}
+      >
         {categoryList.map((item) => (
           <Link href="#" key={item.id}>
-            <ProductCard14 title={item.name} imgUrl={item.image} available={item.description} />
+            <ProductCard14
+              title={item.name}
+              imgUrl={item.name}
+              available={item.slug}
+            />
           </Link>
         ))}
       </Carousel>

@@ -19,19 +19,23 @@ export default function Section4({ topRatedBrands, topRatedList }: Props) {
       <Container>
         <Grid container spacing={6}>
           <Grid item lg={6} xs={12}>
-            <CategorySectionHeader iconName="ranking-1" title="Top Ratings" seeMoreLink="#" />
+            <CategorySectionHeader
+              iconName="ranking-1"
+              title="Top Ratings"
+              seeMoreLink="#"
+            />
 
             <Card p="1rem" borderRadius={8}>
               <Grid container spacing={4}>
                 {topRatedList.map((item) => (
-                  <Grid item md={3} sm={6} xs={6} key={item.title}>
+                  <Grid item md={3} sm={6} xs={6} key={item.name}>
                     <Link href={`/product/search/${item.slug}`}>
                       <ProductCard4
-                        title={item.title}
+                        title={item.name}
                         price={item.price}
-                        imgUrl={item.thumbnail}
-                        rating={item.rating || 4}
-                        reviewCount={item.reviews?.length || 12}
+                        imgUrl={item.image}
+                        rating={4}
+                        reviewCount={12}
                       />
                     </Link>
                   </Grid>
@@ -41,7 +45,11 @@ export default function Section4({ topRatedBrands, topRatedList }: Props) {
           </Grid>
 
           <Grid item md={6} xs={12}>
-            <CategorySectionHeader iconName="Group" title="Featured Brands" seeMoreLink="#" />
+            <CategorySectionHeader
+              iconName="Group"
+              title="Featured Brands"
+              seeMoreLink="#"
+            />
 
             <Card p="1rem" borderRadius={8}>
               <Grid container spacing={4}>

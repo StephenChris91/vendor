@@ -24,11 +24,19 @@ export default function Section3({ categoryList }: Props) {
   }, [width]);
 
   return (
-    <CategorySectionCreator iconName="categories" title="Top Categories" seeMoreLink="#">
+    <CategorySectionCreator
+      iconName="categories"
+      title="Top Categories"
+      seeMoreLink="#"
+    >
       <Carousel totalSlides={categoryList.length} visibleSlides={visibleSlides}>
         {categoryList.map((item, ind) => (
           <Link href={`/product/search/${item.slug}`} key={ind}>
-            <ProductCard6 title={item.name} imgUrl={item.image} subtitle={item.description} />
+            <ProductCard6
+              title={item.name}
+              imgUrl={item.name}
+              subtitle={item.name}
+            />
           </Link>
         ))}
       </Carousel>

@@ -28,15 +28,22 @@ export default function Section10({ products }: Section10Props) {
     { id: 1, title: "New Arrivals", type: "new" },
     { id: 2, title: "Best Seller", type: "best" },
     { id: 3, title: "Most Popular", type: "popular" },
-    { id: 4, title: "View All", type: "view" }
+    { id: 4, title: "View All", type: "view" },
   ];
 
   return (
     <Container mb="4rem">
-      <FlexBox alignItems="center" justifyContent="space-between" flexWrap="wrap" mb="1.5rem">
+      <FlexBox
+        alignItems="center"
+        justifyContent="space-between"
+        flexWrap="wrap"
+        mb="1.5rem"
+      >
         <div>
           <H2 fontSize={20}>Selected Products</H2>
-          <Paragraph>All our new arrivals in a exclusive brand selection</Paragraph>
+          <Paragraph>
+            All our new arrivals in a exclusive brand selection
+          </Paragraph>
         </div>
 
         <ButtonsWrapper>
@@ -45,7 +52,8 @@ export default function Section10({ products }: Section10Props) {
               key={id}
               variant="outlined"
               color={activeColor(type)}
-              onClick={handleSelected(type)}>
+              onClick={handleSelected(type)}
+            >
               {title}
             </Button>
           ))}
@@ -59,11 +67,11 @@ export default function Section10({ products }: Section10Props) {
               id={product.id}
               key={product.id}
               slug={product.slug}
-              name={product.title}
+              name={product.name}
               price={product.price}
-              img={product.thumbnail}
-              images={product.images as string[]}
-              reviews={product.reviews?.length || 15}
+              img={product.image}
+              images={product.gallery as string[]}
+              reviews={15}
             />
           ))}
         </Carousel>

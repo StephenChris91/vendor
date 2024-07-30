@@ -20,12 +20,12 @@ export default function Section11({ moreItems }: Props) {
               hoverEffect
               id={item.id}
               slug={item.slug}
-              title={item.title}
+              title={item.name}
               price={item.price}
-              off={item.discount}
-              rating={item.rating}
-              imgUrl={item.thumbnail}
-              images={item.images as string[]}
+              off={item.sale_price}
+              rating={4}
+              imgUrl={item.image}
+              images={item.gallery as string[]}
             />
           </Grid>
         ))}

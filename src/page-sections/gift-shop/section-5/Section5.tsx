@@ -18,8 +18,8 @@ const Wrapper = styled("div")(({ theme }) => ({
     boxShadow: theme.shadows[2],
     color: theme.colors.marron.main,
     background: theme.colors.marron[50],
-    "&:hover": { background: theme.colors.marron[100] }
-  }
+    "&:hover": { background: theme.colors.marron[100] },
+  },
 }));
 
 // ===============================================
@@ -31,24 +31,28 @@ export default function Section5({ products, title }: Props) {
     xs: 1,
     sm: 2,
     md: 3,
-    initialSlide: 4
+    initialSlide: 4,
   });
 
   return (
     <CategorySectionCreator title={title} seeMoreLink="#">
       <Wrapper>
-        <Carousel infinite={true} visibleSlides={visibleSlides} totalSlides={products.length}>
+        <Carousel
+          infinite={true}
+          visibleSlides={visibleSlides}
+          totalSlides={products.length}
+        >
           {products.map((item) => (
             <ProductCard15
               id={item.id}
               key={item.id}
               slug={item.slug}
-              title={item.title}
+              title={item.name}
               price={item.price}
-              off={item.discount}
-              rating={item.rating}
-              images={item.images}
-              imgUrl={item.thumbnail}
+              off={item.sale_price}
+              rating={5}
+              images={item.gallery}
+              imgUrl={item.image}
             />
           ))}
         </Carousel>

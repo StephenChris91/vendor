@@ -29,17 +29,18 @@ export default function Section3({ categories }: Props) {
                 height="100%"
                 borderRadius={8}
                 hoverEffect={true}
-                alignItems="center">
+                alignItems="center"
+              >
                 <NextImage
                   width={46}
                   height={46}
                   alt="bonik"
-                  src={item.image}
+                  src={item.name}
                   objectFit="contain"
                 />
 
                 <Box ml="2rem" flex={1} overflow="hidden">
-                  <Tiny color="primary.main">{item.description}</Tiny>
+                  <Tiny color="primary.main">{item.name}</Tiny>
                   <H5 ellipsis>{item.name}</H5>
                 </Box>
               </FlexBox>

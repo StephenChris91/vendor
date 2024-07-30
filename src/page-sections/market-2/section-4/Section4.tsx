@@ -31,11 +31,11 @@ export default function Section4({ products }: Section4Props) {
               key={product.id}
               id={product.id}
               slug={product.slug}
-              name={product.title}
+              name={product.name}
               price={product.price}
-              img={product.thumbnail}
-              images={product.images as string[]}
-              reviews={product.reviews?.length || 11}
+              img={product.image}
+              images={product.gallery as string[]}
+              reviews={11}
             />
           ))}
         </Carousel>

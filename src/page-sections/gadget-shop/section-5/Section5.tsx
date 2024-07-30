@@ -15,7 +15,7 @@ export default function Section5({ products }: Props) {
     initialSlide: 6,
     xs: 2,
     sm: 3,
-    md: 4
+    md: 4,
   });
 
   return (
@@ -26,8 +26,8 @@ export default function Section5({ products }: Props) {
             <ProductCard2
               slug={item.slug}
               price={item.price}
-              title={item.title}
-              imgUrl={item.thumbnail}
+              title={item.name}
+              imgUrl={item.image}
             />
           </div>
         ))}

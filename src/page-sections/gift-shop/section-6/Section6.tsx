@@ -20,12 +20,12 @@ export default function Section6({ products }: Props) {
             <ProductCard15
               id={item.id}
               slug={item.slug}
-              title={item.title}
+              title={item.name}
               price={item.price}
-              off={item.discount}
-              rating={item.rating}
-              images={item.images}
-              imgUrl={item.thumbnail}
+              off={item.sale_price}
+              rating={4}
+              images={item.gallery}
+              imgUrl={item.image}
             />
           </Grid>
         ))}
@@ -35,7 +35,8 @@ export default function Section6({ products }: Props) {
         <Button
           color="primary"
           variant="contained"
-          style={{ backgroundColor: theme.colors.marron.main }}>
+          style={{ backgroundColor: theme.colors.marron.main }}
+        >
           Load More...
         </Button>
       </Box>
