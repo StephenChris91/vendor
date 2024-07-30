@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
@@ -7,24 +5,22 @@ import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
 import TextField from "@component/text-field";
 
-interface AddPaymentInfoProps {
-  updateFormData: (data: { paymentInfo: PaymentInfo }) => void;
-  initialPaymentInfo: PaymentInfo;
-}
-
 interface PaymentInfo {
   accountName: string;
   accountNumber: string;
   bankName: string;
 }
 
+interface AddPaymentInfoProps {
+  updateFormData: (data: { paymentInfo: PaymentInfo }) => void;
+  initialPaymentInfo: PaymentInfo;
+}
+
 const formSchema = yup.object().shape({
   accountName: yup.string().required("Account name is required"),
   accountNumber: yup
     .string()
-    .matches(/^\d+$/, "Account number must contain only digits")
-    .min(10, "Account number must be at least 10 digits")
-    .max(11, "Account number must not exceed 11 digits")
+    .matches(/^\d{10,11}$/, "Account number must be 10 or 11 digits")
     .required("Account number is required"),
   bankName: yup.string().required("Bank name is required"),
 });
@@ -33,7 +29,7 @@ const AddPaymentInfo: React.FC<AddPaymentInfoProps> = ({
   updateFormData,
   initialPaymentInfo,
 }) => {
-  const formik = useFormik({
+  const formik = useFormik<PaymentInfo>({
     initialValues: {
       accountName: initialPaymentInfo?.accountName || "",
       accountNumber: initialPaymentInfo?.accountNumber || "",
@@ -57,7 +53,14 @@ const AddPaymentInfo: React.FC<AddPaymentInfoProps> = ({
   };
 
   const handleChange = (e: React.ChangeEvent<any>) => {
-    formik.handleChange(e);
+    const { name, value } = e.target;
+    if (name === "accountNumber") {
+      // Only allow digits and limit to 11 characters
+      const sanitizedValue = value.replace(/\D/g, "").slice(0, 11);
+      formik.setFieldValue(name, sanitizedValue);
+    } else {
+      formik.handleChange(e);
+    }
     formik.submitForm();
   };
 
@@ -93,6 +96,10 @@ const AddPaymentInfo: React.FC<AddPaymentInfoProps> = ({
         onChange={handleChange}
         value={formik.values.accountNumber}
         errorText={formik.touched.accountNumber && formik.errors.accountNumber}
+        inputProps={{
+          inputMode: "numeric",
+          pattern: "[0-9]*",
+        }}
       />
 
       <TextField

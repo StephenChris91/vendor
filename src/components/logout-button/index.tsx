@@ -23,7 +23,10 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
   const onClick = async () => {
     try {
       setIsLoading(true);
-      await signOut({ redirect: false });
+      await signOut({
+        redirect: true,
+        callbackUrl: "/",
+      });
       setUser(null); // Update the AuthContext
       toast.success("Logged out successfully");
       onLogout?.(); // Call the onLogout prop if it exists

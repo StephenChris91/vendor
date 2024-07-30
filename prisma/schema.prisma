@@ -110,7 +110,7 @@ model shop {
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
   userId       String        @unique
-  user         user          @relation(fields: [userId], references: [id])
+  user         user          @relation(fields: [userId], references: [id], onDelete: Cascade)
   products     product[]     @relation("ShopProducts")
   orders       order[]
   address      Address?
@@ -125,17 +125,17 @@ model Address {
   state      String
   postalCode String
   country    String
-  shop       shop   @relation(fields: [shopId], references: [id])
+  shop       shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
   shopId     String @unique
 }
 
 model PaymentInfo {
-  id          String @id @default(cuid())
-  accountName String
-  accountNo   String
-  bankName    String
-  shop        shop   @relation(fields: [shopId], references: [id])
-  shopId      String @unique
+  id            String @id @default(cuid())
+  accountName   String
+  accountNumber String
+  bankName      String
+  shop          shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopId        String @unique
 }
 
 model ShopSettings {
@@ -146,7 +146,7 @@ model ShopSettings {
   category        String?
   deliveryOptions String[]
   isActive        Boolean  @default(true)
-  shop            shop     @relation(fields: [shopId], references: [id])
+  shop            shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
   shopId          String   @unique
 }
 
@@ -165,18 +165,20 @@ model product {
   product_type  ProductType   @default(Simple)
   video         String?
   image         String?
-  author_id     String?
+  user_id       String?
   ratings       Float?
   total_reviews Int?
   my_review     String?
   in_wishlist   Boolean?
   shop_id       String?
   categories    category[]
-  shop          shop?         @relation("ShopProducts", fields: [shop_id], references: [id])
-  author        user?         @relation("UserProducts", fields: [author_id], references: [id])
+  shop          shop?         @relation("ShopProducts", fields: [shop_id], references: [id], onDelete: SetNull)
+  user          user?         @relation("UserProducts", fields: [user_id], references: [id], onDelete: SetNull)
   gallery       String[]
   shop_name     String?
   stock         Int?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 model category {

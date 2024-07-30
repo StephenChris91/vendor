@@ -1,9 +1,12 @@
+'use server'
+
 import { productSchema } from "schemas";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "auth";
 import { getUserById } from "lib/data/user";
 import { db } from "../../prisma/prisma";
+import { Prisma } from "@prisma/client";
 
 export async function createProduct(values: z.infer<typeof productSchema>) {
   const session = await auth();
@@ -46,15 +49,35 @@ export async function createProduct(values: z.infer<typeof productSchema>) {
   }
 
   try {
-    const productData = {
-      ...validInput.data,
+    const productData: Prisma.productCreateInput = {
+      name: validInput.data.name,
+      slug: validInput.data.slug,
+      description: validInput.data.description,
+      price: validInput.data.price,
+      sale_price: validInput.data.sale_price,
+      sku: validInput.data.sku,
+      quantity: validInput.data.quantity,
+      in_stock: validInput.data.in_stock,
+      is_taxable: validInput.data.is_taxable,
+      status: validInput.data.status,
+      product_type: validInput.data.product_type,
+      image: validInput.data.image,
+      video: validInput.data.video,
+      gallery: validInput.data.gallery,
+      ratings: validInput.data.ratings,
+      total_reviews: validInput.data.total_reviews,
+      my_review: validInput.data.my_review,
+      in_wishlist: validInput.data.in_wishlist,
+      shop_name: validInput.data.shop_name,
       shop: {
         connect: { id: shop.id },
       },
       categories: {
         connect: categoryIds.map(id => ({ id })),
       },
-      user: session.user.id
+      user: {
+        connect: { id: session.user.id },
+      },
     };
 
     const product = await db.product.create({

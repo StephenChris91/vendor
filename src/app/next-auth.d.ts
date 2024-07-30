@@ -8,6 +8,8 @@ declare module "next-auth" {
             firstname: string
             lastname: string
             isOnboardedVendor: boolean
+            hasPaid: boolean
+            shopStatus?: string
         } & DefaultSession["user"]
     }
 
@@ -16,5 +18,9 @@ declare module "next-auth" {
         firstname: string
         lastname: string
         isOnboardedVendor: boolean
+        hasPaid: boolean
+        shop?: {
+            status: string
+        }
     }
 }

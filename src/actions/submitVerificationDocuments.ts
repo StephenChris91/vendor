@@ -13,19 +13,12 @@ export async function submitVerificationDocuments(
 ) {
   try {
     // Update user's profile to indicate documents have been submitted
-    // await db.user.update({
-    //   where: { id: userId },
-    //   data: {
-    //     verificationStatus: VerificationStatus.Pending,
-    //   },
-    // });
-
     await db.user.update({
       where: { id: userId },
       data: {
         verificationStatus: VerificationStatus.Pending
       }
-    })
+    });
 
     // Prepare attachments for the email
     const attachments = documents.map(doc => ({
@@ -35,8 +28,8 @@ export async function submitVerificationDocuments(
 
     // Send email to admin using Resend
     await resend.emails.send({
-      from: "Vendorspot Notification <admin@vendorspot.ng>", // Replace with your verified domain
-      to: userEmail,
+      from: "Vendorspot Notification <admin@vendorspot.ng>",
+      to: process.env.NEXT_PUBLIC_ADMIN_EMAIL!,
       subject: "New Verification Documents Submitted",
       html: `
         <p>New verification documents have been submitted:</p>

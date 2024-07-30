@@ -49,7 +49,7 @@ export default {
         }),
     ],
     callbacks: {
-        async jwt({ token, user, account, profile }) {
+        async jwt({ token, user }) {
             console.log("JWT callback - token before:", token);
             console.log("JWT callback - user:", user);
 
@@ -58,6 +58,8 @@ export default {
                 token.firstname = user.firstname;
                 token.lastname = user.lastname;
                 token.isOnboardedVendor = user.isOnboardedVendor;
+                token.hasPaid = user.hasPaid;
+                token.shopStatus = user.shop?.status;
             }
 
             console.log("JWT callback - token after:", token);
@@ -73,6 +75,9 @@ export default {
                 session.user.firstname = token.firstname as string;
                 session.user.lastname = token.lastname as string;
                 session.user.isOnboardedVendor = token.isOnboardedVendor as boolean;
+                session.user.hasPaid = token.hasPaid as boolean;
+                session.user.shopStatus = token.shopStatus as string | undefined;
+
             }
 
             console.log("Session callback - session after:", session);

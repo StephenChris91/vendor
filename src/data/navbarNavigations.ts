@@ -136,7 +136,7 @@ const navbarNavigations = [
     requiresRole: ''
   },
   {
-    title: "Dashboard", url: "/dashboard", badge: "",
+    title: "Dashboard", url: "/vendor/dashboard", badge: "",
     // child: [],
     requiresAuth: true,
     requiresNoAuth: false,

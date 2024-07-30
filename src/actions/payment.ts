@@ -82,6 +82,7 @@ export const verifyAndUpdatePayment = async (reference: string) => {
                 },
                 data: {
                     hasPaid: true,
+                    paymentReference: response.data.data.reference,
                 },
             });
             return true;

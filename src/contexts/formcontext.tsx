@@ -56,7 +56,7 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     coverImage: "",
     paymentInfo: {
       accountName: "",
-      accountNumber: "",
+      accountNumber: "", // Initialize as empty string
       bankName: "",
     },
     address: {
@@ -77,13 +77,30 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   const updateFormData = (data: Partial<FormData>) => {
-    setFormData((prev) => ({
-      ...prev,
-      ...data,
-      paymentInfo: { ...prev.paymentInfo, ...data.paymentInfo },
-      address: { ...prev.address, ...data.address },
-      shopSettings: { ...prev.shopSettings, ...data.shopSettings },
-    }));
+    setFormData((prev) => {
+      const newData = { ...prev };
+      Object.keys(data).forEach((key) => {
+        if (key === "paymentInfo" && data.paymentInfo) {
+          newData.paymentInfo = {
+            ...prev.paymentInfo,
+            ...data.paymentInfo,
+          };
+        } else if (key === "address" && data.address) {
+          newData.address = {
+            ...prev.address,
+            ...data.address,
+          };
+        } else if (key === "shopSettings" && data.shopSettings) {
+          newData.shopSettings = {
+            ...prev.shopSettings,
+            ...data.shopSettings,
+          };
+        } else {
+          newData[key] = data[key];
+        }
+      });
+      return newData;
+    });
     console.log("Form data updated:", data);
   };
 

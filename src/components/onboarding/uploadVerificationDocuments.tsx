@@ -14,7 +14,7 @@ import { Button } from "@component/buttons";
 interface UploadVerificationDocumentsProps {
   userId: string;
   userEmail: string;
-  onComplete: () => void;
+  // onComplete: () => void;
 }
 
 interface FormValues {
@@ -50,7 +50,7 @@ const formSchema = yup.object().shape({
 
 const UploadVerificationDocuments: React.FC<
   UploadVerificationDocumentsProps
-> = ({ userId, userEmail, onComplete }) => {
+> = ({ userId, userEmail }) => {
   const [fileNames, setFileNames] = useState<string[]>([]);
 
   const formik = useFormik<FormValues>({
@@ -76,7 +76,7 @@ const UploadVerificationDocuments: React.FC<
         await submitVerificationDocuments(userId, userEmail, documentData);
 
         toast.success("Documents submitted successfully for verification!");
-        onComplete();
+        // onComplete();
       } catch (error) {
         console.error("Error submitting documents:", error);
         toast.error("Failed to submit documents. Please try again.");

@@ -4,6 +4,9 @@ export const getUserByEmail = async (email: string) => {
     try {
         const user = await db.user.findUnique({
             where: { email },
+            include: {
+                shop: true,
+            },
         });
         console.log('User fetched:', user);
         return user; // Return null if user doesn't exist
@@ -17,6 +20,9 @@ export const getUserById = async (id: string) => {
     try {
         const user = await db.user.findUnique({
             where: { id },
+            include: {
+                shop: true,
+            },
         });
         return user;
     } catch (error) {

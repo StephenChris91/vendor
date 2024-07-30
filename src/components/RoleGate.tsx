@@ -16,7 +16,7 @@ export const RoleGate: React.FC<RoleGateProps> = ({
   const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <div>Loading...</div>; // Or any loading component
+    return <div>Loading...</div>;
   }
 
   if (status === "unauthenticated") {

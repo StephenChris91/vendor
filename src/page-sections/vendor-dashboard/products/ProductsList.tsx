@@ -14,13 +14,13 @@ import { IconButton } from "@component/buttons";
 import Typography, { H5 } from "@component/Typography";
 
 import { calculateDiscount, currency } from "@utils/utils";
-import Product from "@models/product.model";
 import { Meta } from "interfaces";
+import { ProductType } from "types";
 
 // ==============================================================
 interface Props {
   meta: Meta;
-  products: Product[];
+  products: ProductType[];
 }
 // ==============================================================
 
@@ -43,7 +43,7 @@ export default function ProductsList({ meta, products }: Props) {
             <FlexBox alignItems="center" m="6px" flex="2 2 220px !important">
               <Avatar src={item.thumbnail} size={36} />
               <Typography textAlign="left" ml="20px">
-                {item.title}
+                {item.name}
               </Typography>
             </FlexBox>
 
@@ -52,7 +52,7 @@ export default function ProductsList({ meta, products }: Props) {
             </H5>
 
             <H5 m="6px" textAlign="left" fontWeight="400">
-              {calculateDiscount(item.price, item.discount)}
+              {calculateDiscount(item.price, item.sale_price)}
             </H5>
 
             <Hidden flex="0 0 0 !important" down={769}>
@@ -69,7 +69,10 @@ export default function ProductsList({ meta, products }: Props) {
       ))}
 
       <FlexBox justifyContent="center" mt="2.5rem">
-        <Pagination pageCount={meta?.totalPage || 1} onChange={(data) => setPage(data + 1)} />
+        <Pagination
+          pageCount={meta?.totalPage || 1}
+          onChange={(data) => setPage(data + 1)}
+        />
       </FlexBox>
     </>
   );

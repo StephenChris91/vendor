@@ -77,7 +77,11 @@ export const addressSchema = z.object({
 // Payment info sub-schema
 export const paymentInfoSchema = z.object({
   accountName: z.string().min(1, "Account name is required"),
-  accountNumber: z.string().min(1, "Account number is required"),
+  accountNumber: z.string()
+    .regex(/^\d{10,11}$/, "Account number must be 10 or 11 digits")
+    .refine((value) => value.length >= 10 && value.length <= 11, {
+      message: "Account number must be 10 or 11 digits long",
+    }),
   bankName: z.string().min(1, "Bank name is required"),
 });
 

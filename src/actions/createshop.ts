@@ -1,23 +1,26 @@
 'use server';
 import { paymentInfoSchema, shopAddressSchema, shopSettingsSchema } from './../schemas/index';
-// actions/createshop.ts
-
 import { shopSchema } from "schemas";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "auth";
 import { ShopStatus } from '@prisma/client';
 import { db } from '../../prisma/prisma';
+import { redirect } from 'next/navigation';
+
+// Update paymentInfoSchema to expect a number for accountNumber
+// const updatedPaymentInfoSchema = paymentInfoSchema.extend({
+//     accountNumber: z.number().int().gte(1000000000).lte(99999999999), // 10 to 11 digit number
+// });
 
 // Extend the shopSchema to include nested objects and additional fields
 const extendedShopSchema = shopSchema.extend({
     address: shopAddressSchema,
     paymentInfo: paymentInfoSchema,
     shopSettings: shopSettingsSchema,
-    status: z.nativeEnum(ShopStatus), // Use the Prisma-generated enum
+    status: z.nativeEnum(ShopStatus),
     hasPaid: z.boolean(),
 });
-
 
 export async function createShop(values: z.infer<typeof extendedShopSchema>) {
     const session = await auth();
@@ -63,28 +66,30 @@ export async function createShop(values: z.infer<typeof extendedShopSchema>) {
                 },
                 address: {
                     create: {
-                        street: address.street || "",
-                        city: address.city || "",
-                        state: address.state || "",
-                        postalCode: address.postalCode || "",
-                        country: address.country || "",
+                        street: address.street,
+                        city: address.city,
+                        state: address.state,
+                        postalCode: address.postalCode,
+                        country: address.country,
                     },
                 },
                 paymentInfo: {
                     create: {
-                        accountName: paymentInfo.accountName || "",
-                        accountNo: paymentInfo.accountNumber || "", // Changed from accountNumber to accountNo
-                        bankName: paymentInfo.bankName || "",
+                        accountName: paymentInfo.accountName,
+                        accountNumber: paymentInfo.accountNumber,
+                        bankName: paymentInfo.bankName,
                     },
                 },
                 shopSettings: {
                     create: {
-                        phoneNumber: shopSettings.phoneNumber || "",
-                        website: shopSettings.website || "",
-                        businessHours: shopSettings.businessHours || "",
-                        category: shopSettings.category || "",
-                        deliveryOptions: shopSettings.deliveryOptions || [],
-                        isActive: shopSettings.isActive ?? true,
+                        phoneNumber: shopSettings.phoneNumber,
+                        website: shopSettings.website,
+                        businessHours: shopSettings.businessHours,
+                        category: shopSettings.category,
+                        deliveryOptions: shopSettings.deliveryOptions,
+                        isActive: shopSettings.isActive,
+
+
                     },
                 },
             },
@@ -104,8 +109,9 @@ export async function createShop(values: z.infer<typeof extendedShopSchema>) {
             },
         });
 
+
         revalidatePath('/');
-        return { status: 'success', shop };
+        return { status: 'success', shop, message: 'Shop has been created successfully' };
     } catch (error) {
         console.error(error);
         return { status: 'error', message: 'Failed to create shop' };

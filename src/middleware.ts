@@ -29,16 +29,17 @@ export default auth((req) => {
 
     if (isAuthRoute) {
         if (isLoggedIn) {
-            // Special case for onboarding
-            if (nextUrl.pathname === '/onboarding' && req.auth?.user?.role === "Vendor" && !req.auth?.user?.isOnboardedVendor) {
-                return null; // Allow access to onboarding for non-onboarded vendors
+            // Special case for onboarding and confirmation
+            if ((nextUrl.pathname === '/onboarding' || nextUrl.pathname === '/onboarding/confirmation')
+                && req.auth?.user?.role === "Vendor") {
+                return null; // Allow access to onboarding and confirmation for vendors
             }
 
             // Redirect based on user role
             if (req.auth?.user?.role === "Admin") {
                 return Response.redirect(new URL(DEFAULT_ADMIN_REDIRECT, nextUrl));
             } else if (req.auth?.user?.role === "Vendor") {
-                if (!req.auth?.user?.isOnboardedVendor) {
+                if (!req.auth?.user?.isOnboardedVendor && nextUrl.pathname !== '/onboarding/confirmation') {
                     return Response.redirect(new URL('/onboarding', nextUrl));
                 }
                 return Response.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
@@ -73,7 +74,8 @@ export default auth((req) => {
         }
 
         // Vendor onboarding check
-        if (req.auth?.user?.role === "Vendor" && !req.auth?.user?.isOnboardedVendor && nextUrl.pathname !== '/onboarding') {
+        if (req.auth?.user?.role === "Vendor" && !req.auth?.user?.isOnboardedVendor
+            && !isPublicRoute && !req.auth?.user?.hasPaid && nextUrl.pathname !== '/onboarding' && nextUrl.pathname !== '/onboarding/confirmation') {
             return Response.redirect(new URL('/onboarding', nextUrl));
         }
     }

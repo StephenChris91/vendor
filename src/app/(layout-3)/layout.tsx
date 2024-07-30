@@ -1,6 +1,11 @@
 import { PropsWithChildren } from "react";
 import AppLayout from "@component/layout/layout-3";
+import Providers from "@utils/providers";
 
 export default function Layout({ children }: PropsWithChildren) {
-  return <AppLayout>{children}</AppLayout>;
+  return (
+    <Providers>
+      <AppLayout>{children}</AppLayout>;
+    </Providers>
+  );
 }
