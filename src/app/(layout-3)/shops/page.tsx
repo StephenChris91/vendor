@@ -19,19 +19,24 @@ export default async function ShopList() {
         {shopList.map((item) => (
           <Grid item lg={4} sm={6} xs={12} key={item.id}>
             <ShopCard1
-              name={item.name}
-              phone={item.phone}
-              address={item.address}
-              rating={item.rating || 5}
-              imgUrl={item.profilePicture}
-              coverImgUrl={item.coverPicture}
+              name={item.shopName}
+              phone={item.shopSettings.phoneNumber}
+              address={item.address.city}
+              rating={5}
+              imgUrl={item.logo}
+              coverImgUrl={item.banner}
               shopUrl={`/shops/${item.slug}`}
             />
           </Grid>
         ))}
       </Grid>
 
-      <FlexBox flexWrap="wrap" justifyContent="space-between" alignItems="center" mt="32px">
+      <FlexBox
+        flexWrap="wrap"
+        justifyContent="space-between"
+        alignItems="center"
+        mt="32px"
+      >
         <SemiSpan>Showing 1-9 of {shopList.length} Shops</SemiSpan>
         <Pagination pageCount={Math.ceil(shopList.length / 9)} />
       </FlexBox>
