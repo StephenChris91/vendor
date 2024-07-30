@@ -30,12 +30,12 @@ const ContentArea = styled(Box)`
 `;
 
 export default function AdminDashboardLayout({ children }: PropsWithChildren) {
-  const pathname = usePathname();
+  // const pathname = usePathname();
   const user = useCurrentUser();
 
   return (
     <LayoutWrapper>
-      <AdminHeader user={user} />
+      <AdminHeader />
       <MainContent>
         <AdminSidebar />
         <ContentArea>{children}</ContentArea>
