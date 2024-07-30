@@ -61,7 +61,7 @@ export async function PUT(
 
         // Handle author relation update
         if (body.author_id) {
-            updateData.author = {
+            updateData.user = {
                 connect: { id: body.author_id }
             };
         }
@@ -73,7 +73,7 @@ export async function PUT(
             include: {
                 categories: true,
                 shop: true,
-                author: true,
+                user: true,
             },
         });
 
@@ -106,7 +106,7 @@ export async function GET(
             include: {
                 categories: true,
                 shop: true,
-                author: true,
+                user: true,
             },
         });
 
