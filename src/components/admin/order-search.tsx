@@ -1,11 +1,10 @@
-// components/admin/OrderSearchFilter.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import TextField from "@component/text-field";
 import { Button } from "@component/buttons";
-import Select from "@component/Select";
+import Select, { SelectOption } from "@component/Select"; // Ensure SelectOption is imported
 
 const FilterBox = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -39,8 +38,9 @@ const OrderSearchFilter: React.FC<OrderSearchFilterProps> = ({
   onFilter,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [paymentStatus, setPaymentStatus] = useState("");
-  const [fulfillmentStatus, setFulfillmentStatus] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState<SelectOption | null>(null);
+  const [fulfillmentStatus, setFulfillmentStatus] =
+    useState<SelectOption | null>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -49,8 +49,29 @@ const OrderSearchFilter: React.FC<OrderSearchFilterProps> = ({
   };
 
   const handleFilter = () => {
-    onFilter({ paymentStatus, fulfillmentStatus, startDate, endDate });
+    onFilter({
+      paymentStatus: paymentStatus?.value || "",
+      fulfillmentStatus: fulfillmentStatus?.value || "",
+      startDate,
+      endDate,
+    });
   };
+
+  const paymentStatusOptions: SelectOption[] = [
+    { value: "", label: "All Payment Statuses" },
+    { value: "Paid", label: "Paid" },
+    { value: "Pending", label: "Pending" },
+    { value: "Failed", label: "Failed" },
+  ];
+
+  const fulfillmentStatusOptions: SelectOption[] = [
+    { value: "", label: "All Fulfillment Statuses" },
+    { value: "Pending", label: "Pending" },
+    { value: "Processing", label: "Processing" },
+    { value: "Shipped", label: "Shipped" },
+    { value: "Delivered", label: "Delivered" },
+    { value: "Cancelled", label: "Cancelled" },
+  ];
 
   return (
     <FilterBox>
@@ -68,27 +89,17 @@ const OrderSearchFilter: React.FC<OrderSearchFilterProps> = ({
         <Select
           placeholder="Payment Status"
           value={paymentStatus}
-          onChange={(e) => setPaymentStatus(e.target.value)}
+          onChange={(option) => setPaymentStatus(option as SelectOption)}
+          options={paymentStatusOptions}
           mb={2}
-        >
-          <option value="">All Payment Statuses</option>
-          <option value="Paid">Paid</option>
-          <option value="Pending">Pending</option>
-          <option value="Failed">Failed</option>
-        </Select>
+        />
         <Select
           placeholder="Fulfillment Status"
           value={fulfillmentStatus}
-          onChange={(e) => setFulfillmentStatus(e.target.value)}
+          onChange={(option) => setFulfillmentStatus(option as SelectOption)}
+          options={fulfillmentStatusOptions}
           mb={2}
-        >
-          <option value="">All Fulfillment Statuses</option>
-          <option value="Pending">Pending</option>
-          <option value="Processing">Processing</option>
-          <option value="Shipped">Shipped</option>
-          <option value="Delivered">Delivered</option>
-          <option value="Cancelled">Cancelled</option>
-        </Select>
+        />
         <StyledInput
           type="date"
           placeholder="Start Date"

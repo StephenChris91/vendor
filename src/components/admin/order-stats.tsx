@@ -64,7 +64,7 @@ const OrderStatistics: React.FC = () => {
       <H4 mb={2}>Order Statistics</H4>
       <FlexBox flexWrap="wrap" justifyContent="space-between">
         <StatItem>
-          <Icon size="40px" color="primary.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             shopping-bag
           </Icon>
           <Box>
@@ -77,7 +77,7 @@ const OrderStatistics: React.FC = () => {
           </Box>
         </StatItem>
         <StatItem>
-          <Icon size="40px" color="warning.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             clock
           </Icon>
           <Box>
@@ -90,7 +90,7 @@ const OrderStatistics: React.FC = () => {
           </Box>
         </StatItem>
         <StatItem>
-          <Icon size="40px" color="success.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             dollar-sign
           </Icon>
           <Box>
@@ -103,7 +103,7 @@ const OrderStatistics: React.FC = () => {
           </Box>
         </StatItem>
         <StatItem>
-          <Icon size="40px" color="info.main" mr={1}>
+          <Icon size="40px" color="primary" mr={1}>
             trending-up
           </Icon>
           <Box>
