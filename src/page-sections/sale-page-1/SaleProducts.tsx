@@ -20,7 +20,10 @@ type Props = {
 
 export default function SaleProducts({ products, meta }: Props) {
   const { push } = useRouter();
-  const handlePageChange = (page: number) => push(`?page=${page + 1}`);
+
+  const handlePageChange = ({ selected }: { selected: number }) => {
+    push(`?page=${selected + 1}`);
+  };
 
   return (
     <>
@@ -31,18 +34,25 @@ export default function SaleProducts({ products, meta }: Props) {
               id={item.id}
               slug={item.slug}
               price={item.price}
-              title={item.title}
-              off={item.discount}
-              images={item.images}
-              imgUrl={item.thumbnail}
-              rating={item.rating || 4}
+              title={item.name}
+              off={item.sale_price}
+              images={item.gallery}
+              imgUrl={item.image}
+              rating={4}
             />
           </Grid>
         ))}
       </Grid>
 
-      <FlexBox flexWrap="wrap" justifyContent="space-between" alignItems="center" my="4rem">
-        <SemiSpan>{renderProductCount(meta.page - 1, meta.pageSize, meta.total)}</SemiSpan>
+      <FlexBox
+        flexWrap="wrap"
+        justifyContent="space-between"
+        alignItems="center"
+        my="4rem"
+      >
+        <SemiSpan>
+          {renderProductCount(meta.page - 1, meta.pageSize, meta.total)}
+        </SemiSpan>
         <Pagination onChange={handlePageChange} pageCount={meta.totalPage} />
       </FlexBox>
     </>
