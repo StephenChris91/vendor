@@ -1,39 +1,45 @@
-import { useCallback } from "react";
-import { useDropzone } from "react-dropzone";
-
+import { useCallback, useEffect, useRef } from "react";
 import Box from "./Box";
 import Divider from "./Divider";
 import { Button } from "./buttons";
 import Typography, { H5, Small } from "./Typography";
 
-// ==============================================================
 export interface DropZoneProps {
-  onChange?: (files: []) => void;
+  onChange?: (result: any) => void;
 }
-// ==============================================================
+
+declare global {
+  interface Window {
+    cloudinary: any;
+  }
+}
 
 export default function DropZone({ onChange }: DropZoneProps) {
-  const onDrop = useCallback((acceptedFiles: any) => {
-    if (onChange) onChange(acceptedFiles);
-  }, []);
+  const cloudinaryRef = useRef<any>();
+  const widgetRef = useRef<any>();
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    maxFiles: 10,
-    multiple: true,
-    accept: {
-      "image/*": [
-        ".png",
-        ".jpeg",
-        ".jpg",
-        ".gif",
-        ".pdf",
-        ".docx",
-        ".doc",
-        ".odt",
-      ],
-    },
-  });
+  useEffect(() => {
+    cloudinaryRef.current = window.cloudinary;
+    widgetRef.current = cloudinaryRef.current?.createUploadWidget(
+      {
+        cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+        uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
+        maxFiles: 10,
+        sources: ["local", "url", "camera"],
+        multiple: true,
+        resourceType: "auto",
+      },
+      function (error: any, result: any) {
+        if (!error && result && result.event === "success") {
+          if (onChange) onChange(result.info);
+        }
+      }
+    );
+  }, [onChange]);
+
+  const openWidget = useCallback(() => {
+    if (widgetRef.current) widgetRef.current.open();
+  }, []);
 
   return (
     <Box
@@ -45,12 +51,10 @@ export default function DropZone({ onChange }: DropZoneProps) {
       flexDirection="column"
       borderColor="gray.400"
       justifyContent="center"
-      bg={isDragActive && "gray.200"}
       transition="all 250ms ease-in-out"
       style={{ outline: "none" }}
-      {...getRootProps()}
+      onClick={openWidget}
     >
-      <input {...getInputProps()} />
       <H5 mb="18px" color="text.muted">
         Drag & drop product image here
       </H5>
@@ -62,9 +66,9 @@ export default function DropZone({ onChange }: DropZoneProps) {
         mt="-10px"
         lineHeight="1"
         color="text.muted"
-        bg={isDragActive ? "gray.200" : "body.paper"}
+        bg="body.paper"
       >
-        on
+        or
       </Typography>
 
       <Button

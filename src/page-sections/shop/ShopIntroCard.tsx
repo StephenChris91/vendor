@@ -83,7 +83,7 @@ export default function ShopIntroCard({ shop }: Props) {
                 </Icon>
 
                 <SemiSpan color="text.muted" ml="12px">
-                  {shop?.address.city}
+                  {shop?.address?.street}
                 </SemiSpan>
               </FlexBox>
 
