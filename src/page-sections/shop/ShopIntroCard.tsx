@@ -8,8 +8,10 @@ import FlexBox from "@component/FlexBox";
 import { Button } from "@component/buttons";
 import { H3, SemiSpan, Small } from "@component/Typography";
 import { ShopIntroWrapper } from "./styles";
+import Shop from "@models/shop.model";
 
-export default function ShopIntroCard() {
+type Props = { shop: Shop };
+export default function ShopIntroCard({ shop }: Props) {
   return (
     <ShopIntroWrapper mb="32px" pb="20px" overflow="hidden">
       <Box className="cover-image" height="202px" />
@@ -20,7 +22,7 @@ export default function ShopIntroCard() {
           mr="37px"
           border="4px solid"
           borderColor="gray.100"
-          src="/assets/images/faces/propic.png"
+          src={shop?.logo || "/assets/images/faces/propic.png"}
         />
 
         <div className="description-holder">
@@ -29,31 +31,43 @@ export default function ShopIntroCard() {
             mb="22px"
             flexWrap="wrap"
             alignItems="center"
-            justifyContent="space-between">
+            justifyContent="space-between"
+          >
             <Box
               my="8px"
               p="4px 16px"
               borderRadius="4px"
               bg="secondary.main"
-              display="inline-block">
+              display="inline-block"
+            >
               <H3 fontWeight="600" color="gray.100">
-                Scarlett Beauty
+                {shop?.shopName}
               </H3>
             </Box>
 
             <FlexBox my="8px">
               {socialLinks.map((item, ind) => (
-                <a key={ind} href={item.url} target="_blank" rel="noreferrer noopener">
+                <a
+                  key={ind}
+                  href={item.url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
                   <Icon
                     size="30px"
                     defaultcolor="auto"
-                    mr={ind < socialLinks.length - 1 ? "10px" : ""}>{`${item.name}_filled`}</Icon>
+                    mr={ind < socialLinks.length - 1 ? "10px" : ""}
+                  >{`${item.name}_filled`}</Icon>
                 </a>
               ))}
             </FlexBox>
           </FlexBox>
 
-          <FlexBox flexWrap="wrap" justifyContent="space-between" alignItems="center">
+          <FlexBox
+            flexWrap="wrap"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <div>
               <FlexBox alignItems="center" mb="14px">
                 <Rating color="warn" value={5} outof={5} readOnly />
@@ -69,7 +83,7 @@ export default function ShopIntroCard() {
                 </Icon>
 
                 <SemiSpan color="text.muted" ml="12px">
-                  845 N. Stonybrook Ave. Tonawanda, NY 14210, Denmark
+                  {shop?.address.city}
                 </SemiSpan>
               </FlexBox>
 
@@ -100,5 +114,5 @@ const socialLinks = [
   { name: "facebook", url: "https://facebook.com" },
   { name: "twitter", url: "https://twitter.com" },
   { name: "youtube", url: "https://youtube.com" },
-  { name: "instagram", url: "https://instagram.com" }
+  { name: "instagram", url: "https://instagram.com" },
 ];

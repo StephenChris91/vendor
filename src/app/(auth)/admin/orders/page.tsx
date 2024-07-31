@@ -1,4 +1,4 @@
-import OrdersPage from "@component/admin/orders-page";
+import OrdersPage from "@component/admin/orders/orders-page";
 
 const page = () => {
   return <OrdersPage />;

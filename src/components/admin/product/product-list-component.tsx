@@ -10,37 +10,14 @@ import Modal from "@component/Modal";
 import TextField from "@component/text-field";
 import Select, { SelectOption } from "@component/Select"; // Ensure SelectOption is imported
 
-const TableWrapper = styled(Box)`
-  background: ${(props) => props.theme.colors.body.paper};
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  overflow-x: auto;
-`;
-
-const StyledTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-`;
-
-const TableHead = styled.thead`
-  background-color: ${(props) => props.theme.colors.gray[100]};
-`;
-
-const TableRow = styled.tr`
-  &:not(:last-child) {
-    border-bottom: 1px solid ${(props) => props.theme.colors.gray[200]};
-  }
-`;
-
-const TableHeaderCell = styled.th`
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-`;
-
-const TableCell = styled.td`
-  padding: 1rem;
-`;
+import {
+  TableWrapper,
+  StyledTable,
+  TableHead,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+} from "./styles";
 
 interface Product {
   id: string;

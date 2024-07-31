@@ -5,7 +5,13 @@ import { H1, Paragraph } from "components/Typography";
 import { theme } from "@utils/theme";
 import { GiftCarouselItem } from "@models/carousel.model";
 // STYLED COMPONENTS
-import { GridItemOne, GridItemTwo, StyledBox, StyledButton, StyledGrid } from "./styles";
+import {
+  GridItemOne,
+  GridItemTwo,
+  StyledBox,
+  StyledButton,
+  StyledGrid,
+} from "./styles";
 
 // ==========================================================
 type Props = { carouselData: GiftCarouselItem[] };
@@ -22,7 +28,8 @@ export default function Section1({ carouselData }: Props) {
         showArrow={false}
         dotClass="carousel-dot"
         totalSlides={carouselData.length}
-        dotColor={theme.colors.marron.main}>
+        dotColor={theme.colors.marron.main}
+      >
         {carouselData.map((item) => (
           <StyledGrid container key={item.id}>
             <GridItemOne item md={6} xs={12}>
@@ -40,7 +47,13 @@ export default function Section1({ carouselData }: Props) {
             </GridItemOne>
 
             <GridItemTwo item md={6} xs={12}>
-              <NextImage priority width={600} height={450} src={item.imgUrl} alt="bonik" />
+              <NextImage
+                priority
+                width={600}
+                height={450}
+                src={item.imgUrl}
+                alt="vendorspot"
+              />
             </GridItemTwo>
           </StyledGrid>
         ))}

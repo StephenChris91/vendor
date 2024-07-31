@@ -27,6 +27,8 @@ const nextConfig = {
       "mukoxyechbobgdvpbirs.supabase.co",
       "https://vendorspot-marketplace.s3.eu-north-1.amazonaws.com",
       "vendorspot-marketplace.s3.eu-north-1.amazonaws.com",
+      "https://picsum.photos/500/300?random=1",
+      "picsum.photos",
       // "https://mukoxyechbobgdvpbirs.supabase.co",
     ],
   },

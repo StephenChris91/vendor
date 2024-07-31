@@ -34,8 +34,8 @@ export default function Section3({ categories }: Props) {
                 <NextImage
                   width={46}
                   height={46}
-                  alt="bonik"
-                  src={item.name}
+                  alt="vendorspot"
+                  src="https://picsum.photos/500/300?random=1"
                   objectFit="contain"
                 />
 

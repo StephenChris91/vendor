@@ -7,19 +7,7 @@ import TextField from "@component/text-field";
 import { Button } from "@component/buttons";
 import Select, { SelectOption } from "@component/Select";
 
-const FilterBox = styled(Box)`
-  background: ${(props) => props.theme.colors.body.paper};
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-`;
-
-const ResponsiveFlexBox = styled(FlexBox)`
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-`;
+import { ResponsiveFlexBox, FilterBox } from "./styles";
 
 const categoryOptions: SelectOption[] = [
   { label: "All Categories", value: "" },

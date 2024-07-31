@@ -5,7 +5,14 @@ import { Carousel } from "@component/carousel";
 import { MainCarouselItem } from "@models/grocery-3.model";
 import { theme } from "@utils/theme";
 // STYLED COMPONENTS
-import { GridItemOne, GridItemTwo, StyledBox, StyledButton, StyledGrid, TextBox } from "./styles";
+import {
+  GridItemOne,
+  GridItemTwo,
+  StyledBox,
+  StyledButton,
+  StyledGrid,
+  TextBox,
+} from "./styles";
 
 // ===================================================================
 type Props = { carouselData: MainCarouselItem[] };
@@ -22,13 +29,20 @@ export default function Section1({ carouselData }: Props) {
         visibleSlides={1}
         dotClass="carousel-dot"
         totalSlides={carouselData.length}
-        dotColor={theme.colors.primary.main}>
+        dotColor={theme.colors.primary.main}
+      >
         {carouselData.map((item, ind) => (
           <Box backgroundColor={theme.colors.paste[50]} key={ind}>
             <StyledGrid container>
               <GridItemOne item md={6} sm={6} xs={12}>
                 <div className="img">
-                  <NextImage priority width={500} height={500} src={item.imgUrl} alt="bonik" />
+                  <NextImage
+                    priority
+                    width={500}
+                    height={500}
+                    src={item.imgUrl}
+                    alt="vendorspot"
+                  />
                 </div>
               </GridItemOne>
 

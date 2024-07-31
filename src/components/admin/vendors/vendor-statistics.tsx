@@ -1,41 +1,25 @@
-// components/admin/vendor-statistics.tsx
 import React from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H4, H6 } from "@component/Typography";
 import Icon from "@component/icon/Icon";
-
-const StatBox = styled(Box)`
-  background: ${(props) => props.theme.colors.body.paper};
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-`;
-
-const StatItem = styled(FlexBox)`
-  align-items: center;
-  margin-bottom: 1rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-`;
+import { StatBox, StatItem } from "./styles";
 
 interface VendorStatisticsProps {
   totalVendors: number;
   newVendors: number;
   averageRating: number;
   pendingApprovals: number;
+  displayedVendors?: any[]; // Add this line
 }
 
 const VendorStatistics: React.FC<VendorStatisticsProps> = ({
-  totalVendors,
-  newVendors,
-  averageRating,
-  pendingApprovals,
+  totalVendors = 0,
+  newVendors = 0,
+  averageRating = 0,
+  pendingApprovals = 0,
+  displayedVendors = [], // Initialize displayedVendors as an empty array by default
 }) => {
   return (
     <StatBox>
@@ -65,7 +49,7 @@ const VendorStatistics: React.FC<VendorStatisticsProps> = ({
           </Icon>
           <Box>
             <H6 color="text.muted">Average Vendor Rating</H6>
-            <H4>{averageRating.toFixed(1)}</H4>
+            <H4>{averageRating.toFixed(2)}</H4>
           </Box>
         </StatItem>
         <StatItem>

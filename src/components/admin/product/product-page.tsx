@@ -2,9 +2,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import Box from "@component/Box";
-import FlexBox from "@component/FlexBox";
 import { H3 } from "@component/Typography";
 import ProductList from "./product-list-component";
 import ProductStatistics from "./product-stats";
@@ -13,15 +10,7 @@ import AddProductButton from "../add-product-button";
 import BulkActions from "../bulk-actions-button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const PageWrapper = styled(Box)`
-  padding: 2rem;
-`;
-
-const ResponsiveFlexBox = styled(FlexBox)`
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-`;
+import { PageWrapper, ResponsiveFlexBox } from "./styles";
 
 interface Product {
   id: string;

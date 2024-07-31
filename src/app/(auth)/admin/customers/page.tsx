@@ -1,4 +1,4 @@
-import CustomersPage from "@component/admin/customers-page";
+import CustomersPage from "@component/admin/customers/customers-page";
 
 const page = () => {
   return <CustomersPage />;

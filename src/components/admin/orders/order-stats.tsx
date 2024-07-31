@@ -6,23 +6,7 @@ import FlexBox from "@component/FlexBox";
 import { H4, H6 } from "@component/Typography";
 import Icon from "@component/icon/Icon";
 
-const StatBox = styled(Box)`
-  background: ${(props) => props.theme.colors.body.paper};
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-`;
-
-const StatItem = styled(FlexBox)`
-  align-items: center;
-  margin-bottom: 1rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-`;
+import { StatBox, StatItem } from "./styles";
 
 interface OrderStats {
   totalOrders: number;

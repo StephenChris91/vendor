@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H3, Paragraph } from "@component/Typography";

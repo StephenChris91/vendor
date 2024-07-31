@@ -1,28 +1,29 @@
+"use client";
+
+// ShopDetails.tsx
 import { Fragment } from "react";
-// API FUNCTIONS
-import api from "@utils/__api__/shops";
-// GLOBAL CUSTOM COMPONENTS
 import Grid from "@component/grid/Grid";
 import ProductFilterCard from "@component/products/ProductFilterCard";
-// PAGE SECTION COMPONENTS
 import ShopIntroCard from "@sections/shop/ShopIntroCard";
 import ProductDetails from "@sections/shop/ProductDetails";
-// CUSTOM DATA MODEL
-import { SlugParams } from "interfaces";
+import Shop from "@models/shop.model";
+import { useShopById } from "@utils/__api__/shops";
+import { useParams } from "next/navigation";
 
-export default async function ShopDetails({ params }: SlugParams) {
-  const shop = await api.getShopBySlug(params.slug);
+export default function ShopDetails() {
+  const { id } = useParams();
+  const { data: shop, isLoading, error } = useShopById(id as string);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error)
+    return <div>Error loading shop details. Please try again later.</div>;
+  if (!shop) return <div>Shop not found</div>;
 
   return (
     <Fragment>
-      <ShopIntroCard />
+      <ShopIntroCard shop={shop} />
 
       <Grid container spacing={6}>
-        {/* SHOW IN LARGE DEVICE */}
-        {/* <Hidden as={Grid} item md={3} xs={12} down={1024}>
-          <ProductFilterCard />
-        </Hidden> */}
-
         <Grid item md={3} xs={12}>
           <ProductFilterCard />
         </Grid>

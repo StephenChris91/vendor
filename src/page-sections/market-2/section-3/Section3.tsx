@@ -30,7 +30,7 @@ export default function Section3({ categories }: Props) {
                 width={300}
                 height={300}
                 alt="category"
-                src={item.name as string}
+                src="https://picsum.photos/500/300?random=1"
               />
 
               <CategoryTitle className="category-title">

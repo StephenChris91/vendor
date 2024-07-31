@@ -24,7 +24,7 @@ export default function Section2({ categories }: Props) {
               <NextImage
                 width={588}
                 height={593}
-                src={firstItem.name}
+                src="https://picsum.photos/500/300?random=1"
                 alt="bonik"
               />
               <H3
@@ -47,7 +47,7 @@ export default function Section2({ categories }: Props) {
                       <NextImage
                         width={282}
                         height={253}
-                        src={item.name}
+                        src="https://picsum.photos/500/300?random=1"
                         alt="bonik"
                       />
                       <H5 fontWeight="600" p="1rem" mt="1rem">

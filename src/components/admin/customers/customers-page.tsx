@@ -7,10 +7,10 @@ import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H3 } from "@component/Typography";
-import CustomerStatistics from "@component/admin/customer-stats";
-import CustomerSearchFilter from "@component/admin/customer-search";
-import CustomerList from "@component/admin/customer-list";
+import CustomerSearchFilter from "@component/admin/customers/customer-search";
+import CustomerList from "@component/admin/customers/customer-list";
 import BulkActions from "@component/admin/bulk-actions-button";
+import CustomerStatistics from "./customer-stats";
 
 const PageWrapper = styled(Box)`
   padding: 2rem;

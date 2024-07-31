@@ -1,4 +1,4 @@
-import VendorsPage from "@component/admin/vendor-page";
+import VendorsPage from "@component/admin/vendors/vendor-page";
 
 const page = () => {
   return <VendorsPage />;

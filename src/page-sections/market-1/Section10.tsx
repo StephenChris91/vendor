@@ -39,7 +39,7 @@ export default function Section10({ categories }: Props) {
                     width={52}
                     height={52}
                     alt="fashion"
-                    src={item.name}
+                    src="https://picsum.photos/500/300?random=1"
                   />
                 </Box>
 

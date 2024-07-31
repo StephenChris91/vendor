@@ -144,8 +144,8 @@ export default function ProductCard1({
         price,
         imgUrl,
         name: title,
-        qty: amount
-      }
+        qty: amount,
+      },
     });
   };
 
@@ -163,13 +163,19 @@ export default function ProductCard1({
               bg="primary.main"
               position="absolute"
               color="primary.text"
-              zIndex={1}>
+              zIndex={1}
+            >
               {off}% off
             </Chip>
           )}
 
           <FlexBox className="extra-icons">
-            <Icon color="secondary" variant="small" mb="0.5rem" onClick={toggleDialog}>
+            <Icon
+              color="secondary"
+              variant="small"
+              mb="0.5rem"
+              onClick={toggleDialog}
+            >
               eye-alt
             </Icon>
 
@@ -194,7 +200,8 @@ export default function ProductCard1({
                   textAlign="left"
                   fontWeight="600"
                   className="title"
-                  color="text.secondary">
+                  color="text.secondary"
+                >
                   {title}
                 </H3>
               </Link>
@@ -218,14 +225,16 @@ export default function ProductCard1({
               width="30px"
               alignItems="center"
               flexDirection="column-reverse"
-              justifyContent={!!cartItem?.qty ? "space-between" : "flex-start"}>
+              justifyContent={!!cartItem?.qty ? "space-between" : "flex-start"}
+            >
               <Button
                 size="none"
                 padding="3px"
                 color="primary"
                 variant="outlined"
                 borderColor="primary.light"
-                onClick={handleCartAmountChange((cartItem?.qty || 0) + 1)}>
+                onClick={handleCartAmountChange((cartItem?.qty || 0) + 1)}
+              >
                 <Icon variant="small">plus</Icon>
               </Button>
 
@@ -241,7 +250,8 @@ export default function ProductCard1({
                     color="primary"
                     variant="outlined"
                     borderColor="primary.light"
-                    onClick={handleCartAmountChange(cartItem.qty - 1)}>
+                    onClick={handleCartAmountChange(cartItem.qty - 1)}
+                  >
                     <Icon variant="small">minus</Icon>
                   </Button>
                 </Fragment>

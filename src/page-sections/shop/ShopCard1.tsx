@@ -13,6 +13,7 @@ import { ShopCard1Wrapper } from "./styles";
 
 // =====================================================
 type ShopCard1Props = {
+  id?: string;
   name: string;
   phone: string;
   rating: number;
@@ -24,13 +25,14 @@ type ShopCard1Props = {
 // =====================================================
 
 export default function ShopCard1({
+  id,
   name,
   phone,
   rating,
   imgUrl,
   address,
   shopUrl,
-  coverImgUrl
+  coverImgUrl,
 }: ShopCard1Props) {
   return (
     <ShopCard1Wrapper overflow="hidden" coverImgUrl={coverImgUrl}>
@@ -65,8 +67,14 @@ export default function ShopCard1({
       </div>
 
       <FlexBox pl="30px" pr="18px" justifyContent="space-between">
-        <Avatar src={imgUrl} size={64} mt="-32px" border="4px solid" borderColor="gray.100" />
-        <Link href={shopUrl}>
+        <Avatar
+          src={imgUrl}
+          size={64}
+          mt="-32px"
+          border="4px solid"
+          borderColor="gray.100"
+        />
+        <Link href={`/shops/${id}`}>
           <IconButton my="0.25rem">
             <Icon defaultcolor="auto">arrow-long-right</Icon>
           </IconButton>

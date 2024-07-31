@@ -7,9 +7,9 @@ import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H3 } from "@component/Typography";
 import { Button } from "@component/buttons";
-import VendorList from "@component/admin/vendor-list";
-import VendorSearchFilter from "@component/admin/vendor-search";
-import VendorStatistics from "@component/admin/vendor-statistics";
+import VendorList from "@component/admin/vendors/vendor-list";
+import VendorSearchFilter from "@component/admin/vendors/vendor-search";
+import VendorStatistics from "@component/admin/vendors/vendor-statistics";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 

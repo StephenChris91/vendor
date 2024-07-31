@@ -7,7 +7,13 @@ import LazyImage from "components/LazyImage";
 import { Carousel } from "components/carousel";
 import { HealthCarouselItem } from "@models/carousel.model";
 // STYLED COMPONENTS
-import { GridItemOne, GridItemTwo, StyledButton, StyledGrid, StyledRoot } from "./styles";
+import {
+  GridItemOne,
+  GridItemTwo,
+  StyledButton,
+  StyledGrid,
+  StyledRoot,
+} from "./styles";
 
 // ==========================================================================
 type Props = { id: string; carouselData: HealthCarouselItem[] };
@@ -26,7 +32,8 @@ export default function Section1({ id, carouselData }: Props) {
         showArrow={false}
         dotClass="carousel-dot"
         totalSlides={carouselData.length}
-        dotColor={theme.colors.primary.main}>
+        dotColor={theme.colors.primary.main}
+      >
         {carouselData.map(({ id, imgUrl, title }) => (
           <StyledGrid container key={id}>
             <GridItemOne item md={6} xs={12}>
@@ -37,7 +44,13 @@ export default function Section1({ id, carouselData }: Props) {
             </GridItemOne>
 
             <GridItemTwo item md={6} xs={12}>
-              <LazyImage priority width={570} height={360} src={imgUrl} alt="bonik" />
+              <LazyImage
+                priority
+                width={570}
+                height={360}
+                src={imgUrl}
+                alt="vendorspot"
+              />
             </GridItemTwo>
           </StyledGrid>
         ))}

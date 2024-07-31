@@ -6,27 +6,7 @@ import TextField from "@component/text-field";
 import { Button } from "@component/buttons";
 import Select, { SelectOption } from "@component/Select"; // Ensure SelectOption is imported
 
-const FilterBox = styled(Box)`
-  background: ${(props) => props.theme.colors.body.paper};
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-`;
-
-const ResponsiveFlexBox = styled(FlexBox)`
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-`;
-
-const StyledInput = styled.input`
-  padding: 0.5rem;
-  border: 1px solid ${(props) => props.theme.colors.gray[300]};
-  border-radius: 5px;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-`;
+import { FilterBox, ResponsiveFlexBox, StyledInput } from "./styles";
 
 interface OrderSearchFilterProps {
   onSearch: (query: string) => void;

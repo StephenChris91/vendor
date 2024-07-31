@@ -30,7 +30,7 @@ export default function Section4({ categoryList }: Props) {
           <Link href="#" key={item.id}>
             <ProductCard14
               title={item.name}
-              imgUrl={item.name}
+              imgUrl="https://picsum.photos/500/300?random=1"
               available={item.slug}
             />
           </Link>

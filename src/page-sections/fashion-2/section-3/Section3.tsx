@@ -26,7 +26,7 @@ export default function Section3({ categories }: Section3Props) {
                 width={300}
                 height={300}
                 alt="category"
-                src={item.name}
+                src="https://picsum.photos/500/300?random=1"
                 style={{ width: "100%", objectFit: "cover" }}
               />
 

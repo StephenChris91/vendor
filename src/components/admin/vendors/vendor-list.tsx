@@ -6,37 +6,14 @@ import { H6 } from "@component/Typography";
 import { Button } from "@component/buttons";
 import Pagination from "@component/pagination";
 
-const TableWrapper = styled(Box)`
-  background: ${(props) => props.theme.colors.body.paper};
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  overflow-x: auto;
-`;
-
-const StyledTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-`;
-
-const TableHead = styled.thead`
-  background-color: ${(props) => props.theme.colors.gray[100]};
-`;
-
-const TableRow = styled.tr`
-  &:not(:last-child) {
-    border-bottom: 1px solid ${(props) => props.theme.colors.gray[200]};
-  }
-`;
-
-const TableHeaderCell = styled.th`
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-`;
-
-const TableCell = styled.td`
-  padding: 1rem;
-`;
+import {
+  TableWrapper,
+  TableHead,
+  TableRow,
+  TableHeaderCell,
+  StyledTable,
+  TableCell,
+} from "./styles";
 
 interface Vendor {
   id: string;
@@ -57,7 +34,7 @@ interface VendorListProps {
 }
 
 const VendorList: React.FC<VendorListProps> = ({
-  vendors,
+  vendors = [], // Default to an empty array
   onViewProfile,
   onEditVendor,
   onToggleStatus,
@@ -65,16 +42,19 @@ const VendorList: React.FC<VendorListProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const vendorsPerPage = 10; // Set number of items per page
 
+  // Handle page change event for pagination
   const handlePageChange = (data: { selected: number }) => {
     setCurrentPage(data.selected + 1); // ReactPaginate is 0-indexed
     console.log("Page changed to:", data.selected + 1);
   };
 
   // Slice vendors to show only those on the current page
-  const displayedVendors = vendors.slice(
-    (currentPage - 1) * vendorsPerPage,
-    currentPage * vendorsPerPage
-  );
+  const displayedVendors = Array.isArray(vendors)
+    ? vendors.slice(
+        (currentPage - 1) * vendorsPerPage,
+        currentPage * vendorsPerPage
+      )
+    : []; // Ensure displayedVendors is an array
 
   return (
     <TableWrapper>
@@ -150,7 +130,8 @@ const VendorList: React.FC<VendorListProps> = ({
           onChange={handlePageChange}
           pageRangeDisplayed={5}
           marginPagesDisplayed={2}
-          // page={currentPage - 1} // ReactPaginate uses 0-based index
+          // Ensure `page` is correctly mapped to 0-based index
+          // page={currentPage - 1}
         />
       </Box>
     </TableWrapper>

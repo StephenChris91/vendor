@@ -1,34 +1,58 @@
-import { Fragment } from "react";
-// GLOBAL CUSTOM COMPONENTS
+"use client";
+
+import { Fragment, useEffect } from "react";
 import Grid from "@component/grid/Grid";
 import FlexBox from "@component/FlexBox";
 import Pagination from "@component/pagination";
 import ShopCard1 from "@sections/shop/ShopCard1";
 import { H2, SemiSpan } from "@component/Typography";
-// API FUNCTIONS
-import api from "@utils/__api__/shops";
+import { useShopList } from "@utils/__api__/shops";
 
-export default async function ShopList() {
-  const shopList = await api.getShopList();
+export default function ShopList() {
+  const { data: shopListData, isLoading, error } = useShopList();
+
+  useEffect(() => {
+    if (shopListData) {
+      console.log("Shop list data:", shopListData);
+    }
+  }, [shopListData]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) {
+    console.error("Error in ShopList:", error);
+    return <div>Error loading shops. Please try again later.</div>;
+  }
+  if (
+    !shopListData ||
+    !Array.isArray(shopListData) ||
+    shopListData.length === 0
+  ) {
+    console.log("Shop list is empty or not in expected format:", shopListData);
+    return <div>No shops found.</div>;
+  }
 
   return (
     <Fragment>
       <H2 mb="24px">All Shops</H2>
 
       <Grid container spacing={6}>
-        {shopList.map((item) => (
-          <Grid item lg={4} sm={6} xs={12} key={item.id}>
-            <ShopCard1
-              name={item.shopName}
-              phone={item.shopSettings.phoneNumber}
-              address={item.address.city}
-              rating={5}
-              imgUrl={item.logo}
-              coverImgUrl={item.banner}
-              shopUrl={`/shops/${item.slug}`}
-            />
-          </Grid>
-        ))}
+        {shopListData.map((item) => {
+          console.log("Shop item:", item);
+          return (
+            <Grid item lg={4} sm={6} xs={12} key={item.id}>
+              <ShopCard1
+                id={item.id}
+                name={item.shopName || "Unnamed Shop"}
+                phone={item.shopSettings?.phoneNumber || "N/A"}
+                address={item.address?.city || "N/A"}
+                rating={5}
+                imgUrl={item.logo || "/placeholder-image.jpg"}
+                coverImgUrl={item.banner || "/placeholder-banner.jpg"}
+                shopUrl={`/shops/${item.id}`}
+              />
+            </Grid>
+          );
+        })}
       </Grid>
 
       <FlexBox
@@ -37,8 +61,8 @@ export default async function ShopList() {
         alignItems="center"
         mt="32px"
       >
-        <SemiSpan>Showing 1-9 of {shopList.length} Shops</SemiSpan>
-        <Pagination pageCount={Math.ceil(shopList.length / 9)} />
+        <SemiSpan>Showing 1-9 of {shopListData.length} Shops</SemiSpan>
+        <Pagination pageCount={Math.ceil(shopListData.length / 9)} />
       </FlexBox>
     </Fragment>
   );

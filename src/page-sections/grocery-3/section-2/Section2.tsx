@@ -34,7 +34,12 @@ export default function Section2({ offerProducts }: Props) {
               </Box>
 
               <Box width="40%">
-                <LazyImage width={100} height={100} src={item.imgUrl} alt="bonik" />
+                <LazyImage
+                  width={100}
+                  height={100}
+                  src={item.imgUrl}
+                  alt="vendorspot"
+                />
               </Box>
             </StyledCard>
           </Link>

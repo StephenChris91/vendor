@@ -1,17 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { db } from '../../../../../prisma/prisma';
 
-export async function GET(request: NextRequest) {
-    const searchParams = request.nextUrl.searchParams;
-    const slug = searchParams.get('slug');
-
-    if (!slug) {
-        return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
-    }
+export async function GET(
+    request: Request,
+    { params }: { params: { id: string } }
+) {
+    const shopId = params.id;
 
     try {
         const shop = await db.shop.findUnique({
-            where: { slug: slug }
+            where: {
+                id: shopId,
+            },
+            include: {
+                shopSettings: true,
+                address: true,
+                paymentInfo: true,
+            },
         });
 
         if (!shop) {
