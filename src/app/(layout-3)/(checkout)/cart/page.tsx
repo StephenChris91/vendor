@@ -1,31 +1,121 @@
 "use client";
 import Link from "next/link";
-import { Fragment } from "react";
-// GLOBAL CUSTOM COMPONENTS
+import { Fragment, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Box from "@component/Box";
-import Select from "@component/Select";
 import Grid from "@component/grid/Grid";
 import { Card1 } from "@component/Card1";
 import Divider from "@component/Divider";
 import FlexBox from "@component/FlexBox";
-import TextArea from "@component/textarea";
 import { Button } from "@component/buttons";
-import TextField from "@component/text-field";
 import Typography from "@component/Typography";
 import { ProductCard7 } from "@component/product-cards";
-// CUSTOM HOOK
+import Select from "@component/Select";
+import TextField from "@component/text-field";
 import { useAppContext } from "@context/app-context";
-// CUSTOM DATA
-import countryList from "@data/countryList";
-// UTILS
 import { currency } from "@utils/utils";
 
+import stateList from "@data/stateList";
+import { useCurrentUser } from "@lib/use-session-client";
+import { useShippingRates } from "@hook/useShippingRates";
+import { getVendorsFromCart } from "@lib/cartUtils";
+
+const ShippingRates = ({ rates, selectedRate, onSelectRate }) => (
+  <Box mt="1rem">
+    <Typography fontWeight="600" mb="0.5rem">
+      Shipping Rates
+    </Typography>
+    {rates.map((rate) => (
+      <Box key={rate.carrier_name + rate.amount} mb="0.5rem">
+        <input
+          type="radio"
+          id={rate.carrier_name}
+          name="shippingRate"
+          value={rate.amount}
+          checked={
+            selectedRate && selectedRate.carrier_name === rate.carrier_name
+          }
+          onChange={() => onSelectRate(rate)}
+        />
+        <label htmlFor={rate.carrier_name}>
+          {rate.carrier_name} - {currency(rate.amount)}
+        </label>
+      </Box>
+    ))}
+  </Box>
+);
+
 export default function Cart() {
+  const router = useRouter();
   const { state } = useAppContext();
+  const user = useCurrentUser();
+  const [selectedRate, setSelectedRate] = useState(null);
+  const [vendors, setVendors] = useState([]);
+  const { shippingRates, isLoading, error, getShippingRates } =
+    useShippingRates();
+  const [address, setAddress] = useState({
+    country: { label: "Nigeria", value: "NG" },
+    state: null,
+    city: "",
+    street: "",
+  });
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/login?redirect=/cart");
+    }
+  }, [user, router]);
+
+  useEffect(() => {
+    async function fetchVendors() {
+      if (user && state.cart.length > 0) {
+        try {
+          const fetchedVendors = await getVendorsFromCart(state.cart);
+          setVendors(fetchedVendors);
+        } catch (error) {
+          console.error("Error fetching vendors:", error);
+          // Handle error (e.g., show error message to user)
+        }
+      }
+    }
+
+    fetchVendors();
+  }, [user, state.cart]);
+
+  const handleAddressChange = (field, value) => {
+    setAddress((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSelectRate = (rate) => {
+    setSelectedRate(rate);
+  };
+
+  const handleGetShippingRates = async () => {
+    if (address.state && address.city && address.street) {
+      try {
+        await getShippingRates(user, state.cart, vendors, address);
+        console.log("Shipping rates fetched successfully");
+      } catch (error) {
+        console.error("Error getting shipping rates:", error);
+        // Handle error (e.g., show error message to user)
+      }
+    } else {
+      alert("Please fill in all address fields");
+    }
+  };
 
   const getTotalPrice = () => {
-    return state.cart.reduce((accumulator, item) => accumulator + item.price * item.qty, 0) || 0;
+    const itemsTotal = state.cart.reduce(
+      (accumulator, item) => accumulator + item.price * item.qty,
+      0
+    );
+    const shippingCost = selectedRate ? selectedRate.amount : 0;
+    return itemsTotal + shippingCost;
   };
+
+  if (!user) {
+    return null; // The useEffect hook will redirect to login
+  }
 
   return (
     <Fragment>
@@ -47,7 +137,11 @@ export default function Cart() {
 
         <Grid item lg={4} md={4} xs={12}>
           <Card1>
-            <FlexBox justifyContent="space-between" alignItems="center" mb="1rem">
+            <FlexBox
+              justifyContent="space-between"
+              alignItems="center"
+              mb="1rem"
+            >
               <Typography color="gray.600">Total:</Typography>
 
               <Typography fontSize="18px" fontWeight="600" lineHeight="1">
@@ -57,59 +151,83 @@ export default function Cart() {
 
             <Divider mb="1rem" />
 
-            <FlexBox alignItems="center" mb="1rem">
-              <Typography fontWeight="600" mr="10px">
-                Additional Comments
-              </Typography>
-
-              <Box p="3px 10px" bg="primary.light" borderRadius="3px">
-                <Typography fontSize="12px" color="primary.main">
-                  Note
-                </Typography>
-              </Box>
-            </FlexBox>
-
-            <TextArea rows={6} fullwidth mb="1rem" />
-
-            <Divider mb="1rem" />
-
-            <TextField placeholder="Voucher" fullwidth />
-
-            <Button variant="outlined" color="primary" mt="1rem" mb="30px" fullwidth>
-              Apply Voucher
-            </Button>
-
-            <Divider mb="1.5rem" />
-
             <Typography fontWeight="600" mb="1rem">
-              Shipping Estimates
+              Shipping Information
             </Typography>
 
             <Select
               mb="1rem"
               label="Country"
-              options={countryList}
-              placeholder="Select Country"
-              onChange={(e) => console.log(e)}
+              options={[{ label: "Nigeria", value: "NG" }]}
+              value={address.country}
+              onChange={(option) => handleAddressChange("country", option)}
             />
 
             <Select
+              mb="1rem"
               label="State"
-              options={stateList}
+              options={stateList.map((state) => ({
+                label: state.label,
+                value: state.value,
+              }))}
               placeholder="Select State"
-              onChange={(e) => console.log(e)}
+              value={address.state}
+              onChange={(option) => handleAddressChange("state", option)}
             />
 
-            <Box mt="1rem">
-              <TextField label="Zip Code" placeholder="3100" fullwidth />
-            </Box>
+            <TextField
+              mb="1rem"
+              label="City"
+              placeholder="Enter City"
+              fullwidth
+              value={address.city}
+              onChange={(e) => handleAddressChange("city", e.target.value)}
+            />
 
-            <Button variant="outlined" color="primary" my="1rem" fullwidth>
-              Calculate Shipping
+            <TextField
+              mb="1rem"
+              label="Street Address"
+              placeholder="Enter Street Address"
+              fullwidth
+              value={address.street}
+              onChange={(e) => handleAddressChange("street", e.target.value)}
+            />
+
+            <Button
+              variant="outlined"
+              color="primary"
+              fullwidth
+              onClick={handleGetShippingRates}
+              disabled={isLoading}
+            >
+              {isLoading ? "Calculating..." : "Calculate Shipping"}
             </Button>
 
+            {error && (
+              <Typography mt="1rem" color="error.main">
+                {error}
+              </Typography>
+            )}
+
+            {shippingRates.length > 0 ? (
+              <ShippingRates
+                rates={shippingRates}
+                selectedRate={selectedRate}
+                onSelectRate={handleSelectRate}
+              />
+            ) : (
+              <Typography mt="1rem">No shipping rates available</Typography>
+            )}
+
+            <Divider my="1rem" />
+
             <Link href="/checkout">
-              <Button variant="contained" color="primary" fullwidth>
+              <Button
+                variant="contained"
+                color="primary"
+                fullwidth
+                disabled={!selectedRate}
+              >
                 Checkout Now
               </Button>
             </Link>
@@ -119,8 +237,3 @@ export default function Cart() {
     </Fragment>
   );
 }
-
-const stateList = [
-  { value: "New York", label: "New York" },
-  { value: "Chicago", label: "Chicago" }
-];

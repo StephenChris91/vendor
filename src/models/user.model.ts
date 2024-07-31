@@ -24,6 +24,14 @@ interface User {
   createdAt: Date;
   updatedAt: Date;
   verificationStatus: 'Pending' | 'Processing' | 'Complete';
+  phone?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    zip?: string;
+  }
 }
 
 export default User;
