@@ -264,7 +264,13 @@ export default function ProductCard1({
       <ProductQuickView
         open={open}
         onClose={toggleDialog}
-        product={{ images, title, price, id: id as number | string, slug }}
+        product={{
+          id: id ? id.toString() : "",
+          slug,
+          name: title,
+          price,
+          image: imgUrl,
+        }}
       />
     </>
   );

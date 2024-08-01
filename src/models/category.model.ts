@@ -4,7 +4,7 @@ interface Category {
   id: string;
   name: string;
   slug: string;
-  products: Product[];
+  products?: Product[];
 }
 
 export default Category;

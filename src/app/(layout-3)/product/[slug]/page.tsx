@@ -1,20 +1,62 @@
-import { Fragment } from "react";
+"use client";
 
-import api from "@utils/__api__/products";
+import { Fragment } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 import ProductIntro from "@component/products/ProductIntro";
 import ProductView from "@component/products/ProductView";
+import {
+  getProduct,
+  getRelatedProducts,
+  getFrequentlyBought,
+} from "actions/products/clientProductActions";
+import { getAvailableShop } from "actions/products/getAvailableShops";
+import { product, shop } from "@prisma/client";
 
-// ==============================================================
-interface Props {
-  params: { slug: string };
-}
-// ==============================================================
+export default function ProductDetails() {
+  const { slug } = useParams();
 
-export default async function ProductDetails({ params }: Props) {
-  const shops = await api.getAvailableShop();
-  const relatedProducts = await api.getRelatedProducts();
-  const frequentlyBought = await api.getFrequentlyBought();
-  const product = await api.getProduct(params.slug as string);
+  const { data: product, isLoading: productLoading } = useQuery<product, Error>(
+    {
+      queryKey: ["product", slug],
+      queryFn: () => getProduct(slug as string),
+    }
+  );
+
+  const { data: shops, isLoading: shopsLoading } = useQuery<
+    Partial<shop>[],
+    Error
+  >({
+    queryKey: ["availableShops"],
+    queryFn: getAvailableShop,
+  });
+
+  const { data: relatedProducts, isLoading: relatedLoading } = useQuery<
+    product[],
+    Error
+  >({
+    queryKey: ["relatedProducts", slug],
+    queryFn: () => getRelatedProducts(slug as string),
+  });
+
+  const { data: frequentlyBought, isLoading: frequentlyBoughtLoading } =
+    useQuery<product[], Error>({
+      queryKey: ["frequentlyBought", slug],
+      queryFn: () => getFrequentlyBought(slug as string),
+    });
+
+  if (
+    productLoading ||
+    shopsLoading ||
+    relatedLoading ||
+    frequentlyBoughtLoading
+  ) {
+    return <div>Loading...</div>;
+  }
+
+  if (!product) {
+    return <div>Product not found</div>;
+  }
 
   return (
     <Fragment>
@@ -26,9 +68,10 @@ export default async function ProductDetails({ params }: Props) {
       />
 
       <ProductView
-        shops={shops}
-        relatedProducts={relatedProducts}
-        frequentlyBought={frequentlyBought}
+        product={product}
+        shops={shops || []}
+        relatedProducts={relatedProducts || []}
+        frequentlyBought={frequentlyBought || []}
       />
     </Fragment>
   );

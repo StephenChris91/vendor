@@ -1,25 +1,39 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import Grid from "@component/grid/Grid";
 import FlexBox from "@component/FlexBox";
 import Pagination from "@component/pagination";
 import { SemiSpan } from "@component/Typography";
 import { ProductCard1 } from "@component/product-cards";
 import { renderProductCount } from "@utils/utils";
-import Product from "@models/product.model";
-import { Meta } from "interfaces";
 
-// ==============================================================
-type Props = { products: Product[]; meta: Meta };
-// ==============================================================
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  sale_price: number;
+  image: string;
+  gallery: string[];
+  ratings: number;
+};
 
-export default function SaleProducts2({ products, meta }: Props) {
-  const { push } = useRouter();
+type Meta = {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPage: number;
+};
 
+type Props = {
+  products: Product[];
+  meta: Meta;
+  onPageChange: (page: number) => void;
+};
+
+export default function SaleProducts2({ products, meta, onPageChange }: Props) {
   const handlePageChange = ({ selected }: { selected: number }) => {
-    push(`?page=${selected + 1}`);
+    onPageChange(selected + 1);
   };
 
   return (
@@ -35,7 +49,7 @@ export default function SaleProducts2({ products, meta }: Props) {
               off={item.sale_price}
               images={item.gallery}
               imgUrl={item.image}
-              rating={4}
+              rating={item.ratings}
             />
           </Grid>
         ))}
@@ -48,7 +62,7 @@ export default function SaleProducts2({ products, meta }: Props) {
         my="4rem"
       >
         <SemiSpan>
-          {renderProductCount(meta.page - 1, meta.pageSize, meta.total)}
+          {renderProductCount(meta.page, meta.pageSize, meta.total)}
         </SemiSpan>
         <Pagination onChange={handlePageChange} pageCount={meta.totalPage} />
       </FlexBox>

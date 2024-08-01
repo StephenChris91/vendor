@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Box from "../Box";
 import Card from "../Card";
 import Badge from "../badge";
@@ -14,9 +15,8 @@ import Categories from "../categories/Categories";
 
 import StyledNavbar from "./styles";
 import navbarNavigations from "@data/navbarNavigations";
-import { useAuth } from "@context/authContext";
+import { useCurrentUser } from "@lib/use-session-client";
 
-// ==============================================================
 interface Nav {
   url: string;
   child?: Nav[];
@@ -29,23 +29,26 @@ interface Nav {
 }
 
 type NavbarProps = { navListOpen?: boolean };
-// ==============================================================
 
 export default function Navbar({ navListOpen }: NavbarProps) {
-  const { user } = useAuth();
+  const user = useCurrentUser();
+  const router = useRouter();
+
+  const handleNavClick = (nav: Nav) => {
+    if (nav.requiresAuth && !user) {
+      // Redirect to login if auth is required but user is not logged in
+      router.push("/login");
+    } else if (nav.url) {
+      router.push(nav.url);
+    }
+  };
 
   const renderNestedNav = (list: Nav[], isRoot = false) => {
     return list?.map((nav: Nav) => {
       // Conditionally render nav items based on user's login state and role
-      if (nav.requiresAuth && !user) {
-        return null;
-      }
-      if (nav.requiresNoAuth && user) {
-        return null;
-      }
-      if (nav.requiresRole && user?.role !== nav.requiresRole) {
-        return null;
-      }
+      if (nav.requiresAuth && !user) return null;
+      if (nav.requiresNoAuth && user) return null;
+      if (nav.requiresRole && user?.role !== nav.requiresRole) return null;
 
       if (isRoot) {
         if (nav.url && nav.extLink) {
@@ -77,11 +80,9 @@ export default function Navbar({ navListOpen }: NavbarProps) {
               alignItems="center"
               key={nav.title}
             >
-              {nav.badge ? (
-                <Badge title={nav.badge}>{nav.title}</Badge>
-              ) : (
-                <Span className="nav-link">{nav.title}</Span>
-              )}
+              <Span className="nav-link" onClick={() => handleNavClick(nav)}>
+                {nav.title}
+              </Span>
               <div className="root-child">
                 <Card
                   borderRadius={8}
@@ -90,16 +91,32 @@ export default function Navbar({ navListOpen }: NavbarProps) {
                   boxShadow="large"
                   minWidth="230px"
                 >
-                  {renderNestedNav(nav.child)}
+                  {/* {renderNestedNav(nav.child)} */}
                 </Card>
               </div>
             </FlexBox>
           );
         }
 
+        return (
+          <Span
+            className="nav-link"
+            key={nav.title}
+            onClick={() => handleNavClick(nav)}
+          >
+            {nav.badge ? (
+              <Badge style={{ marginRight: "0px" }} title={nav.badge}>
+                {nav.title}
+              </Badge>
+            ) : (
+              nav.title
+            )}
+          </Span>
+        );
+      } else {
         if (nav.url) {
           return (
-            <NavLink className="nav-link" href={nav.url} key={nav.title}>
+            <MenuItem key={nav.title} onClick={() => handleNavClick(nav)}>
               {nav.badge ? (
                 <Badge style={{ marginRight: "0px" }} title={nav.badge}>
                   {nav.title}
@@ -107,23 +124,7 @@ export default function Navbar({ navListOpen }: NavbarProps) {
               ) : (
                 <Span className="nav-link">{nav.title}</Span>
               )}
-            </NavLink>
-          );
-        }
-      } else {
-        if (nav.url) {
-          return (
-            <NavLink href={nav.url} key={nav.title}>
-              <MenuItem>
-                {nav.badge ? (
-                  <Badge style={{ marginRight: "0px" }} title={nav.badge}>
-                    {nav.title}
-                  </Badge>
-                ) : (
-                  <Span className="nav-link">{nav.title}</Span>
-                )}
-              </MenuItem>
-            </NavLink>
+            </MenuItem>
           );
         }
 
@@ -139,13 +140,7 @@ export default function Navbar({ navListOpen }: NavbarProps) {
                 color="gray.700"
                 style={{ display: "flex", justifyContent: "space-between" }}
               >
-                {nav.badge ? (
-                  <Badge style={{ marginRight: "0px" }} title={nav.badge}>
-                    {nav.title}
-                  </Badge>
-                ) : (
-                  <Span className="nav-link">{nav.title}</Span>
-                )}
+                <Span className="nav-link">{nav.title}</Span>
                 <Icon size="8px" defaultcolor="currentColor">
                   right-arrow
                 </Icon>

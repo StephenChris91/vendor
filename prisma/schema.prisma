@@ -99,6 +99,19 @@ model user {
   verificationStatus VerificationStatus @default(Pending)
   addresses          CustomerAddress[]
   paymentMethods     PaymentMethod[]
+  wishlistItems      Wishlist[]
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
 }
 
 model account {
@@ -184,7 +197,7 @@ model ShopSettings {
 model product {
   id            String        @id @default(uuid())
   name          String
-  slug          String
+  slug          String        @unique
   description   String
   price         Int
   sale_price    Int
@@ -208,8 +221,10 @@ model product {
   gallery       String[]
   shop_name     String?
   stock         Int?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  wishlistedBy  Wishlist[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model category {

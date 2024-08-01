@@ -177,3 +177,37 @@ export const deleteProductById = async (id: string): Promise<ProductWithDetails 
     return null;
   }
 };
+
+
+export async function getProduct(slug: string) {
+  try {
+    const product = await db.product.findFirst({
+      where: { slug },
+      include: {
+        categories: true,
+        shop: {
+          select: {
+            id: true,
+            shopName: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    return {
+      ...product,
+      sale_price: product.sale_price ?? 0,
+      image: product.image ?? "",
+      gallery: product.gallery ?? [],
+      ratings: product.ratings ?? 0,
+    };
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    throw new Error('Failed to fetch product');
+  }
+}
