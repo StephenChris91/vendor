@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Card from "@component/Card";
 import Icon from "@component/icon/Icon";
 import FlexBox from "@component/FlexBox";
@@ -9,55 +9,88 @@ import TableRow from "@component/TableRow";
 import Pagination from "@component/pagination";
 import { IconButton } from "@component/buttons";
 import Typography, { H5 } from "@component/Typography";
+import { deletePaymentMethod } from "actions/payments/deletePaymentMethod";
 
-// ==============================================================
-interface Props {
-  methodList: {
-    exp: string;
-    orderNo: string;
-    card_no: string;
-    payment_method: string;
-  }[];
+interface PaymentMethod {
+  id: string;
+  cardNumber: string;
+  cardHolderName: string;
+  expirationDate: string;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
-// ==============================================================
+
+interface Props {
+  methodList: PaymentMethod[];
+}
 
 export default function PaymentMethodList({ methodList }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: deletePaymentMethod,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["paymentMethods"] });
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
+
+  const getCardType = (cardNumber: string) => {
+    // Implement logic to determine card type based on card number
+    // This is a simplified example
+    if (cardNumber.startsWith("34") || cardNumber.startsWith("37"))
+      return "Amex";
+    if (cardNumber.startsWith("4")) return "Visa";
+    if (cardNumber.startsWith("5")) return "Mastercard";
+    return "Credit Card";
+  };
 
   return (
     <>
-      {methodList.map((item, ind) => (
-        <TableRow key={ind} my="1rem" padding="6px 18px">
+      {methodList.map((item) => (
+        <TableRow key={item.id} my="1rem" padding="6px 18px">
           <FlexBox alignItems="center" m="6px">
             <Card width="42px" height="28px" mr="10px" elevation={4}>
               <img
                 width="100%"
-                alt={item.payment_method}
-                src={`/assets/images/payment-methods/${item.payment_method}.svg`}
+                alt={getCardType(item.cardNumber)}
+                src={`/assets/images/payment-methods/${getCardType(
+                  item.cardNumber
+                ).toLowerCase()}.svg`}
               />
             </Card>
 
             <H5 className="pre" m="6px">
-              Ralf Edward
+              {item.cardHolderName}
             </H5>
           </FlexBox>
 
           <Typography className="pre" m="6px">
-            {item.card_no}
+            **** **** **** {item.cardNumber.slice(-4)}
           </Typography>
 
           <Typography className="pre" m="6px">
-            {item.exp}
+            {item.expirationDate}
           </Typography>
 
           <Typography className="pre" textAlign="center" color="text.muted">
-            <IconButton onClick={() => router.push("/payment-methods/xkssThds6h37sd")}>
+            <IconButton
+              onClick={() => router.push(`/payment-methods/${item.id}`)}
+            >
               <Icon variant="small" defaultcolor="currentColor">
                 edit
               </Icon>
             </IconButton>
 
-            <IconButton onClick={(e) => e.stopPropagation()}>
+            <IconButton
+              onClick={() => handleDelete(item.id)}
+              disabled={deleteMutation.isPending}
+            >
               <Icon variant="small" defaultcolor="currentColor">
                 delete
               </Icon>

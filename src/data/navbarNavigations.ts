@@ -142,6 +142,13 @@ const navbarNavigations = [
     requiresNoAuth: false,
     requiresRole: 'Vendor'
   },
+  {
+    title: "Profile", url: "/profile", badge: "",
+    // child: [],
+    requiresAuth: true,
+    requiresNoAuth: false,
+    requiresRole: 'Customer'
+  },
   // { title: "Back to Demos", url: "/" }
   // {
   //   title: "Documentation",

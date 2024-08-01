@@ -1,26 +1,32 @@
 "use client";
 
 import Link from "next/link";
-
 import Icon from "@component/icon/Icon";
 import TableRow from "@component/TableRow";
 import Typography from "@component/Typography";
 import { IconButton } from "@component/buttons";
-import Address from "@models/address.model";
+import { CustomerAddress } from "@prisma/client";
 
-export default function AddressItem({ item }: { item: Address }) {
+interface AddressItemProps {
+  item: CustomerAddress;
+  onDelete: () => void;
+}
+
+export default function AddressItem({ item, onDelete }: AddressItemProps) {
   return (
-    <TableRow my="1rem" padding="6px 18px" key={item.id}>
+    <TableRow my="1rem" padding="6px 18px">
       <Typography className="pre" m="6px" textAlign="left">
         {item.title}
       </Typography>
 
       <Typography flex="1 1 260px !important" m="6px" textAlign="left">
-        {`${item.street}, ${item.city}, ${item.country}`}
+        {`${item.street}, ${item.city}, ${item.state || ""} ${
+          item.zipCode || ""
+        }, ${item.country}`}
       </Typography>
 
       <Typography className="pre" m="6px" textAlign="left">
-        {item.phone}
+        {item.phone || "N/A"}
       </Typography>
 
       <Typography className="pre" textAlign="center" color="text.muted">
@@ -32,7 +38,7 @@ export default function AddressItem({ item }: { item: Address }) {
           </IconButton>
         </Link>
 
-        <IconButton onClick={(e) => e.stopPropagation()}>
+        <IconButton onClick={onDelete}>
           <Icon variant="small" defaultcolor="currentColor">
             delete
           </Icon>

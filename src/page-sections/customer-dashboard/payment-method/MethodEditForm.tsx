@@ -2,73 +2,110 @@
 
 import * as yup from "yup";
 import { Formik } from "formik";
-
+import { useRouter } from "next/navigation";
 import Box from "@component/Box";
 import Grid from "@component/grid/Grid";
 import { Button } from "@component/buttons";
 import TextField from "@component/text-field";
+import { editPaymentMethod } from "actions/payments/editPaymentMethod";
+import { createPaymentMethod } from "actions/payments/createPaymentMethod";
+import toast from "react-hot-toast";
 
-export default function MethodEditForm() {
+type MethodEditFormProps = {
+  paymentMethod?: {
+    id: string;
+    cardNumber: string;
+    cardHolderName: string;
+    expirationDate: string;
+    cvc: string;
+  };
+};
+
+export default function MethodEditForm({ paymentMethod }: MethodEditFormProps) {
+  const router = useRouter();
+
   const INITIAL_VALUES = {
-    exp: "",
-    cvc: "",
-    name: "",
-    card_no: ""
+    cardNumber: paymentMethod?.cardNumber || "",
+    cardHolderName: paymentMethod?.cardHolderName || "",
+    expirationDate: paymentMethod?.expirationDate || "",
+    cvc: paymentMethod?.cvc || "",
   };
 
   const VALIDATION_SCHEMA = yup.object().shape({
-    name: yup.string().required("required"),
-    card_no: yup.string().required("required"),
-    exp: yup.string().required("required"),
-    cvc: yup.string().required("required")
+    cardNumber: yup.string().required("required"),
+    cardHolderName: yup.string().required("required"),
+    expirationDate: yup.string().required("required"),
+    cvc: yup.string().required("required"),
   });
 
-  const handleFormSubmit = async (values: any) => {
-    console.log(values);
+  const handleFormSubmit = async (values: typeof INITIAL_VALUES) => {
+    let result;
+    if (paymentMethod) {
+      result = await editPaymentMethod(paymentMethod.id, values);
+    } else {
+      result = await createPaymentMethod(values);
+    }
+
+    if (result.success) {
+      router.push("/payment-methods");
+      toast.success("Payment Method saved successfully");
+      router.refresh();
+    } else {
+      console.error(result.error);
+      // Show error message to user
+    }
   };
 
   return (
     <Formik
       onSubmit={handleFormSubmit}
       initialValues={INITIAL_VALUES}
-      validationSchema={VALIDATION_SCHEMA}>
-      {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
+      validationSchema={VALIDATION_SCHEMA}
+    >
+      {({
+        values,
+        errors,
+        touched,
+        handleChange,
+        handleBlur,
+        handleSubmit,
+      }) => (
         <form onSubmit={handleSubmit}>
           <Box mb="30px">
             <Grid container horizontal_spacing={6} vertical_spacing={4}>
               <Grid item md={6} xs={12}>
                 <TextField
                   fullwidth
-                  name="card_no"
+                  name="cardNumber"
                   label="Card Number"
                   onBlur={handleBlur}
-                  value={values.card_no}
+                  value={values.cardNumber}
                   onChange={handleChange}
-                  errorText={touched.card_no && errors.card_no}
+                  errorText={touched.cardNumber && errors.cardNumber}
                 />
               </Grid>
 
               <Grid item md={6} xs={12}>
                 <TextField
                   fullwidth
-                  name="name"
+                  name="cardHolderName"
                   onBlur={handleBlur}
-                  value={values.name}
+                  value={values.cardHolderName}
                   label="Name on Card"
                   onChange={handleChange}
-                  errorText={touched.name && errors.name}
+                  errorText={touched.cardHolderName && errors.cardHolderName}
                 />
               </Grid>
 
               <Grid item md={6} xs={12}>
                 <TextField
                   fullwidth
-                  name="exp"
+                  name="expirationDate"
                   label="Exp. Date"
-                  value={values.exp}
+                  value={values.expirationDate}
                   onBlur={handleBlur}
                   onChange={handleChange}
-                  errorText={touched.exp && errors.exp}
+                  errorText={touched.expirationDate && errors.expirationDate}
                 />
               </Grid>
 
@@ -87,7 +124,7 @@ export default function MethodEditForm() {
           </Box>
 
           <Button type="submit" variant="contained" color="primary">
-            Save Changes
+            {paymentMethod ? "Save Changes" : "Add Payment Method"}
           </Button>
         </form>
       )}

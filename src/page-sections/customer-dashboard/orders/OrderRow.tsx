@@ -11,11 +11,9 @@ import TableRow from "@component/TableRow";
 import { IconButton } from "@component/buttons";
 import Typography, { H5, Small } from "@component/Typography";
 import { currency } from "@utils/utils";
-import Order from "@models/order.model";
+import { Order } from "@models/order.model";
 
-// =================================================
 type OrderRowProps = { order: Order };
-// =================================================
 
 export default function OrderRow({ order }: OrderRowProps) {
   const getColor = (status: string) => {
@@ -24,10 +22,8 @@ export default function OrderRow({ order }: OrderRowProps) {
         return "secondary";
       case "Processing":
         return "secondary";
-      case "Delivered":
+      case "Complete":
         return "success";
-      case "Cancelled":
-        return "error";
       default:
         return "";
     }
@@ -42,7 +38,9 @@ export default function OrderRow({ order }: OrderRowProps) {
 
         <Box m="6px">
           <Chip p="0.25rem 1rem" bg={`${getColor(order.status)}.light`}>
-            <Small color={`${getColor(order.status)}.main`}>{order.status}</Small>
+            <Small color={`${getColor(order.status)}.main`}>
+              {order.status}
+            </Small>
           </Chip>
         </Box>
 

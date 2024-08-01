@@ -1,8 +1,7 @@
+"use client";
+
 import { Fragment } from "react";
-import { format } from "date-fns";
-// API FUNCTIONS
-import api from "@utils/__api__/users";
-// GLOBAL CUSTOM COMPONENTS
+import { useQuery } from "@tanstack/react-query";
 import Box from "@component/Box";
 import Card from "@component/Card";
 import Avatar from "@component/avatar";
@@ -11,17 +10,52 @@ import FlexBox from "@component/FlexBox";
 import TableRow from "@component/TableRow";
 import Typography, { H3, H5, Small } from "@component/Typography";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
-// PAGE SECTION COMPONENTS
 import { EditProfileButton } from "@sections/customer-dashboard/profile";
+import { useCurrentUser } from "@lib/use-session-client";
+import { getCustomerProfile } from "actions/customer";
 
-export default async function Profile() {
-  const user = await api.getUser();
+export default function Profile() {
+  const user = useCurrentUser();
+
+  const {
+    data: customerProfile,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["customerProfile", user?.id],
+    queryFn: () => getCustomerProfile(user?.id),
+    enabled: !!user?.id,
+  });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading profile: {(error as Error).message}</div>;
+  }
+
+  if (!customerProfile) {
+    return <div>No profile data available</div>;
+  }
 
   const infoList = [
-    { title: "16", subtitle: "All Orders" },
-    { title: "02", subtitle: "Awaiting Payments" },
-    { title: "00", subtitle: "Awaiting Shipment" },
-    { title: "01", subtitle: "Awaiting Delivery" },
+    {
+      title: customerProfile.orderCounts.total.toString(),
+      subtitle: "All Orders",
+    },
+    {
+      title: customerProfile.orderCounts.awaitingPayment.toString(),
+      subtitle: "Awaiting Payments",
+    },
+    {
+      title: customerProfile.orderCounts.awaitingShipment.toString(),
+      subtitle: "Awaiting Shipment",
+    },
+    {
+      title: customerProfile.orderCounts.awaitingDelivery.toString(),
+      subtitle: "Awaiting Delivery",
+    },
   ];
 
   return (
@@ -42,7 +76,7 @@ export default async function Profile() {
               borderRadius={8}
               alignItems="center"
             >
-              <Avatar src={user.image} size={64} />
+              <Avatar src={customerProfile.image || ""} size={64} />
 
               <Box ml="12px" flex="1 1 0">
                 <FlexBox
@@ -51,25 +85,25 @@ export default async function Profile() {
                   alignItems="center"
                 >
                   <div>
-                    <H5 my="0px">{`${user.firstname} ${user.lastname}`}</H5>
+                    <H5 my="0px">{`${customerProfile.firstname} ${customerProfile.lastname}`}</H5>
 
                     <FlexBox alignItems="center">
                       <Typography fontSize="14px" color="text.hint">
-                        Balance:
+                        Cart Items:
                       </Typography>
 
                       <Typography ml="4px" fontSize="14px" color="primary.main">
-                        $500
+                        {customerProfile.cartItemsCount}
                       </Typography>
                     </FlexBox>
                   </div>
 
                   <Typography
-                    ontSize="14px"
+                    fontSize="14px"
                     color="text.hint"
                     letterSpacing="0.2em"
                   >
-                    {user.role}
+                    {customerProfile.role}
                   </Typography>
                 </FlexBox>
               </Box>
@@ -110,7 +144,7 @@ export default async function Profile() {
             First Name
           </Small>
 
-          <span>{user.firstname}</span>
+          <span>{customerProfile.firstname}</span>
         </FlexBox>
 
         <FlexBox flexDirection="column" p="0.5rem">
@@ -118,7 +152,7 @@ export default async function Profile() {
             Last Name
           </Small>
 
-          <span>{user.lastname}</span>
+          <span>{customerProfile.lastname}</span>
         </FlexBox>
 
         <FlexBox flexDirection="column" p="0.5rem">
@@ -126,26 +160,16 @@ export default async function Profile() {
             Email
           </Small>
 
-          <span>{user.email}</span>
+          <span>{customerProfile.email}</span>
         </FlexBox>
 
         <FlexBox flexDirection="column" p="0.5rem">
-          <Small color="text.muted" mb="4px" textAlign="left">
-            Email
-          </Small>
-
-          <span>{user.email}</span>
-        </FlexBox>
-
-        {/* <FlexBox flexDirection="column" p="0.5rem">
           <Small color="text.muted" mb="4px">
-            Birth date
+            Phone
           </Small>
 
-          <span className="pre">
-            {format(new Date(user.role), "dd MMM, yyyy")}
-          </span>
-        </FlexBox> */}
+          <span>N/A</span>
+        </FlexBox>
       </TableRow>
     </Fragment>
   );

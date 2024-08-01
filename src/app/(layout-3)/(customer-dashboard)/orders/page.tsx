@@ -1,23 +1,48 @@
+"use client";
+
 import { Fragment } from "react";
-// API FUNCTIONS
-import api from "@utils/__api__/orders";
-// GLOBAL CUSTOM COMPONENTS
+import { useQuery } from "@tanstack/react-query";
 import Hidden from "@component/hidden";
 import TableRow from "@component/TableRow";
 import { H5 } from "@component/Typography";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
-// PAGE SECTION COMPONENTS
-import { OrderRow, OrdersPagination } from "@sections/customer-dashboard/orders";
+import {
+  OrderRow,
+  OrdersPagination,
+} from "@sections/customer-dashboard/orders";
+import { Order } from "@models/order.model";
+import { getOrders } from "actions/orders/getOrders";
 
-export default async function OrderList() {
-  const orderList = await api.getOrders();
+export default function OrderList() {
+  const { data, isLoading, error } = useQuery<{ orders: Order[] }, Error>({
+    queryKey: ["orders"],
+    queryFn: async () => {
+      const result = await getOrders();
+      if ("error" in result) {
+        throw new Error(result.error);
+      }
+      return result;
+    },
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+
+  if (error) {
+    return <div>An error occurred: {error.message}</div>;
+  }
+
+  const orderList = data?.orders || [];
 
   return (
     <Fragment>
       <DashboardPageHeader title="My Orders" iconName="bag_filled" />
 
       <Hidden down={769}>
-        <TableRow boxShadow="none" padding="0px 18px" backgroundColor="transparent">
+        <TableRow
+          boxShadow="none"
+          padding="0px 18px"
+          backgroundColor="transparent"
+        >
           <H5 color="text.muted" my="0px" mx="6px" textAlign="left">
             Order #
           </H5>

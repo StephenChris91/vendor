@@ -1,16 +1,17 @@
-"use client";
-
-import FlexBox from "@component/FlexBox";
+import { Order } from "@models/order.model";
 import Pagination from "@component/pagination";
-import Order from "@models/order.model";
 
-export default function OrdersPagination({ orderList }: { orderList: Order[] }) {
+type OrdersPaginationProps = {
+  orderList: Order[];
+};
+
+export default function OrdersPagination({ orderList }: OrdersPaginationProps) {
   return (
-    <FlexBox justifyContent="center" mt="2.5rem">
-      <Pagination
-        onChange={(data) => console.log(data)}
-        pageCount={Math.ceil(orderList.length / 10)}
-      />
-    </FlexBox>
+    <Pagination
+      pageCount={Math.ceil(orderList.length / 10)}
+      onChange={(data) => {
+        console.log(data);
+      }}
+    />
   );
 }

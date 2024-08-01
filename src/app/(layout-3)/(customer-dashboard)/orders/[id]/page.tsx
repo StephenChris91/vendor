@@ -1,10 +1,9 @@
+"use client";
+
 import { Fragment } from "react";
 import { format } from "date-fns";
-// UTILS
+import { useQuery } from "@tanstack/react-query";
 import { currency } from "@utils/utils";
-// API FUNCTIONS
-import api from "@utils/__api__/orders";
-// GLOBAL CUSTOM COMPONENTS
 import Box from "@component/Box";
 import Card from "@component/Card";
 import Grid from "@component/grid/Grid";
@@ -13,13 +12,37 @@ import FlexBox from "@component/FlexBox";
 import TableRow from "@component/TableRow";
 import Typography, { H5, H6, Paragraph } from "@component/Typography";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
-// PAGE SECTION COMPONENTS
-import { OrderStatus, WriteReview, OrderListButton } from "@sections/customer-dashboard/orders";
-// CUSTOM DATA MODEL
-import { IDParams } from "interfaces";
+import {
+  OrderStatus,
+  WriteReview,
+  OrderListButton,
+} from "@sections/customer-dashboard/orders";
+import { Order } from "@models/order.model";
+import { getOrder } from "actions/orders/getOrder";
 
-export default async function OrderDetails({ params }: IDParams) {
-  const order = await api.getOrder(String(params.id));
+type OrderDetailsProps = {
+  params: { id: string };
+};
+
+export default function OrderDetails({ params }: OrderDetailsProps) {
+  const {
+    data: order,
+    isLoading,
+    error,
+  } = useQuery<{ order: Order }, Error>({
+    queryKey: ["order", params.id],
+    queryFn: async () => {
+      const result = await getOrder(params.id);
+      if ("error" in result) {
+        throw new Error(result.error);
+      }
+      return result;
+    },
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>An error occurred: {error.message}</div>;
+  if (!order) return <div>Order not found</div>;
 
   return (
     <Fragment>
@@ -38,7 +61,9 @@ export default async function OrderDetails({ params }: IDParams) {
               Order ID:
             </Typography>
 
-            <Typography fontSize="14px">#{order.id.substring(0, 8)}</Typography>
+            <Typography fontSize="14px">
+              #{order.order.id.substring(0, 8)}
+            </Typography>
           </FlexBox>
 
           <FlexBox className="pre" m="6px" alignItems="center">
@@ -47,26 +72,22 @@ export default async function OrderDetails({ params }: IDParams) {
             </Typography>
 
             <Typography fontSize="14px">
-              {format(new Date(order.createdAt), "dd MMM, yyyy")}
+              {format(new Date(order.order.createdAt), "dd MMM, yyyy")}
             </Typography>
           </FlexBox>
 
-          {order.isDelivered && (
-            <FlexBox className="pre" m="6px" alignItems="center">
-              <Typography fontSize="14px" color="text.muted" mr="4px">
-                Delivered on:
-              </Typography>
+          <FlexBox className="pre" m="6px" alignItems="center">
+            <Typography fontSize="14px" color="text.muted" mr="4px">
+              Status:
+            </Typography>
 
-              <Typography fontSize="14px">
-                {format(new Date(order.deliveredAt), "dd MMM, yyyy")}
-              </Typography>
-            </FlexBox>
-          )}
+            <Typography fontSize="14px">{order.order.status}</Typography>
+          </FlexBox>
         </TableRow>
 
         <Box py="0.5rem">
-          {order.items.map((item, ind) => (
-            <WriteReview item={item} />
+          {order.order.orderItems.map((item) => (
+            <WriteReview key={item.id} item={item} />
           ))}
         </Box>
       </Card>
@@ -75,11 +96,11 @@ export default async function OrderDetails({ params }: IDParams) {
         <Grid item lg={6} md={6} xs={12}>
           <Card p="20px 30px" borderRadius={8}>
             <H5 mt="0px" mb="14px">
-              Shipping Address
+              Order Information
             </H5>
 
             <Paragraph fontSize="14px" my="0px">
-              {order.shippingAddress}
+              Order Status: {order.order.status}
             </Paragraph>
           </Card>
         </Grid>
@@ -90,38 +111,18 @@ export default async function OrderDetails({ params }: IDParams) {
               Total Summary
             </H5>
 
-            <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
-              <Typography fontSize="14px" color="text.hint">
-                Subtotal:
-              </Typography>
-
-              <H6 my="0px">{currency(order.totalPrice)}</H6>
-            </FlexBox>
-
-            <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
-              <Typography fontSize="14px" color="text.hint">
-                Shipping fee:
-              </Typography>
-
-              <H6 my="0px">$10</H6>
-            </FlexBox>
-
-            <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
-              <Typography fontSize="14px" color="text.hint">
-                Discount:
-              </Typography>
-
-              <H6 my="0px">-${order.discount}</H6>
-            </FlexBox>
-
-            <Divider mb="0.5rem" />
-
-            <FlexBox justifyContent="space-between" alignItems="center" mb="1rem">
+            <FlexBox
+              justifyContent="space-between"
+              alignItems="center"
+              mb="1rem"
+            >
               <H6 my="0px">Total</H6>
-              <H6 my="0px">{currency(order.totalPrice)}</H6>
+              <H6 my="0px">{currency(order.order.totalPrice)}</H6>
             </FlexBox>
 
-            <Typography fontSize="14px">Paid by Credit/Debit Card</Typography>
+            <Typography fontSize="14px">
+              Payment method information not available
+            </Typography>
           </Card>
         </Grid>
       </Grid>

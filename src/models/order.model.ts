@@ -1,24 +1,26 @@
+// models/order.model.ts
+
 import User from "./user.model";
 
-type Item = {
-  product_img: string;
-  product_name: string;
-  product_price: number;
-  product_quantity: number;
+
+export type OrderItem = {
+  id: string;
+  productId: string;
+  quantity: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
-interface Order {
-  user: User;
+export type Order = {
   id: string;
-  tax: number;
-  items: Item[];
-  createdAt: Date;
-  discount: number;
-  deliveredAt: Date;
+  createdAt: string;
+  updatedAt: string;
+  status: 'Pending' | 'Processing' | 'Complete';
   totalPrice: number;
-  isDelivered: boolean;
-  shippingAddress: string;
-  status: "Pending" | "Processing" | "Delivered" | "Cancelled";
-}
+  orderItems: OrderItem[];
+  userId: string;
+  user?: User;  // Optional, in case we need to populate user details
+  shopId?: string;
+};
 
 export default Order;

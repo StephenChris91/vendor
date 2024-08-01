@@ -1,13 +1,19 @@
-import User from "./user.model";
+import { user } from "@prisma/client";
 
 interface Address {
   id: string;
-  user: User;
-  city: string;
   title: string;
-  phone: string;
   street: string;
+  city: string;
+  state?: string;
   country: string;
+  zipCode?: string;
+  phone?: string;
+  isDefault: boolean;
+  userId: string;
+  user?: user;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export default Address;

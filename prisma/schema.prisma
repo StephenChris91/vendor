@@ -46,6 +46,35 @@ enum ShopStatus {
   Rejected
 }
 
+model CustomerAddress {
+  id        String   @id @default(cuid())
+  title     String
+  street    String
+  city      String
+  state     String?
+  country   String
+  zipCode   String?
+  phone     String?
+  isDefault Boolean  @default(false)
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PaymentMethod {
+  id             String   @id @default(cuid())
+  userId         String
+  user           user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cardNumber     String
+  cardHolderName String
+  expirationDate String
+  cvc            String
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
 model user {
   id                 String             @id @default(uuid())
   email              String             @unique
@@ -68,6 +97,8 @@ model user {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   verificationStatus VerificationStatus @default(Pending)
+  addresses          CustomerAddress[]
+  paymentMethods     PaymentMethod[]
 }
 
 model account {
