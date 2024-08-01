@@ -10,12 +10,14 @@ export default function LoginDialog({ handle, children }: Props) {
 
   const toggleDialog = () => setOpen(!open);
 
+  const closeDialog = () => setOpen(false);
+
   return (
     <Fragment>
       {cloneElement(handle, { onClick: toggleDialog })}
 
       <Modal open={open} onClose={toggleDialog}>
-        {children}
+        {cloneElement(children, { onLoginSuccess: closeDialog })}
       </Modal>
     </Fragment>
   );

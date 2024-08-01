@@ -4,10 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
-
-import useVisibility from "./useVisibility";
 import { toast } from "react-hot-toast";
-
+import useVisibility from "./useVisibility";
 import Box from "@component/Box";
 import Icon from "@component/icon/Icon";
 import Divider from "@component/Divider";
@@ -15,25 +13,22 @@ import FlexBox from "@component/FlexBox";
 import TextField from "@component/text-field";
 import { Button, IconButton } from "@component/buttons";
 import { H3, H5, H6, SemiSpan, Small, Span } from "@component/Typography";
-// STYLED COMPONENT
 import { StyledRoot } from "./styles";
 import { login } from "actions/login";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 
-export default function Login() {
+type LoginProps = {
+  onLoginSuccess?: () => void;
+};
+
+export default function Login({ onLoginSuccess }: LoginProps) {
   const router = useRouter();
   const { passwordVisibility, togglePasswordVisibility } = useVisibility();
   const [isLoading, setIsLoading] = useState(false);
-  // const [debugInfo, setDebugInfo] = useState<string>("");
+  const { update } = useSession();
 
   const initialValues = { email: "", password: "" };
-  // const session = useSession();
-  // useEffect(() => {
-  //   async function logUser() {
-  //     console.log(session);
-  //   }
-  // }, []);
 
   const formSchema = yup.object().shape({
     email: yup.string().email("invalid email").required("${path} is required"),
@@ -48,14 +43,18 @@ export default function Login() {
         toast.error(result.error);
       } else if (result.success) {
         toast.success(result.success);
-        console.log(result);
+        await update(); // Update the session
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
         // Handle client-side navigation based on user role
         if (result.redirectTo) {
           router.push(result.redirectTo);
         }
       }
     } catch (error) {
-      toast.error("An unexpected error occurred");
+      console.error("Login error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +92,7 @@ export default function Login() {
           onBlur={handleBlur}
           value={values.email}
           onChange={handleChange}
-          placeholder="exmple@mail.com"
+          placeholder="example@mail.com"
           label="Email or Phone Number"
           errorText={touched.email && errors.email}
         />
@@ -188,13 +187,6 @@ export default function Login() {
           </Link>
         </FlexBox>
       </form>
-
-      {/* <Box mt="1rem" p="1rem" bg="gray.100">
-        <H6>Debug Info:</H6>
-        <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-          {debugInfo}
-        </pre>
-      </Box> */}
 
       <FlexBox justifyContent="center" bg="gray.200" py="19px">
         <SemiSpan>Forgot your password?</SemiSpan>

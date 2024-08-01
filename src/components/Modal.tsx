@@ -1,4 +1,4 @@
-import { cloneElement, ReactElement } from "react";
+import { ReactElement, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
 
@@ -7,7 +7,7 @@ import { isValidProp } from "@utils/utils";
 
 // STYLED COMPONENT
 const StyledModal = styled(FlexBox).withConfig({
-  shouldForwardProp: (prop: string) => isValidProp(prop)
+  shouldForwardProp: (prop: string) => isValidProp(prop),
 })<{ open?: boolean }>(({ open }) => ({
   inset: 0,
   zIndex: 999,
@@ -21,11 +21,12 @@ const StyledModal = styled(FlexBox).withConfig({
   transition: "all 200ms",
   "& .container": {
     top: "50%",
-    width: "100%",
+    width: "auto",
+    maxWidth: "90%",
     overflow: "auto",
     position: "relative",
-    transform: "translateY(-50%)"
-  }
+    transform: "translateY(-50%)",
+  },
 }));
 
 // ===============================================================
@@ -37,13 +38,26 @@ type ModalProps = {
 // ===============================================================
 
 export default function Modal({ children, open = false, onClose }: ModalProps) {
-  const handleModalContentClick = (e: any) => {
-    e.stopPropagation();
-  };
+  const modalRef = useRef<HTMLDivElement>(null);
 
-  const handleBackdropClick = () => {
-    if (onClose) onClose();
-  };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        if (onClose) onClose();
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open, onClose]);
 
   if (globalThis.document && open) {
     let modal = document.querySelector("#modal-root");
@@ -55,14 +69,10 @@ export default function Modal({ children, open = false, onClose }: ModalProps) {
     }
 
     return createPortal(
-      <StyledModal
-        open={open}
-        alignItems="center"
-        flexDirection="column"
-        onClick={handleBackdropClick}>
-        <div className="container">
+      <StyledModal open={open} alignItems="center" flexDirection="column">
+        <div className="container" ref={modalRef}>
           <FlexBox justifyContent="center" m="0.5rem">
-            {children && cloneElement(children, { onClick: handleModalContentClick })}
+            {children}
           </FlexBox>
         </div>
       </StyledModal>,

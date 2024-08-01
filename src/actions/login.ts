@@ -7,7 +7,7 @@ import { sendVerificationEmail } from 'lib/mail';
 import { getUserByEmail } from 'lib/data/user';
 import { generateVerificationToken } from 'lib/data/tokens';
 import { signIn } from 'auth';
-import { revalidatePath } from 'next/cache';
+import { AuthError } from 'next-auth';
 
 export const login = async (values: z.infer<typeof loginSchema>) => {
     const validInput = loginSchema.safeParse(values)
@@ -43,9 +43,8 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
         await signIn('credentials', {
             email,
             password,
+            redirect: false,
         });
-
-        revalidatePath('/')
 
         let redirectTo = '/profile'; // Default redirect
         if (isAdmin) redirectTo = '/admin';
@@ -54,8 +53,13 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
 
         return { success: 'Logged in successfully', redirectTo };
     } catch (error) {
-        if ((error as Error).message.includes("CredentialsSignin")) {
-            return { error: 'Invalid email or password' };
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case "CredentialsSignin":
+                    return { error: 'Invalid email or password' };
+                default:
+                    return { error: 'An unexpected error occurred' };
+            }
         }
         throw error;
     }
