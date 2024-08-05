@@ -1,4 +1,3 @@
-// app/api/products/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { ProductStatus, ProductType, Prisma } from '@prisma/client';
 import { db } from '../../../../../prisma/prisma';
@@ -16,28 +15,28 @@ export async function PUT(
     try {
         const body = await request.json();
 
-        // Prepare the update data
-        const updateData: Prisma.productUpdateInput = {
-            name: body.name,
-            slug: body.slug,
-            description: body.description,
-            price: parseInt(body.price),
-            sale_price: parseInt(body.sale_price),
-            sku: body.sku,
-            quantity: parseInt(body.quantity),
-            in_stock: body.in_stock,
-            is_taxable: body.is_taxable,
-            status: body.status as ProductStatus,
-            product_type: body.product_type as ProductType,
-            video: body.video,
-            image: body.image,
-            ratings: body.ratings ? parseFloat(body.ratings) : undefined,
-            total_reviews: body.total_reviews ? parseInt(body.total_reviews) : undefined,
-            my_review: body.my_review,
-            in_wishlist: body.in_wishlist,
-            shop_name: body.shop_name,
-            stock: body.stock ? parseInt(body.stock) : undefined,
-        };
+        // Prepare the update data, only including fields that are provided
+        const updateData: Prisma.productUpdateInput = {};
+
+        if (body.name !== undefined) updateData.name = body.name;
+        if (body.slug !== undefined) updateData.slug = body.slug;
+        if (body.description !== undefined) updateData.description = body.description;
+        if (body.price !== undefined) updateData.price = parseInt(body.price);
+        if (body.sale_price !== undefined) updateData.sale_price = parseInt(body.sale_price);
+        if (body.sku !== undefined) updateData.sku = body.sku;
+        if (body.quantity !== undefined) updateData.quantity = parseInt(body.quantity);
+        if (body.in_stock !== undefined) updateData.in_stock = body.in_stock;
+        if (body.is_taxable !== undefined) updateData.is_taxable = body.is_taxable;
+        if (body.status !== undefined) updateData.status = body.status as ProductStatus;
+        if (body.product_type !== undefined) updateData.product_type = body.product_type as ProductType;
+        if (body.video !== undefined) updateData.video = body.video;
+        if (body.image !== undefined) updateData.image = body.image;
+        if (body.ratings !== undefined) updateData.ratings = parseFloat(body.ratings);
+        if (body.total_reviews !== undefined) updateData.total_reviews = parseInt(body.total_reviews);
+        if (body.my_review !== undefined) updateData.my_review = body.my_review;
+        if (body.in_wishlist !== undefined) updateData.in_wishlist = body.in_wishlist;
+        if (body.shop_name !== undefined) updateData.shop_name = body.shop_name;
+        if (body.stock !== undefined) updateData.stock = parseInt(body.stock);
 
         // Handle gallery update
         if (Array.isArray(body.gallery)) {
@@ -85,7 +84,7 @@ export async function PUT(
                 return NextResponse.json({ message: 'A unique constraint would be violated on Product. (Likely duplicate slug)' }, { status: 400 });
             }
         }
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ message: 'Internal Server Error', error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
     }
 }
 

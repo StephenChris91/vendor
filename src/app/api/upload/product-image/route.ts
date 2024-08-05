@@ -1,8 +1,8 @@
-// app/api/upload/shop-banner/route.ts
+// app/api/upload/product-image/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { uploadToS3, folderExists, createFolder } from '@utils/s3Client';
 import { auth } from 'auth';
+import { createFolder, folderExists, uploadToS3 } from '@utils/s3Client';
 
 export async function POST(request: NextRequest) {
     const session = await auth();
@@ -18,20 +18,20 @@ export async function POST(request: NextRequest) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const userName = session.user.name;
-        const folderPath = `${userName}/Banner`;
+        const userName = session.user.firstname;
+        const folderPath = `${userName}/Products`;
 
         if (!(await folderExists(folderPath))) {
             await createFolder(folderPath);
         }
 
-        const fileName = `shop_banner_${Date.now()}_${file.name}`;
+        const fileName = `${Date.now()}_${file.name}`;
         const filePath = `${folderPath}/${fileName}`;
         const url = await uploadToS3(buffer, filePath);
 
         return NextResponse.json({ url });
     } catch (error) {
-        console.error('Error uploading shop banner:', error);
+        console.error('Error uploading product image:', error);
         return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
     }
 }

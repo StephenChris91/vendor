@@ -30,6 +30,7 @@ const nextConfig = {
       "https://picsum.photos/500/300?random=1",
       "picsum.photos",
       "res.cloudinary.com",
+      "vendorspot.s3.eu-north-1.amazonaws.com",
       // "https://mukoxyechbobgdvpbirs.supabase.co",
     ],
   },

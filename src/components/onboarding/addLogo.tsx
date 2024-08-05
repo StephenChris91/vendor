@@ -9,7 +9,6 @@ import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
 import DropZone from "@component/DropZone";
 import { Button } from "@component/buttons";
-import { uploadFileToS3 } from "actions/upload-signUrl";
 
 interface AddLogoProps {
   updateFormData: (data: { logo: string }) => void;
@@ -47,30 +46,17 @@ const AddLogo: React.FC<AddLogoProps> = ({
   }, [initialLogo]);
 
   const handleImageUpload = useCallback(
-    async (files: File[]) => {
-      if (files.length === 0) return;
-
-      const file = files[0];
-      setIsUploading(true);
-
-      try {
-        const base64 = await fileToBase64(file);
-        const fileName = `shop-logo-${userId}-${Date.now()}.${file.name
-          .split(".")
-          .pop()}`;
-        const uploadedUrl = await uploadFileToS3(base64, fileName, userName);
-
-        formik.setFieldValue("logo", uploadedUrl);
-        updateFormData({ logo: uploadedUrl });
+    (result: string | File[]) => {
+      if (typeof result === "string") {
+        formik.setFieldValue("logo", result);
+        updateFormData({ logo: result });
         toast.success("Shop logo uploaded successfully!");
-      } catch (error) {
-        console.error("Error uploading logo:", error);
+      } else {
+        console.error("Unexpected result type from DropZone");
         toast.error("Failed to upload logo. Please try again.");
-      } finally {
-        setIsUploading(false);
       }
     },
-    [formik, userId, userName, updateFormData]
+    [formik, updateFormData]
   );
 
   const handleRemoveLogo = () => {
@@ -90,7 +76,18 @@ const AddLogo: React.FC<AddLogoProps> = ({
         Upload a logo for your shop
       </H5>
 
-      <DropZone onChange={handleImageUpload} />
+      <DropZone
+        onChange={handleImageUpload}
+        uploadType="shop-logo"
+        useS3={true}
+        multiple={false}
+        acceptedFileTypes={{
+          "image/png": [".png"],
+          "image/jpeg": [".jpg", ".jpeg"],
+          "image/gif": [".gif"],
+          "image/webp": [".webp"],
+        }}
+      />
 
       {formik.touched.logo && formik.errors.logo && (
         <Small color="error.main" mt="0.5rem">
@@ -126,21 +123,6 @@ const AddLogo: React.FC<AddLogoProps> = ({
       )}
     </Box>
   );
-};
-
-const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result.split(",")[1]);
-      } else {
-        reject(new Error("Failed to convert file to base64"));
-      }
-    };
-    reader.onerror = (error) => reject(error);
-  });
 };
 
 export default AddLogo;

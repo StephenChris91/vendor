@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H6 } from "@component/Typography";
 import { Button } from "@component/buttons";
 import Pagination from "@component/pagination";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 import {
   TableWrapper,
@@ -14,13 +16,14 @@ import {
   StyledTable,
   TableCell,
 } from "./styles";
+import { updateVendorStatus } from "actions/updateVendorStatus";
 
 interface Vendor {
   id: string;
   name: string;
   email: string;
   registrationDate: string;
-  status: string;
+  status: "active" | "inactive";
   totalSales: number;
   productCount: number;
   rating: number;
@@ -28,33 +31,46 @@ interface Vendor {
 
 interface VendorListProps {
   vendors: Vendor[];
-  onViewProfile: (id: string) => void;
-  onEditVendor: (id: string) => void;
-  onToggleStatus: (id: string, currentStatus: string) => void;
+  onToggleStatus: (id: string, newStatus: "active" | "inactive") => void;
 }
 
 const VendorList: React.FC<VendorListProps> = ({
-  vendors = [], // Default to an empty array
-  onViewProfile,
-  onEditVendor,
+  vendors = [],
   onToggleStatus,
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const vendorsPerPage = 10; // Set number of items per page
+  const router = useRouter();
 
-  // Handle page change event for pagination
-  const handlePageChange = (data: { selected: number }) => {
-    setCurrentPage(data.selected + 1); // ReactPaginate is 0-indexed
-    console.log("Page changed to:", data.selected + 1);
+  const handleStatusChange = async (
+    vendorId: string,
+    currentStatus: "active" | "inactive"
+  ) => {
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+    const toastId = toast.loading(
+      `${newStatus === "active" ? "Activating" : "Deactivating"} vendor...`
+    );
+    try {
+      await updateVendorStatus(vendorId, newStatus);
+      onToggleStatus(vendorId, newStatus);
+      toast.success(
+        `Vendor ${
+          newStatus === "active" ? "activated" : "deactivated"
+        } successfully`,
+        { id: toastId }
+      );
+    } catch (error) {
+      console.error("Failed to update vendor status:", error);
+      toast.error(
+        `Failed to ${
+          newStatus === "active" ? "activate" : "deactivate"
+        } vendor. Please try again.`,
+        { id: toastId }
+      );
+    }
   };
 
-  // Slice vendors to show only those on the current page
-  const displayedVendors = Array.isArray(vendors)
-    ? vendors.slice(
-        (currentPage - 1) * vendorsPerPage,
-        currentPage * vendorsPerPage
-      )
-    : []; // Ensure displayedVendors is an array
+  const handleViewVendor = (vendorId: string) => {
+    router.push(`/admin/vendors/${vendorId}`);
+  };
 
   return (
     <TableWrapper>
@@ -72,7 +88,7 @@ const VendorList: React.FC<VendorListProps> = ({
           </TableRow>
         </TableHead>
         <tbody>
-          {displayedVendors.map((vendor) => (
+          {vendors.map((vendor) => (
             <TableRow key={vendor.id}>
               <TableCell>{vendor.name}</TableCell>
               <TableCell>{vendor.email}</TableCell>
@@ -80,11 +96,7 @@ const VendorList: React.FC<VendorListProps> = ({
               <TableCell>
                 <H6
                   color={
-                    vendor.status === "active"
-                      ? "success.main"
-                      : vendor.status === "inactive"
-                      ? "error.main"
-                      : "warning.main"
+                    vendor.status === "active" ? "success.main" : "error.main"
                   }
                 >
                   {vendor.status}
@@ -98,23 +110,16 @@ const VendorList: React.FC<VendorListProps> = ({
                   <Button
                     variant="outlined"
                     color="primary"
-                    onClick={() => onViewProfile(vendor.id)}
+                    onClick={() => handleViewVendor(vendor.id)}
                     mr={1}
                   >
                     View
                   </Button>
                   <Button
                     variant="outlined"
-                    color="secondary"
-                    onClick={() => onEditVendor(vendor.id)}
-                    mr={1}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color={vendor.status === "active" ? "primary" : "secondary"}
-                    onClick={() => onToggleStatus(vendor.id, vendor.status)}
+                    // color={vendor.status === "active" ? "error.main" : "success.main"}
+                    color={vendor.status === "active" ? "primary" : "warn"}
+                    onClick={() => handleStatusChange(vendor.id, vendor.status)}
                   >
                     {vendor.status === "active" ? "Deactivate" : "Activate"}
                   </Button>
@@ -124,16 +129,6 @@ const VendorList: React.FC<VendorListProps> = ({
           ))}
         </tbody>
       </StyledTable>
-      <Box p={2}>
-        <Pagination
-          pageCount={Math.ceil(vendors.length / vendorsPerPage)}
-          onChange={handlePageChange}
-          pageRangeDisplayed={5}
-          marginPagesDisplayed={2}
-          // Ensure `page` is correctly mapped to 0-based index
-          // page={currentPage - 1}
-        />
-      </Box>
     </TableWrapper>
   );
 };

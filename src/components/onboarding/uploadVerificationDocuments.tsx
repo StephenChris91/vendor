@@ -14,7 +14,6 @@ import { Button } from "@component/buttons";
 interface UploadVerificationDocumentsProps {
   userId: string;
   userEmail: string;
-  // onComplete: () => void;
 }
 
 interface FormValues {
@@ -76,7 +75,8 @@ const UploadVerificationDocuments: React.FC<
         await submitVerificationDocuments(userId, userEmail, documentData);
 
         toast.success("Documents submitted successfully for verification!");
-        // onComplete();
+        formik.resetForm();
+        setFileNames([]);
       } catch (error) {
         console.error("Error submitting documents:", error);
         toast.error("Failed to submit documents. Please try again.");
@@ -100,32 +100,37 @@ const UploadVerificationDocuments: React.FC<
   };
 
   const handleFileChange = useCallback(
-    (acceptedFiles: File[]) => {
-      const acceptedFormats = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/vnd.oasis.opendocument.text",
-      ];
+    (result: string | File[]) => {
+      if (Array.isArray(result)) {
+        const acceptedFormats = [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "application/vnd.oasis.opendocument.text",
+        ];
 
-      const validFiles = acceptedFiles.filter((file) =>
-        acceptedFormats.includes(file.type)
-      );
-
-      if (validFiles.length !== acceptedFiles.length) {
-        toast.error(
-          "Some files were not added. Please upload only PDF or document files."
+        const validFiles = result.filter((file) =>
+          acceptedFormats.includes(file.type)
         );
-      }
 
-      formik.setFieldValue("documents", [
-        ...formik.values.documents,
-        ...validFiles,
-      ]);
-      setFileNames((prevNames) => [
-        ...prevNames,
-        ...validFiles.map((file) => file.name),
-      ]);
+        if (validFiles.length !== result.length) {
+          toast.error(
+            "Some files were not added. Please upload only PDF or document files."
+          );
+        }
+
+        formik.setFieldValue("documents", [
+          ...formik.values.documents,
+          ...validFiles,
+        ]);
+        setFileNames((prevNames) => [
+          ...prevNames,
+          ...validFiles.map((file) => file.name),
+        ]);
+      } else {
+        console.error("Unexpected result type from DropZone");
+        toast.error("Failed to add files. Please try again.");
+      }
     },
     [formik]
   );
@@ -152,7 +157,19 @@ const UploadVerificationDocuments: React.FC<
         Please upload PDF or document files for verification
       </H5>
 
-      <DropZone onChange={handleFileChange} />
+      <DropZone
+        onChange={handleFileChange}
+        uploadType="verification-documents"
+        useS3={false}
+        multiple={true}
+        acceptedFileTypes={{
+          "application/pdf": [".pdf"],
+          "application/msword": [".doc"],
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            [".docx"],
+          "application/vnd.oasis.opendocument.text": [".odt"],
+        }}
+      />
 
       {formik.touched.documents && formik.errors.documents && (
         <Small color="error.main" mt="0.5rem">

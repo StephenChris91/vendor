@@ -64,10 +64,13 @@ export const renderProductCount = (
  * @returns - RETURN NEW PRICE
  */
 
-export function calculateDiscount(price: number, discount: number) {
-  const afterDiscount = Number((price - price * (discount / 100)).toFixed(2));
-  return currency(afterDiscount);
-}
+// utils/utils.ts
+export const calculateDiscount = (price: number, salePrice?: number): number => {
+  if (salePrice && salePrice < price) {
+    return salePrice;
+  }
+  return price;
+};
 
 /**
  * CHANGE THE CURRENCY FORMAT

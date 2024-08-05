@@ -31,8 +31,8 @@ export default function VendorProducts({
   const page = params.page ? parseInt(params.page) : 1;
   const pageSize = 10;
 
-  const session = useCurrentUser();
-  const vendorId = session.user?.id;
+  const user = useCurrentUser();
+  const vendorId = user?.id;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["vendorProducts", { vendorId, page, pageSize }],

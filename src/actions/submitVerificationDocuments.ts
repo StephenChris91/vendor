@@ -3,6 +3,9 @@
 import { Resend } from "resend";
 import { db } from "../../prisma/prisma";
 import { VerificationStatus } from '@prisma/client'
+import { render } from '@react-email/components';
+import VerificationEmail from "@component/verification-email";
+import React from 'react';
 
 const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_VERIFICATION_KEY);
 
@@ -26,18 +29,21 @@ export async function submitVerificationDocuments(
       content: Buffer.from(doc.content, 'base64'),
     }));
 
+    // Render the email template
+    const emailHtml = render(
+      React.createElement(VerificationEmail, {
+        userId,
+        userEmail,
+        documentCount: documents.length
+      })
+    );
+
     // Send email to admin using Resend
     await resend.emails.send({
       from: "Vendorspot Notification <admin@vendorspot.ng>",
       to: process.env.NEXT_PUBLIC_ADMIN_EMAIL!,
       subject: "New Verification Documents Submitted",
-      html: `
-        <p>New verification documents have been submitted:</p>
-        <p>User ID: ${userId}</p>
-        <p>User Email: ${userEmail}</p>
-        <p>Number of Documents: ${documents.length}</p>
-        <p>Please review the attached documents and update the user's verification status.</p>
-      `,
+      html: emailHtml,
       attachments: attachments,
     });
 

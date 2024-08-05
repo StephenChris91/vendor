@@ -37,36 +37,47 @@ export default function ProductsList({ meta, products }: Props) {
 
   return (
     <>
-      {products.map((item) => (
-        <Link href={`/vendor/products/${item.slug}`} key={item.id}>
-          <TableRow my="1rem" padding="6px 18px">
-            <FlexBox alignItems="center" m="6px" flex="2 2 220px !important">
-              <Avatar src={item.thumbnail} size={36} />
-              <Typography textAlign="left" ml="20px">
-                {item.name}
-              </Typography>
-            </FlexBox>
+      {products.map((item) => {
+        const discountedPrice = calculateDiscount(item.price, item.sale_price);
 
-            <H5 m="6px" textAlign="left" fontWeight="400">
-              {currency(item.price)}
-            </H5>
+        return (
+          <Link href={`/vendor/products/${item.slug}`} key={item.id}>
+            <TableRow my="1rem" padding="6px 18px">
+              <FlexBox alignItems="center" m="6px" flex="2 2 220px !important">
+                <Avatar src={item.image} size={36} />
+                <Typography textAlign="left" ml="20px">
+                  {item.name}
+                </Typography>
+              </FlexBox>
 
-            <H5 m="6px" textAlign="left" fontWeight="400">
-              {calculateDiscount(item.price, item.sale_price)}
-            </H5>
+              <H5 m="6px" textAlign="left" fontWeight="400">
+                {currency(discountedPrice)}
+              </H5>
 
-            <Hidden flex="0 0 0 !important" down={769}>
-              <Typography textAlign="center" color="text.muted">
-                <IconButton>
-                  <Icon variant="small" defaultcolor="currentColor">
-                    arrow-right
-                  </Icon>
-                </IconButton>
-              </Typography>
-            </Hidden>
-          </TableRow>
-        </Link>
-      ))}
+              {discountedPrice !== item.price && (
+                <H5
+                  m="6px"
+                  textAlign="left"
+                  fontWeight="400"
+                  color="text.muted"
+                >
+                  <del>{currency(item.price)}</del>
+                </H5>
+              )}
+
+              <Hidden flex="0 0 0 !important" down={769}>
+                <Typography textAlign="center" color="text.muted">
+                  <IconButton>
+                    <Icon variant="small" defaultcolor="currentColor">
+                      arrow-right
+                    </Icon>
+                  </IconButton>
+                </Typography>
+              </Hidden>
+            </TableRow>
+          </Link>
+        );
+      })}
 
       <FlexBox justifyContent="center" mt="2.5rem">
         <Pagination

@@ -1,7 +1,7 @@
 // app/admin/products/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { H3 } from "@component/Typography";
 import ProductList from "./product-list-component";
 import ProductStatistics from "./product-stats";
@@ -9,6 +9,7 @@ import ProductSearchFilter from "./product-search";
 import AddProductButton from "../add-product-button";
 import BulkActions from "../bulk-actions-button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 import { PageWrapper, ResponsiveFlexBox } from "./styles";
 
@@ -18,9 +19,9 @@ interface Product {
   sku: string;
   price: number;
   stock: number;
-  category: string;
-  vendor: string;
-  status: string;
+  categories: { name: string }[];
+  shop: { shopName: string };
+  status: "Published" | "Draft" | "Suspended" | "OutOfStock";
 }
 
 interface ProductStats {
@@ -38,7 +39,7 @@ const fetchProducts = async (): Promise<Product[]> => {
 };
 
 const fetchProductStats = async (): Promise<ProductStats> => {
-  const response = await fetch("/api/product-stats");
+  const response = await fetch("/api/products/product-stats");
   if (!response.ok) {
     throw new Error("Failed to fetch product stats");
   }
@@ -68,15 +69,25 @@ export default function ProductsPage() {
   });
 
   const updateProductMutation = useMutation({
-    mutationFn: (updatedProduct: Partial<Product>) =>
-      fetch(`/api/products/${updatedProduct.id}`, {
+    mutationFn: async (updatedProduct: Partial<Product>) => {
+      const response = await fetch(`/api/products/${updatedProduct.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedProduct),
-      }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update product");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["productStats"] });
+      toast.success("Product updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update product: ${error.message}`);
     },
   });
 
@@ -90,7 +101,6 @@ export default function ProductsPage() {
 
   const handleAddProduct = () => {
     // Navigate to add product page
-    // You'll need to implement this navigation logic
     console.log("Navigating to add product page");
   };
 
@@ -100,16 +110,16 @@ export default function ProductsPage() {
         case "delete":
           // Implement delete logic
           break;
-        case "activate":
+        case "publish":
           await updateProductMutation.mutateAsync({
             id: productId,
-            status: "active",
+            status: "Published",
           });
           break;
-        case "deactivate":
+        case "unpublish":
           await updateProductMutation.mutateAsync({
             id: productId,
-            status: "inactive",
+            status: "Draft",
           });
           break;
       }
@@ -121,6 +131,10 @@ export default function ProductsPage() {
     setSelectedProducts((prev) =>
       isSelected ? [...prev, productId] : prev.filter((id) => id !== productId)
     );
+  };
+
+  const handleUpdateProduct = async (updatedProduct: Partial<Product>) => {
+    await updateProductMutation.mutateAsync(updatedProduct);
   };
 
   if (isLoadingProducts || isLoadingStats) {
@@ -151,7 +165,7 @@ export default function ProductsPage() {
         products={products}
         onSelect={handleProductSelection}
         selectedProducts={selectedProducts}
-        onUpdateProduct={updateProductMutation.mutate}
+        onUpdateProduct={handleUpdateProduct}
       />
     </PageWrapper>
   );

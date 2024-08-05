@@ -45,7 +45,7 @@ export default function ShopIntroCard({ shop }: Props) {
               </H3>
             </Box>
 
-            <FlexBox my="8px">
+            {/* <FlexBox my="8px">
               {socialLinks.map((item, ind) => (
                 <a
                   key={ind}
@@ -60,7 +60,7 @@ export default function ShopIntroCard({ shop }: Props) {
                   >{`${item.name}_filled`}</Icon>
                 </a>
               ))}
-            </FlexBox>
+            </FlexBox> */}
           </FlexBox>
 
           <FlexBox
@@ -93,7 +93,7 @@ export default function ShopIntroCard({ shop }: Props) {
                 </Icon>
 
                 <SemiSpan color="text.muted" ml="12px">
-                  (613) 343-9004
+                  {shop?.shopSettings.businessHours}
                 </SemiSpan>
               </FlexBox>
             </div>

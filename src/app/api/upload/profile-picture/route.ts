@@ -1,4 +1,4 @@
-// app/api/upload/shop-banner/route.ts
+// app/api/upload/profile-picture/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadToS3, folderExists, createFolder } from '@utils/s3Client';
@@ -19,19 +19,19 @@ export async function POST(request: NextRequest) {
 
         const buffer = Buffer.from(await file.arrayBuffer());
         const userName = session.user.name;
-        const folderPath = `${userName}/Banner`;
+        const folderPath = `${userName}/Profile Picture`;
 
         if (!(await folderExists(folderPath))) {
             await createFolder(folderPath);
         }
 
-        const fileName = `shop_banner_${Date.now()}_${file.name}`;
+        const fileName = `profile_picture_${Date.now()}_${file.name}`;
         const filePath = `${folderPath}/${fileName}`;
         const url = await uploadToS3(buffer, filePath);
 
         return NextResponse.json({ url });
     } catch (error) {
-        console.error('Error uploading shop banner:', error);
+        console.error('Error uploading profile picture:', error);
         return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
     }
 }

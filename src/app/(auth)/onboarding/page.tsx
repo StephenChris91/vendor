@@ -10,6 +10,7 @@ import { H1 } from "@component/Typography";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@component/buttons";
+import ShopOnboardingForm from "lib/useMultistep";
 
 const Onboarding = () => {
   const { data: session, status } = useSession();
@@ -123,7 +124,7 @@ const Onboarding = () => {
           justifyContent="center"
         >
           <FormProvider>
-            <MultiStepForm />
+            <ShopOnboardingForm userName="John Doe" userId="123456" />
           </FormProvider>
         </Box>
       </FlexBox>

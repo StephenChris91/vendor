@@ -44,7 +44,7 @@ export default function VendorDashboardLayout({ children }: PropsWithChildren) {
 
   const user = useCurrentUser();
 
-  if (user.shopStatus == "Pending") {
+  if (user?.shopStatus == "Pending") {
     return (
       <OnboardingStyledRoot>
         <FlexBox

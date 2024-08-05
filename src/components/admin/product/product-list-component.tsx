@@ -8,7 +8,8 @@ import Pagination from "@component/pagination";
 import Checkbox from "@component/CheckBox";
 import Modal from "@component/Modal";
 import TextField from "@component/text-field";
-import Select, { SelectOption } from "@component/Select"; // Ensure SelectOption is imported
+import Select, { SelectOption } from "@component/Select";
+import toast from "react-hot-toast";
 
 import {
   TableWrapper,
@@ -25,16 +26,16 @@ interface Product {
   sku: string;
   price: number;
   stock: number;
-  category: string;
-  vendor: string;
-  status: string;
+  categories: { name: string }[];
+  shop: { shopName: string };
+  status: "Published" | "Draft" | "Suspended" | "OutOfStock";
 }
 
 interface ProductListProps {
   products: Product[];
   onSelect: (productId: string, isSelected: boolean) => void;
   selectedProducts: string[];
-  onUpdateProduct: (product: Partial<Product>) => void;
+  onUpdateProduct: (product: Partial<Product>) => Promise<void>;
 }
 
 const ProductList: React.FC<ProductListProps> = ({
@@ -67,29 +68,67 @@ const ProductList: React.FC<ProductListProps> = ({
     setEditingProduct(null);
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (editingProduct) {
-      onUpdateProduct(editingProduct);
-      setEditingProduct(null);
+      try {
+        await onUpdateProduct(editingProduct);
+        toast.success("Product updated successfully");
+        setEditingProduct(null);
+      } catch (error) {
+        toast.error("Failed to update product");
+      }
     }
   };
 
-  const handleEditChange = (field: keyof Product, value: string | number) => {
+  const handleEditChange = (field: keyof Product, value: any) => {
     if (editingProduct) {
-      setEditingProduct({ ...editingProduct, [field]: value });
+      if (field === "categories") {
+        setEditingProduct({
+          ...editingProduct,
+          categories: [{ name: value }],
+        });
+      } else if (field === "shop") {
+        setEditingProduct({
+          ...editingProduct,
+          shop: { shopName: value },
+        });
+      } else {
+        setEditingProduct({ ...editingProduct, [field]: value });
+      }
+    }
+  };
+
+  const handlePublishUnpublish = async (product: Product) => {
+    const newStatus = product.status === "Published" ? "Draft" : "Published";
+    try {
+      await onUpdateProduct({ id: product.id, status: newStatus });
+      toast.success(
+        `Product ${
+          newStatus === "Published" ? "published" : "unpublished"
+        } successfully`
+      );
+    } catch (error) {
+      toast.error(
+        `Failed to ${
+          newStatus === "Published" ? "publish" : "unpublish"
+        } product`
+      );
     }
   };
 
   const categoryOptions: SelectOption[] = [
     { value: "Electronics", label: "Electronics" },
     { value: "Clothing", label: "Clothing" },
+    { value: "Food", label: "Food" },
+    { value: "Books", label: "Books" },
     // Add more categories as needed
   ];
 
   const statusOptions: SelectOption[] = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-    { value: "out-of-stock", label: "Out of Stock" },
+    { value: "Published", label: "Published" },
+    { value: "Draft", label: "Draft" },
+    { value: "Suspended", label: "Suspended" },
+    { value: "OutOfStock", label: "Out of Stock" },
   ];
 
   return (
@@ -132,16 +171,16 @@ const ProductList: React.FC<ProductListProps> = ({
               <TableCell>{product.sku}</TableCell>
               <TableCell>${product.price.toFixed(2)}</TableCell>
               <TableCell>{product.stock}</TableCell>
-              <TableCell>{product.category}</TableCell>
-              <TableCell>{product.vendor}</TableCell>
+              <TableCell>{product.categories[0]?.name || "N/A"}</TableCell>
+              <TableCell>{product.shop?.shopName || "N/A"}</TableCell>
               <TableCell>
                 <H6
                   color={
-                    product.status === "active"
+                    product.status === "Published"
                       ? "success.main"
-                      : product.status === "inactive"
-                      ? "error.main"
-                      : "warning.main"
+                      : product.status === "Draft"
+                      ? "warning.main"
+                      : "error.main"
                   }
                 >
                   {product.status}
@@ -158,8 +197,13 @@ const ProductList: React.FC<ProductListProps> = ({
                   >
                     Edit
                   </Button>
-                  <Button variant="outlined" color="secondary" size="small">
-                    View
+                  <Button
+                    variant="outlined"
+                    color={product.status === "Published" ? "primary" : "dark"}
+                    size="small"
+                    onClick={() => handlePublishUnpublish(product)}
+                  >
+                    {product.status === "Published" ? "Unpublish" : "Publish"}
                   </Button>
                 </FlexBox>
               </TableCell>
@@ -171,7 +215,6 @@ const ProductList: React.FC<ProductListProps> = ({
         <Pagination
           pageCount={Math.ceil(products.length / itemsPerPage)}
           onChange={paginate}
-          // page={currentPage - 1}
         />
       </Box>
 
@@ -214,35 +257,36 @@ const ProductList: React.FC<ProductListProps> = ({
               }
             />
             <Select
-              // fullwidth
               mb={2}
               label="Category"
+              options={categoryOptions}
               value={categoryOptions.find(
-                (option) => option.value === editingProduct.category
+                (option) => option.value === editingProduct.categories[0]?.name
               )}
               onChange={(option) =>
-                handleEditChange("category", (option as SelectOption).value)
+                handleEditChange("categories", (option as SelectOption).value)
               }
-              options={categoryOptions}
             />
             <TextField
               fullwidth
               mb={2}
               label="Vendor"
-              value={editingProduct.vendor}
-              onChange={(e) => handleEditChange("vendor", e.target.value)}
+              value={editingProduct.shop?.shopName}
+              onChange={(e) => handleEditChange("shop", e.target.value)}
             />
             <Select
-              // fullwidth
               mb={3}
               label="Status"
+              options={statusOptions}
               value={statusOptions.find(
                 (option) => option.value === editingProduct.status
               )}
               onChange={(option) =>
-                handleEditChange("status", (option as SelectOption).value)
+                handleEditChange(
+                  "status",
+                  (option as SelectOption).value as Product["status"]
+                )
               }
-              options={statusOptions}
             />
             <FlexBox justifyContent="flex-end">
               <Button
