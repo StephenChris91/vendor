@@ -8,6 +8,7 @@ import {
   Text,
   Button,
   Link,
+  Img,
 } from "@react-email/components";
 
 interface VerificationEmailProps {
@@ -36,12 +37,27 @@ export const VerificationEmail: React.FC<VerificationEmailProps> = ({
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
             }}
           >
+            <Img
+              style={{
+                margin: "0 auto",
+              }}
+              src="/public/assets/images/logo-2.svg"
+              width="64"
+              height="64"
+              alt="Logo"
+            ></Img>
             <Text
               style={{
                 fontSize: "24px",
                 fontWeight: "bold",
                 marginBottom: "16px",
-                color: "#2563eb",
+                color: "#fff",
+                textAlign: "center",
+                backgroundColor: "#0071FC",
+                padding: "8px",
+                borderRadius: "4px",
+                textTransform: "uppercase",
+                letterSpacing: "0.2px",
               }}
             >
               New Verification Documents Submitted

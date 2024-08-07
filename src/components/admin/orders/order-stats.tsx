@@ -26,7 +26,7 @@ const OrderStatistics: React.FC<{ stats: OrderStats }> = ({ stats }) => {
           </Icon>
           <Box>
             <H6 color="text.muted">Total Orders</H6>
-            <H4>{stats.totalOrders}</H4>
+            <H4>{stats?.totalOrders}</H4>
           </Box>
         </StatItem>
         <StatItem>
@@ -35,7 +35,7 @@ const OrderStatistics: React.FC<{ stats: OrderStats }> = ({ stats }) => {
           </Icon>
           <Box>
             <H6 color="text.muted">Pending Orders</H6>
-            <H4>{stats.pendingOrders}</H4>
+            <H4>{stats?.pendingOrders}</H4>
           </Box>
         </StatItem>
         <StatItem>
@@ -44,7 +44,7 @@ const OrderStatistics: React.FC<{ stats: OrderStats }> = ({ stats }) => {
           </Icon>
           <Box>
             <H6 color="text.muted">Total Revenue</H6>
-            <H4>${stats.totalRevenue.toLocaleString()}</H4>
+            <H4>${stats?.totalRevenue.toLocaleString()}</H4>
           </Box>
         </StatItem>
         <StatItem>
@@ -53,7 +53,7 @@ const OrderStatistics: React.FC<{ stats: OrderStats }> = ({ stats }) => {
           </Icon>
           <Box>
             <H6 color="text.muted">Average Order Value</H6>
-            <H4>${stats.averageOrderValue.toLocaleString()}</H4>
+            <H4>${stats?.averageOrderValue.toLocaleString()}</H4>
           </Box>
         </StatItem>
       </FlexBox>

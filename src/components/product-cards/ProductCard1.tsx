@@ -107,26 +107,26 @@ const Wrapper = styled(Card)`
 
 // =======================================================================
 interface ProductCard1Props extends CardProps {
-  off?: number;
+  id: string | number;
   slug: string;
   title: string;
   price: number;
   imgUrl: string;
   rating: number;
+  off?: number;
   images: string[];
-  id?: string | number;
 }
 // =======================================================================
 
 export default function ProductCard1({
   id,
-  off,
   slug,
   title,
   price,
   imgUrl,
+  rating,
+  off,
   images,
-  rating = 4,
   ...props
 }: ProductCard1Props) {
   const [open, setOpen] = useState(false);
@@ -139,7 +139,7 @@ export default function ProductCard1({
     dispatch({
       type: "CHANGE_CART_AMOUNT",
       payload: {
-        id: id as number | string,
+        id,
         slug,
         price,
         imgUrl,
@@ -206,11 +206,11 @@ export default function ProductCard1({
                 </H3>
               </Link>
 
-              <Rating value={rating || 0} outof={5} color="warn" readOnly />
+              <Rating value={rating} outof={5} color="warn" readOnly />
 
               <FlexBox alignItems="center" mt="10px">
                 <SemiSpan pr="0.5rem" fontWeight="600" color="primary.main">
-                  {calculateDiscount(price, off as number)}
+                  {calculateDiscount(price, off)}
                 </SemiSpan>
 
                 {!!off && (
@@ -265,7 +265,7 @@ export default function ProductCard1({
         open={open}
         onClose={toggleDialog}
         product={{
-          id: id ? id.toString() : "",
+          id: id.toString(),
           slug,
           name: title,
           price,

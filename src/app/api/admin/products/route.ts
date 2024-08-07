@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
             },
         });
 
-        const totalProducts = await prisma.product.count();
+        const totalProducts = await db.product.count();
 
         return NextResponse.json({
             products: products.map(product => ({
@@ -37,29 +37,3 @@ export async function GET(request: NextRequest) {
     }
 }
 
-export async function POST(request: NextRequest) {
-    try {
-        const body = await request.json();
-        const product = await prisma.product.create({
-            data: {
-                name: body.name,
-                slug: body.slug,
-                description: body.description,
-                price: body.price,
-                sale_price: body.sale_price,
-                quantity: body.quantity,
-                status: body.status,
-                product_type: body.product_type,
-                shop: body.shop_id ? { connect: { id: body.shop_id } } : undefined,
-                user: body.author_id ? { connect: { id: body.author_id } } : undefined,
-                categories: {
-                    connect: body.category_ids?.map((id: string) => ({ id })) || [],
-                },
-            },
-        });
-        return NextResponse.json(product);
-    } catch (error) {
-        console.error('Error creating product:', error);
-        return NextResponse.json({ error: 'Error creating product' }, { status: 500 });
-    }
-}

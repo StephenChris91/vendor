@@ -37,7 +37,7 @@ export default function ProductsList({ meta, products }: Props) {
 
   return (
     <>
-      {products.map((item) => {
+      {products?.map((item) => {
         const discountedPrice = calculateDiscount(item.price, item.sale_price);
 
         return (

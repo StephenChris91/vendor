@@ -160,6 +160,7 @@ model shop {
   address      Address?
   paymentInfo  PaymentInfo?
   shopSettings ShopSettings?
+  shopOrders   shopOrder[]
 }
 
 model Address {
@@ -222,6 +223,7 @@ model product {
   shop_name     String?
   stock         Int?
   wishlistedBy  Wishlist[]
+  orderItems    orderItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -254,34 +256,82 @@ model passwordResetToken {
   @@unique([email, token])
 }
 
-model orderItem {
-  id        String   @id @default(uuid()) @map("_id")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model order {
+  id              String   @id @default(cuid())
+  userId          String
+  status          String
+  subtotal        Float
+  tax             Float
+  shippingCost    Float
+  totalPrice      Float
+  paymentIntentId String?
+  paymentMethod   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  productId String
-  quantity  Int
-
-  orderId String
-  order   order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user             user             @relation(fields: [userId], references: [id])
+  orderItems       orderItem[]
+  shippingAddress  shippingAddress?
+  shopOrders       shopOrder[]
+  shopId           String
+  shop             shop?            @relation(fields: [shopId], references: [id])
+  paymentReference String?          @unique
 }
 
-model order {
-  id        String   @id @default(uuid()) @map("id")
+model shippingAddress {
+  id      String  @id @default(uuid())
+  orderId String  @unique
+  name    String
+  street  String
+  city    String
+  state   String
+  zipCode String
+  country String
+  phone   String?
+
+  order order @relation(fields: [orderId], references: [id])
+}
+
+model shopOrder {
+  id           String   @id @default(uuid())
+  orderId      String
+  shopId       String
+  status       String
+  subtotal     Float
+  tax          Float
+  shippingCost Float
+  totalPrice   Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  order      order       @relation(fields: [orderId], references: [id])
+  shop       shop        @relation(fields: [shopId], references: [id])
+  orderItems orderItem[]
+}
+
+model TaxRate {
+  id        String   @id @default(uuid())
+  state     String
+  rate      Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  status     orderStatus
-  totalPrice Float
+  @@unique([state])
+}
 
-  orderItems orderItem[]
+model orderItem {
+  id          String @id @default(cuid())
+  orderId     String
+  shopOrderId String
+  productId   String
+  quantity    Int
+  price       Float
+  name        String
+  sku         String
 
-  userId String
-  user   user    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  shop   shop?   @relation(fields: [shopId], references: [id])
-  shopId String?
-
-  @@map("orders")
+  order     order     @relation(fields: [orderId], references: [id])
+  shopOrder shopOrder @relation(fields: [shopOrderId], references: [id])
+  product   product   @relation(fields: [productId], references: [id])
 }
 
 model cartItem {

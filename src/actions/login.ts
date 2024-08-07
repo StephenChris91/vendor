@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { loginSchema } from 'schemas';
-import { sendVerificationEmail } from 'lib/mail';
+import { sendVerificationEmail } from '@lib/emails/mail';
 import { getUserByEmail } from 'lib/data/user';
 import { generateVerificationToken } from 'lib/data/tokens';
 import { signIn } from 'auth';

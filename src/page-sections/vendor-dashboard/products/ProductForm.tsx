@@ -32,6 +32,7 @@ const UploadImageBox = styled("div")(({ theme }) => ({
 
 interface Props {
   product?: Product;
+  categoryOptions: SelectOption[];
 }
 
 interface FormValues {
@@ -63,8 +64,8 @@ const productTypeOptions: SelectOption[] = [
   { value: "Variable", label: "Variable" },
 ];
 
-export default function ProductUpdateForm({ product }: Props) {
-  const [categoryOptions, setCategoryOptions] = useState<SelectOption[]>([]);
+export default function ProductUpdateForm({ product, categoryOptions }: Props) {
+  const [cateOptions, setCateOptions] = useState<SelectOption[]>([]);
 
   useEffect(() => {
     fetchCategories();
@@ -75,7 +76,7 @@ export default function ProductUpdateForm({ product }: Props) {
       const response = await fetch("/api/categories/get-categories");
       if (!response.ok) throw new Error("Failed to fetch categories");
       const categories = await response.json();
-      setCategoryOptions(
+      setCateOptions(
         categories.map((cat: any) => ({ value: cat.id, label: cat.name }))
       );
     } catch (error) {
@@ -108,7 +109,7 @@ export default function ProductUpdateForm({ product }: Props) {
   };
 
   const validationSchema = yup.object().shape({
-    name: yup.string().required("Name is required"),
+    name: yup.string().optional(),
     categories: yup.array().min(1, "At least one category is required"),
     description: yup.string().required("Description is required"),
     stock: yup
@@ -261,46 +262,49 @@ export default function ProductUpdateForm({ product }: Props) {
                   />
                 </Grid>
 
-                <Grid item sm={6} xs={12}>
+                {/* <Grid item sm={6} xs={12}>
                   <Select
-                    options={statusOptions}
-                    value={statusOptions.find(
-                      (option) => option.value === values.status
-                    )}
-                    onChange={(option) =>
-                      setFieldValue("status", option?.value)
+                    isMulti
+                    options={categoryOptions}
+                    value={values.categories}
+                    onChange={(newValue) =>
+                      setFieldValue("categories", newValue)
                     }
-                    label="Status"
-                    placeholder="Select Status"
-                    errorText={touched.status && errors.status}
+                    label="Categories"
+                    placeholder="Select Categories"
+                    errorText={
+                      touched.categories && (errors.categories as string)
+                    }
                   />
-                </Grid>
+                </Grid> */}
 
-                <Grid item sm={6} xs={12}>
+                {/* <Grid item sm={6} xs={12}>
                   <Select
-                    options={productTypeOptions}
-                    value={productTypeOptions.find(
-                      (option) => option.value === values.product_type
-                    )}
-                    onChange={(option) =>
-                      setFieldValue("product_type", option?.value)
+                    isMulti
+                    options={categoryOptions}
+                    value={values.categories}
+                    onChange={(newValue) =>
+                      setFieldValue("categories", newValue)
                     }
-                    label="Product Type"
-                    placeholder="Select Product Type"
-                    errorText={touched.product_type && errors.product_type}
+                    label="Categories"
+                    placeholder="Select Categories"
+                    errorText={
+                      touched.categories && (errors.categories as string)
+                    }
                   />
-                </Grid>
+                </Grid> */}
 
                 <Grid item xs={12}>
                   <DropZone
                     onChange={handleUpload}
                     uploadType="product-image"
                     maxSize={4 * 1024 * 1024} // 4MB limit
-                    acceptedFileTypes={[
-                      "image/jpeg",
-                      "image/png",
-                      "image/webp",
-                    ]}
+                    acceptedFileTypes={{
+                      "image/png": [".png"],
+                      "image/jpeg": [".jpg", ".jpeg"],
+                      "image/gif": [".gif"],
+                      "image/webp": [".webp"],
+                    }}
                     multiple={false}
                   />
                   {values.image && (

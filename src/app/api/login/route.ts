@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { signIn } from 'auth';
 import { AuthError } from 'next-auth';
 import { getUserByEmail } from '@lib/data/user';
-import { sendVerificationEmail } from '@lib/mail';
+import { sendVerificationEmail } from '@lib/emails/mail';
 import { generateVerificationToken } from '@lib/data/tokens';
 
 export async function POST(request: NextRequest) {

@@ -4,7 +4,7 @@ import {
   userRole,
   ProductStatus,
   ProductType,
-  orderStatus,
+  // orderStatus,
 } from "@prisma/client";
 import { hash } from "bcrypt-ts";
 

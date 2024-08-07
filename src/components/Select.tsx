@@ -33,6 +33,7 @@ const Select: React.FC<SelectProps> = ({
   errorText,
   onChange,
   isMulti,
+  value,
   ...props
 }) => {
   const spacingProps: SpaceProps = {};
@@ -97,8 +98,9 @@ const Select: React.FC<SelectProps> = ({
         options={options}
         styles={customStyles}
         isMulti={isMulti}
+        value={value}
         onChange={(option) =>
-          onChange(
+          onChange?.(
             isMulti
               ? (option as SelectOption[])
               : (option as SelectOption | null)

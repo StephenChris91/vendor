@@ -5,7 +5,7 @@ import { hash } from 'bcrypt-ts'
 import { signupSchema } from 'schemas';
 import { getUserByEmail } from 'lib/data/user';
 import { generateVerificationToken } from 'lib/data/tokens';
-import { sendVerificationEmail } from 'lib/mail';
+import { sendVerificationEmail } from '@lib/emails/mail';
 import { db } from '../../prisma/prisma';
 
 export const register = async (values: z.infer<typeof signupSchema>) => {
