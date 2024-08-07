@@ -124,7 +124,7 @@ const Onboarding = () => {
           justifyContent="center"
         >
           <FormProvider>
-            <ShopOnboardingForm userName="John Doe" userId="123456" />
+            <ShopOnboardingForm />
           </FormProvider>
         </Box>
       </FlexBox>
