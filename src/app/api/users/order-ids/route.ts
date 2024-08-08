@@ -1,3 +1,6 @@
+export const dynamic = 'force-dynamic'; // Add this line to mark the route as dynamic
+
+
 import { useCurrentSession } from '@lib/use-session-server';
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../prisma/prisma';

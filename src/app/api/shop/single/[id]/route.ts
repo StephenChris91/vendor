@@ -3,9 +3,14 @@ import { db } from '../../../../../prisma/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: { id?: string } } // Mark id as possibly undefined
 ) {
-    const shopId = params.id;
+    const shopId = params?.id;
+
+    // Handle undefined or null shopId
+    if (!shopId) {
+        return NextResponse.json({ error: 'Shop ID is required' }, { status: 400 });
+    }
 
     try {
         const shop = await db.shop.findUnique({
