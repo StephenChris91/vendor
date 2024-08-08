@@ -1,4 +1,8 @@
 // app/api/admin/vendors/route.ts
+
+export const dynamic = 'force-dynamic'; // Add this line to mark the route as dynamic
+
+
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../prisma/prisma';
 import { Prisma } from '@prisma/client';
