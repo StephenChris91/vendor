@@ -2,29 +2,32 @@
 
 export type OrderStatus = "Pending" | "Processing" | "Complete";
 
+export interface OrderItem {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  orderId: string;
+  shopOrderId: string;
+  productId: string;
+  quantity: number;
+  price: number;
+  name: string;
+  sku: string;
+}
+
 export interface Order {
   id: string;
-  userId: string;
+  createdAt: string;
+  updatedAt: string;
   status: OrderStatus;
+  userId: string;
   subtotal: number;
   tax: number;
   shippingCost: number;
   totalPrice: number;
   paymentIntentId: string | null;
   paymentMethod: string;
-  createdAt: string;
-  updatedAt: string;
   shopId: string;
   paymentReference: string | null;
   orderItems: OrderItem[];
-}
-
-export interface OrderItem {
-  id: string;
-  orderId: string;
-  productId: string;
-  quantity: number;
-  price: number;
-  name: string;
-  sku: string;
 }

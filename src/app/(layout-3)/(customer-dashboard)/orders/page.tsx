@@ -13,16 +13,12 @@ import {
 import { Order } from "@models/order.model";
 import { getOrders } from "actions/orders/getOrders";
 
+type OrdersResponse = { orders: Order[] } | { error: string };
+
 export default function OrderList() {
-  const { data, isLoading, error } = useQuery<{ orders: Order[] }, Error>({
+  const { data, isLoading, error } = useQuery<OrdersResponse, Error>({
     queryKey: ["orders"],
-    queryFn: async () => {
-      const result = await getOrders();
-      if ("error" in result) {
-        throw new Error(result.error);
-      }
-      return result;
-    },
+    queryFn: getOrders,
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -31,7 +27,11 @@ export default function OrderList() {
     return <div>An error occurred: {error.message}</div>;
   }
 
-  const orderList = data?.orders || [];
+  if ("error" in data) {
+    return <div>An error occurred: {data.error}</div>;
+  }
+
+  const orderList = data.orders;
 
   return (
     <Fragment>

@@ -3,10 +3,9 @@
 
 import { useCurrentSession } from "@lib/use-session-server";
 import { db } from "../../../prisma/prisma";
+import { Order, OrderStatus } from "@models/order.model";
 
-
-
-export async function getOrders() {
+export async function getOrders(): Promise<{ orders: Order[] } | { error: string }> {
     try {
         const session = await useCurrentSession();
 
@@ -32,6 +31,7 @@ export async function getOrders() {
                 id: order.id.toString(),
                 createdAt: order.createdAt.toISOString(),
                 updatedAt: order.updatedAt.toISOString(),
+                status: order.status as OrderStatus,
                 orderItems: order.orderItems.map(item => ({
                     ...item,
                     id: item.id.toString(),

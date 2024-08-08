@@ -9,16 +9,19 @@ import FlexBox from "@component/FlexBox";
 import Typography from "@component/Typography";
 import useWindowSize from "@hook/useWindowSize";
 
-type Status = "packaging" | "shipping" | "delivering" | "complete";
+type Status = "Pending" | "Processing" | "Complete";
 
-export default function OrderStatus() {
+interface OrderStatusProps {
+  status: Status;
+}
+
+export default function OrderStatus({ status }: OrderStatusProps) {
   const width = useWindowSize();
-  const orderStatus: Status = "shipping";
   const stepIconList = ["package-box", "truck-1", "delivery"];
-  const orderStatusList = ["packaging", "shipping", "delivering", "complete"];
+  const orderStatusList: Status[] = ["Pending", "Processing", "Complete"];
 
   const breakpoint = 350;
-  const statusIndex = orderStatusList.indexOf(orderStatus);
+  const statusIndex = orderStatusList.indexOf(status);
 
   return (
     <Card p="2rem 1.5rem" mb="30px" borderRadius={8}>
@@ -27,14 +30,16 @@ export default function OrderStatus() {
         flexWrap="wrap"
         alignItems="center"
         justifyContent="space-between"
-        flexDirection={width < breakpoint ? "column" : "row"}>
+        flexDirection={width < breakpoint ? "column" : "row"}
+      >
         {stepIconList.map((item, ind) => (
           <Fragment key={item}>
             <Box position="relative">
               <Avatar
                 size={64}
                 bg={ind <= statusIndex ? "primary.main" : "gray.300"}
-                color={ind <= statusIndex ? "gray.white" : "primary.main"}>
+                color={ind <= statusIndex ? "gray.white" : "primary.main"}
+              >
                 <Icon size="32px" defaultcolor="currentColor">
                   {item}
                 </Icon>
@@ -69,8 +74,9 @@ export default function OrderStatus() {
           bg="primary.light"
           textAlign="center"
           borderRadius="300px"
-          color="primary.main">
-          Estimated Delivery Date <b>4th October</b>
+          color="primary.main"
+        >
+          Status: <b>{status}</b>
         </Typography>
       </FlexBox>
     </Card>

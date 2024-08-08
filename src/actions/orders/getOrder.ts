@@ -3,11 +3,9 @@
 
 import { useCurrentSession } from "@lib/use-session-server";
 import { db } from "../../../prisma/prisma";
+import { Order, OrderStatus } from "../../models/order.model";
 
-
-
-
-export async function getOrder(orderId: string) {
+export async function getOrder(orderId: string): Promise<{ order: Order } | { error: string }> {
     try {
         const session = await useCurrentSession();
 
@@ -29,20 +27,21 @@ export async function getOrder(orderId: string) {
             return { error: 'Order not found' };
         }
 
-        return {
-            order: {
-                ...order,
-                id: order.id.toString(),
-                createdAt: order.createdAt.toISOString(),
-                updatedAt: order.updatedAt.toISOString(),
-                orderItems: order.orderItems.map(item => ({
-                    ...item,
-                    id: item.id.toString(),
-                    createdAt: item.createdAt.toISOString(),
-                    updatedAt: item.updatedAt.toISOString(),
-                })),
-            },
+        const formattedOrder: Order = {
+            ...order,
+            id: order.id.toString(),
+            createdAt: order.createdAt.toISOString(),
+            updatedAt: order.updatedAt.toISOString(),
+            status: order.status as OrderStatus,
+            orderItems: order.orderItems.map(item => ({
+                ...item,
+                id: item.id.toString(),
+                createdAt: item.createdAt.toISOString(),
+                updatedAt: item.updatedAt.toISOString(),
+            })),
         };
+
+        return { order: formattedOrder };
     } catch (error) {
         console.error("Failed to fetch order:", error);
         return { error: 'Failed to fetch order' };
