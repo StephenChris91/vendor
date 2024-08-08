@@ -1,13 +1,13 @@
 // app/api/admin/orders/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../../prisma/prisma';
-import { orderStatus } from '@prisma/client';
+import { OrderStatus } from '@models/order.model';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const search = searchParams.get('search');
-    const paymentStatus = searchParams.get('paymentStatus') as orderStatus | null;
-    const fulfillmentStatus = searchParams.get('fulfillmentStatus') as orderStatus | null;
+    const paymentStatus = searchParams.get('paymentStatus') as OrderStatus | null;
+    const fulfillmentStatus = searchParams.get('fulfillmentStatus') as OrderStatus | null;
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 

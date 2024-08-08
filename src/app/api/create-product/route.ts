@@ -1,7 +1,6 @@
 'use server'
 
 import { productSchema } from "schemas";
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "auth";
 import { getUserById } from "lib/data/user";
