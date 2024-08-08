@@ -15,6 +15,8 @@ import ProductQuickView from "@component/products/ProductQuickView";
 import { theme } from "@utils/theme";
 import { calculateDiscount, currency } from "@utils/utils";
 import { useAppContext } from "@context/app-context";
+import Product from "@models/product.model";
+import { ProductStatus, ProductType } from "@prisma/client";
 
 // STYLED COMPONENTS
 const StyledCard = styled("div")({
@@ -26,8 +28,8 @@ const StyledCard = styled("div")({
   transition: "all 250ms ease-in-out",
   "&:hover": {
     boxShadow: theme.shadows[6],
-    "& .controlBox": { display: "flex", bottom: 0 }
-  }
+    "& .controlBox": { display: "flex", bottom: 0 },
+  },
 });
 
 const ImgBox = styled("div")(({ theme }) => ({
@@ -38,7 +40,7 @@ const ImgBox = styled("div")(({ theme }) => ({
   background: theme.colors.marron[100],
   display: "flex",
   alignItems: "center",
-  justifyContent: "center"
+  justifyContent: "center",
 }));
 
 const ItemController = styled("div")(({ theme }) => ({
@@ -63,9 +65,9 @@ const ItemController = styled("div")(({ theme }) => ({
     "&:hover": {
       cursor: "pointer",
       background: theme.colors.marron.main,
-      "& svg": { color: "#fff" }
-    }
-  }
+      "& svg": { color: "#fff" },
+    },
+  },
 }));
 
 const ContentWrapper = styled("div")({
@@ -73,8 +75,8 @@ const ContentWrapper = styled("div")({
   "& .title, & .categories": {
     overflow: "hidden",
     whiteSpace: "nowrap",
-    textOverflow: "ellipsis"
-  }
+    textOverflow: "ellipsis",
+  },
 });
 
 const StyledChip = styled(Chip)(({ theme }) => ({
@@ -87,7 +89,7 @@ const StyledChip = styled(Chip)(({ theme }) => ({
   fontSize: "10px",
   padding: "3px 7px",
   position: "absolute",
-  background: theme.colors.marron.main
+  background: theme.colors.marron.main,
 }));
 
 // ============================================================
@@ -99,7 +101,7 @@ type Props = {
   imgUrl: string;
   rating?: number;
   images: string[];
-  id: string | number;
+  id: string;
 };
 // ============================================================
 
@@ -121,10 +123,24 @@ export default function ProductCard15(props: Props) {
       price,
       imgUrl,
       name: title,
-      qty: (cartItem?.qty || 0) + 1
+      qty: (cartItem?.qty || 0) + 1,
     };
 
     dispatch({ type: "CHANGE_CART_AMOUNT", payload });
+  };
+
+  const product: Product = {
+    id,
+    name: title,
+    price,
+    description: "", // Provide an actual description
+    sale_price: 0, // Provide an actual sale_price if needed
+    sku: 0, // Provide an actual sku if needed
+    quantity: 0, // Provide an actual quantity if needed
+    gallery: images,
+    slug,
+    status: ProductStatus.Published, // Use the enum value
+    product_type: ProductType.Simple, // Use the enum value
   };
 
   return (
@@ -160,7 +176,7 @@ export default function ProductCard15(props: Props) {
       <ProductQuickView
         open={open}
         onClose={toggleDialog}
-        product={{ id, slug, images, price, title }}
+        product={product} // Pass the full product object
       />
 
       <ContentWrapper>
@@ -184,7 +200,8 @@ export default function ProductCard15(props: Props) {
             fontWeight="600"
             className="title"
             textAlign="center"
-            color="text.secondary">
+            color="text.secondary"
+          >
             {title}
           </H3>
         </Link>

@@ -2,6 +2,7 @@ import Shop from "./shop.model";
 import Review from "./Review.model";
 import Category from "./category.model";
 import User from "./user.model";
+import { ProductStatus, ProductType } from "@prisma/client";
 
 interface Product {
   id: string;
@@ -14,8 +15,8 @@ interface Product {
   quantity: number;
   in_stock?: boolean;
   is_taxable?: boolean;
-  status: 'Published' | 'Draft' | 'Suspended' | 'OutOfStock';
-  product_type: 'Simple' | 'Variable';
+  status: ProductStatus
+  product_type: ProductType
   video?: string;
   image?: string;
   ratings?: number;

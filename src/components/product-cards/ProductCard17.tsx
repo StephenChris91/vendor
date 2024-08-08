@@ -16,14 +16,16 @@ import ProductQuickView from "@component/products/ProductQuickView";
 import { useAppContext } from "@context/app-context";
 import { currency } from "@utils/utils";
 import { theme } from "@utils/theme";
+import Product from "@models/product.model";
+import { ProductStatus, ProductType } from "@prisma/client";
 
 // styled components
 const Wrapper = styled(Box)({
   "&:hover": {
     "& .product-actions": { right: 10 },
     "& img": { transform: "scale(1.1)" },
-    "& .product-view-action": { opacity: 1 }
-  }
+    "& .product-view-action": { opacity: 1 },
+  },
 });
 
 const CardMedia = styled(Box)({
@@ -32,7 +34,7 @@ const CardMedia = styled(Box)({
   overflow: "hidden",
   position: "relative",
   backgroundColor: theme.colors.gray[300],
-  "& img": { transition: "0.3s" }
+  "& img": { transition: "0.3s" },
 });
 
 const AddToCartButton = styled(IconButton)({
@@ -40,7 +42,7 @@ const AddToCartButton = styled(IconButton)({
   right: -40,
   position: "absolute",
   transition: "right 0.3s .1s",
-  backgroundColor: "transparent"
+  backgroundColor: "transparent",
 });
 
 const FavoriteButton = styled(IconButton)({
@@ -48,7 +50,7 @@ const FavoriteButton = styled(IconButton)({
   right: -40,
   position: "absolute",
   transition: "right 0.3s .2s",
-  backgroundColor: "transparent"
+  backgroundColor: "transparent",
 });
 
 const QuickViewButton = styled(Button)({
@@ -60,7 +62,7 @@ const QuickViewButton = styled(Button)({
   borderRadius: 0,
   position: "absolute",
   transition: "all 0.3s",
-  backgroundColor: theme.colors.secondary.main
+  backgroundColor: theme.colors.secondary.main,
 });
 
 // ==============================================================
@@ -73,13 +75,14 @@ type ProductCard17Props = {
   reviews: number;
   category: string;
   images: string[];
-  id: string | number;
+  id: string;
 };
 
 // ==============================================================
 
 export default function ProductCard17(props: ProductCard17Props) {
   const { id, title, price, imgUrl, category, reviews, slug, images } = props;
+  const [open, setOpen] = useState(false);
 
   const { state, dispatch } = useAppContext();
   const [openDialog, setOpenDialog] = useState(false);
@@ -98,17 +101,37 @@ export default function ProductCard17(props: ProductCard17Props) {
       price,
       imgUrl,
       name: title,
-      qty: (cartItem?.qty || 0) + 1
+      qty: (cartItem?.qty || 0) + 1,
     };
 
     dispatch({ type: "CHANGE_CART_AMOUNT", payload });
+  };
+
+  const product: Product = {
+    id,
+    name: title,
+    price,
+    description: "", // Provide an actual description
+    sale_price: 0, // Provide an actual sale_price if needed
+    sku: 0, // Provide an actual sku if needed
+    quantity: 0, // Provide an actual quantity if needed
+    gallery: images,
+    slug,
+    status: ProductStatus.Published, // Use the enum value
+    product_type: ProductType.Simple, // Use the enum value
   };
 
   return (
     <Wrapper>
       <CardMedia>
         <Link href={`/product/${slug}`}>
-          <NextImage width={300} height={300} src={imgUrl} alt="category" className="product-img" />
+          <NextImage
+            width={300}
+            height={300}
+            src={imgUrl}
+            alt="category"
+            className="product-img"
+          />
         </Link>
 
         <AddToCartButton className="product-actions" onClick={handleAddToCart}>
@@ -123,15 +146,16 @@ export default function ProductCard17(props: ProductCard17Props) {
           size="large"
           variant="contained"
           className="product-view-action"
-          onClick={() => setOpenDialog(true)}>
+          onClick={() => setOpenDialog(true)}
+        >
           Quick View
         </QuickViewButton>
       </CardMedia>
 
       <ProductQuickView
-        open={openDialog}
+        open={open}
         onClose={toggleDialog}
-        product={{ id, images, slug, price, title }}
+        product={product} // Pass the full product object
       />
 
       <Box p={1} textAlign="center">

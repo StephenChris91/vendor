@@ -5,18 +5,12 @@ import Card from "@component/Card";
 import Modal from "@component/Modal";
 import Icon from "@component/icon/Icon";
 import ProductIntro from "./ProductIntro";
+import Product from "@models/product.model";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  product: {
-    id: string;
-    slug: string;
-    name: string;
-    price: number;
-    image: string;
-    // Add other necessary fields
-  };
+  product: Product;
 };
 
 export default function ProductQuickView({ open, onClose, product }: Props) {
@@ -33,7 +27,7 @@ export default function ProductQuickView({ open, onClose, product }: Props) {
           id={product.id}
           title={product.name}
           price={product.price}
-          images={[product.image]} // Adjust this if you have multiple images
+          images={product.gallery} // Use gallery instead of image for multiple images
         />
 
         <Box position="absolute" top="0.75rem" right="0.75rem" cursor="pointer">

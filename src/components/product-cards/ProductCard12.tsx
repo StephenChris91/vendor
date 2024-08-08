@@ -15,6 +15,8 @@ import { H3, Span } from "@component/Typography";
 import ProductQuickView from "@component/products/ProductQuickView";
 import { useAppContext } from "@context/app-context";
 import { calculateDiscount, currency } from "@utils/utils";
+import Product from "@models/product.model";
+import { ProductStatus, ProductType } from "@prisma/client";
 
 // STYLED COMPONENTS
 const Wrapper = styled("div")`
@@ -35,8 +37,8 @@ const ImageWrapper = styled("div")({
   display: "inline-block",
   "&:hover": {
     "& .hoverButtonBox": { opacity: 1 },
-    "& .hoverImgBox": { filter: "blur(5px)" }
-  }
+    "& .hoverImgBox": { filter: "blur(5px)" },
+  },
 });
 
 const HoverButtonBox = styled("div")({
@@ -61,16 +63,16 @@ const HoverButtonBox = styled("div")({
       margin: "auto",
       padding: "4px 14px",
       position: "absolute",
-      "& svg": { fontSize: 16 }
-    }
-  }
+      "& svg": { fontSize: 16 },
+    },
+  },
 });
 
 const ImageBox = styled("div")({
   opacity: 1,
   padding: "44px 40px",
   background: "#F5F5F5",
-  transition: "all .3s ease"
+  transition: "all .3s ease",
 });
 
 const ItemController = styled("div")(({ theme }) => ({
@@ -85,9 +87,9 @@ const ItemController = styled("div")(({ theme }) => ({
     display: "flex",
     padding: "6px 12px",
     alignItems: "center",
-    "&:hover": { cursor: "pointer", background: "#f3f5f9" }
+    "&:hover": { cursor: "pointer", background: "#f3f5f9" },
   },
-  "& svg": { fontSize: 22, color: theme.colors.gray[600] }
+  "& svg": { fontSize: 22, color: theme.colors.gray[600] },
 }));
 
 const ContentWrapper = styled("div")({
@@ -95,8 +97,8 @@ const ContentWrapper = styled("div")({
   "& .title, & .categories": {
     overflow: "hidden",
     whiteSpace: "nowrap",
-    textOverflow: "ellipsis"
-  }
+    textOverflow: "ellipsis",
+  },
 });
 
 // =============================================================
@@ -110,6 +112,7 @@ type ProductCard12Props = {
   rating: number;
   images: string[];
 };
+
 // =============================================================
 
 export default function ProductCard12(props: ProductCard12Props) {
@@ -125,8 +128,23 @@ export default function ProductCard12(props: ProductCard12Props) {
   const handleCartAmountChange = (qty: number) => () => {
     dispatch({
       type: "CHANGE_CART_AMOUNT",
-      payload: { price, imgUrl, id, qty, slug, name: title }
+      payload: { price, imgUrl, id, qty, slug, name: title },
     });
+  };
+
+  // Provide all required properties here
+  const product: Product = {
+    id,
+    name: title,
+    price,
+    description: "", // Provide an actual description
+    sale_price: 0, // Provide an actual sale_price if needed
+    sku: 0, // Provide an actual sku if needed
+    quantity: 0, // Provide an actual quantity if needed
+    gallery: images,
+    slug,
+    status: ProductStatus.Published, // Use the enum value
+    product_type: ProductType.Simple, // Use the enum value
   };
 
   return (
@@ -142,7 +160,8 @@ export default function ProductCard12(props: ProductCard12Props) {
             fontWeight="600"
             bg="primary.main"
             position="absolute"
-            color="primary.text">
+            color="primary.text"
+          >
             {off}% off
           </Chip>
         )}
@@ -174,7 +193,10 @@ export default function ProductCard12(props: ProductCard12Props) {
               variant="outlined"
               borderColor="primary.light"
               className="addCartButton"
-              onClick={handleCartAmountChange(cartItem?.qty ? cartItem?.qty - 1 : 1)}>
+              onClick={handleCartAmountChange(
+                cartItem?.qty ? cartItem?.qty - 1 : 1
+              )}
+            >
               {cartItem?.qty ? (
                 <>
                   <Icon variant="small" mr={1}>
@@ -203,7 +225,8 @@ export default function ProductCard12(props: ProductCard12Props) {
             fontSize="14px"
             fontWeight="600"
             className="title"
-            color="text.secondary">
+            color="text.secondary"
+          >
             {title}
           </H3>
         </Link>
@@ -231,7 +254,7 @@ export default function ProductCard12(props: ProductCard12Props) {
       <ProductQuickView
         open={open}
         onClose={toggleDialog}
-        product={{ id, images, slug, price, title }}
+        product={product} // Pass the full product object
       />
     </Wrapper>
   );

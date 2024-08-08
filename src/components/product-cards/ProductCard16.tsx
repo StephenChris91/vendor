@@ -17,6 +17,8 @@ import { H3, Span } from "@component/Typography";
 import ProductQuickView from "@component/products/ProductQuickView";
 import { useAppContext } from "@context/app-context";
 import { calculateDiscount, currency } from "@utils/utils";
+import Product from "@models/product.model";
+import { ProductStatus, ProductType } from "@prisma/client";
 
 // STYLED COMPONENTS
 const StyledBazaarCard = styled(Card)(({ theme }) => ({
@@ -31,19 +33,19 @@ const StyledBazaarCard = styled(Card)(({ theme }) => ({
   borderRadius: "0px 10px 10px 10px",
   "&:hover": {
     boxShadow: theme.shadows[2],
-    "& .controller": { right: 1 }
-  }
+    "& .controller": { right: 1 },
+  },
 }));
 
 const ImageWrapper = styled(Box)({
   textAlign: "center",
   position: "relative",
-  display: "inline-block"
+  display: "inline-block",
 });
 
 const ImageBox = styled(Box)(({ theme }) => ({
   padding: "44px 40px",
-  borderBottom: `1px solid ${theme.colors.gray[300]}`
+  borderBottom: `1px solid ${theme.colors.gray[300]}`,
 }));
 
 const HoverWrapper = styled(FlexBox)(({ theme }) => ({
@@ -70,7 +72,7 @@ const HoverWrapper = styled(FlexBox)(({ theme }) => ({
     padding: "10px 0px",
     alignItems: "center",
     justifyContent: "center",
-    "&:hover": { cursor: "pointer", background: "#f3f5f9" }
+    "&:hover": { cursor: "pointer", background: "#f3f5f9" },
   },
   "& a": {
     width: "100%",
@@ -78,8 +80,8 @@ const HoverWrapper = styled(FlexBox)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    "&:hover": { cursor: "pointer", background: "#f3f5f9" }
-  }
+    "&:hover": { cursor: "pointer", background: "#f3f5f9" },
+  },
 }));
 
 const StyledChip = styled(Chip)(({ theme }) => ({
@@ -92,7 +94,7 @@ const StyledChip = styled(Chip)(({ theme }) => ({
   padding: "3px 12px",
   position: "absolute",
   borderRadius: "0px 50px 50px 0px",
-  background: theme.colors.primary.main
+  background: theme.colors.primary.main,
 }));
 
 const ContentWrapper = styled(Box)({
@@ -100,8 +102,8 @@ const ContentWrapper = styled(Box)({
   "& .title, & .categories": {
     overflow: "hidden",
     whiteSpace: "nowrap",
-    textOverflow: "ellipsis"
-  }
+    textOverflow: "ellipsis",
+  },
 });
 
 const ButtonBox = styled(FlexBox)(({ theme }) => ({
@@ -111,9 +113,9 @@ const ButtonBox = styled(FlexBox)(({ theme }) => ({
   "& button": {
     color: "#fff",
     background: theme.colors.primary.main,
-    "&:hover": { background: theme.colors.primary[400] }
+    "&:hover": { background: theme.colors.primary[400] },
   },
-  "& button svg path": { fill: "white !important" }
+  "& button svg path": { fill: "white !important" },
 }));
 
 // =============================================================
@@ -125,13 +127,15 @@ type ProductCardProps = {
   imgUrl: string;
   rating?: number;
   images: string[];
-  id: string | number;
+  id: string;
   hoverEffect?: boolean;
 };
 // =============================================================
 
 export default function ProductCard16(props: ProductCardProps) {
-  const { off, id, title, price, imgUrl, rating, hoverEffect, slug, images } = props;
+  const { off, id, title, price, imgUrl, rating, hoverEffect, slug, images } =
+    props;
+  const [open, setOpen] = useState(false);
 
   const { state, dispatch } = useAppContext();
   const [openModal, setOpenModal] = useState(false);
@@ -143,8 +147,22 @@ export default function ProductCard16(props: ProductCardProps) {
   const handleCartAmountChange = (qty: number) => () => {
     dispatch({
       type: "CHANGE_CART_AMOUNT",
-      payload: { price, imgUrl, id, qty, slug, name: title }
+      payload: { price, imgUrl, id, qty, slug, name: title },
     });
+  };
+
+  const product: Product = {
+    id,
+    name: title,
+    price,
+    description: "", // Provide an actual description
+    sale_price: 0, // Provide an actual sale_price if needed
+    sku: 0, // Provide an actual sku if needed
+    quantity: 0, // Provide an actual quantity if needed
+    gallery: images,
+    slug,
+    status: ProductStatus.Published, // Use the enum value
+    product_type: ProductType.Simple, // Use the enum value
   };
 
   return (
@@ -184,9 +202,9 @@ export default function ProductCard16(props: ProductCardProps) {
       </ImageWrapper>
 
       <ProductQuickView
-        open={openModal}
+        open={open}
         onClose={toggleDialog}
-        product={{ id, images, slug, price, title }}
+        product={product} // Pass the full product object
       />
 
       <ContentWrapper>
@@ -198,14 +216,16 @@ export default function ProductCard16(props: ProductCardProps) {
               fontSize="14px"
               fontWeight="600"
               className="title"
-              color="text.secondary">
+              color="text.secondary"
+            >
               {title}
             </H3>
           </Link>
 
           {rating && (
             <FlexBox alignItems="center">
-              <Rating value={rating || 0} color="warn" /> <Span ml={1}>{`(${rating}.0)`}</Span>
+              <Rating value={rating || 0} color="warn" />{" "}
+              <Span ml={1}>{`(${rating}.0)`}</Span>
             </FlexBox>
           )}
 
@@ -225,13 +245,16 @@ export default function ProductCard16(props: ProductCardProps) {
         <ButtonBox>
           <Button
             variant="contained"
-            onClick={handleCartAmountChange(cartItem?.qty ? cartItem.qty - 1 : 1)}
+            onClick={handleCartAmountChange(
+              cartItem?.qty ? cartItem.qty - 1 : 1
+            )}
             style={{
               paddingTop: "3px",
               paddingBottom: "3px",
               width: "100%",
-              fontSize: "13px"
-            }}>
+              fontSize: "13px",
+            }}
+          >
             {cartItem?.qty ? (
               <Fragment>
                 <Icon size="16px">minus</Icon> Remove from Cart

@@ -16,6 +16,8 @@ import ProductQuickView from "@component/products/ProductQuickView";
 import { useAppContext } from "@context/app-context";
 import { currency } from "@utils/utils";
 import { theme } from "@utils/theme";
+import Product from "@models/product.model";
+import { ProductStatus, ProductType } from "@prisma/client";
 
 // styled components
 const CardBox = styled(Box)({
@@ -26,8 +28,8 @@ const CardBox = styled(Box)({
   "&:hover": {
     border: "1px solid #000",
     "& .product-actions": { right: 5 },
-    "& .product-img": { transform: "scale(1.1)" }
-  }
+    "& .product-img": { transform: "scale(1.1)" },
+  },
 });
 
 const CardMedia = styled(Box)({
@@ -36,7 +38,7 @@ const CardMedia = styled(Box)({
   cursor: "pointer",
   overflow: "hidden",
   position: "relative",
-  "& .product-img": { transition: "0.3s" }
+  "& .product-img": { transition: "0.3s" },
 });
 
 const AddToCartButton = styled(IconButton)({
@@ -44,7 +46,7 @@ const AddToCartButton = styled(IconButton)({
   right: -40,
   position: "absolute",
   transition: "right 0.3s .1s",
-  background: "transparent"
+  background: "transparent",
 });
 
 const FavoriteButton = styled(IconButton)({
@@ -52,7 +54,7 @@ const FavoriteButton = styled(IconButton)({
   right: -40,
   position: "absolute",
   background: "transparent",
-  transition: "right 0.3s .2s"
+  transition: "right 0.3s .2s",
 });
 
 // ==============================================================
@@ -63,12 +65,13 @@ type ProductCard19Props = {
   price: number;
   reviews: number;
   images: string[];
-  id: string | number;
+  id: string;
 };
 // ==============================================================
 
 export default function ProductCard19(props: ProductCard19Props) {
   const { img, name, price, reviews, id, slug, images } = props;
+  const [open, setOpen] = useState(false);
 
   const { state, dispatch } = useAppContext();
   const [openDialog, setOpenDialog] = useState(false);
@@ -90,10 +93,24 @@ export default function ProductCard19(props: ProductCard19Props) {
       name,
       price,
       imgUrl: img,
-      qty: (cartItem?.qty || 0) + 1
+      qty: (cartItem?.qty || 0) + 1,
     };
 
     dispatch({ type: "CHANGE_CART_AMOUNT", payload });
+  };
+
+  const product: Product = {
+    id,
+    name,
+    price,
+    description: "", // Provide an actual description
+    sale_price: 0, // Provide an actual sale_price if needed
+    sku: 0, // Provide an actual sku if needed
+    quantity: 0, // Provide an actual quantity if needed
+    gallery: images,
+    slug,
+    status: ProductStatus.Published, // Use the enum value
+    product_type: ProductType.Simple, // Use the enum value
   };
 
   return (
@@ -101,15 +118,28 @@ export default function ProductCard19(props: ProductCard19Props) {
       <CardBox height="100%">
         <CardMedia>
           <Link href={`/product/${slug}`}>
-            <NextImage src={img} width={300} height={300} alt="category" className="product-img" />
+            <NextImage
+              src={img}
+              width={300}
+              height={300}
+              alt="category"
+              className="product-img"
+            />
           </Link>
 
-          <AddToCartButton className="product-actions" onClick={() => setOpenDialog(true)}>
+          <AddToCartButton
+            className="product-actions"
+            onClick={() => setOpenDialog(true)}
+          >
             <Icon size="18px">eye</Icon>
           </AddToCartButton>
 
           <FavoriteButton className="product-actions" onClick={handleFavorite}>
-            {isFavorite ? <Icon size="18px">heart-filled</Icon> : <Icon size="18px">heart</Icon>}
+            {isFavorite ? (
+              <Icon size="18px">heart-filled</Icon>
+            ) : (
+              <Icon size="18px">heart</Icon>
+            )}
           </FavoriteButton>
         </CardMedia>
 
@@ -126,7 +156,12 @@ export default function ProductCard19(props: ProductCard19Props) {
             </Small>
           </FlexBox>
 
-          <Button fullwidth color="dark" variant="outlined" onClick={handleAddToCart}>
+          <Button
+            fullwidth
+            color="dark"
+            variant="outlined"
+            onClick={handleAddToCart}
+          >
             Add To Cart
           </Button>
         </Box>
@@ -134,9 +169,9 @@ export default function ProductCard19(props: ProductCard19Props) {
 
       {/* QUICK VIEW MODAL */}
       <ProductQuickView
-        open={openDialog}
+        open={open}
         onClose={toggleDialog}
-        product={{ id, images, price, slug, title: name }}
+        product={product} // Pass the full product object
       />
     </Fragment>
   );
