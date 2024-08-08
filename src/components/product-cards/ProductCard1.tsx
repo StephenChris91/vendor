@@ -19,6 +19,8 @@ import ProductQuickView from "@component/products/ProductQuickView";
 
 import { calculateDiscount, currency, getTheme } from "@utils/utils";
 import { deviceSize } from "@utils/constants";
+import Product from "@models/product.model";
+import { ProductStatus, ProductType } from "@prisma/client";
 
 // STYLED COMPONENT
 const Wrapper = styled(Card)`
@@ -107,7 +109,7 @@ const Wrapper = styled(Card)`
 
 // =======================================================================
 interface ProductCard1Props extends CardProps {
-  id: string | number;
+  id: string;
   slug: string;
   title: string;
   price: number;
@@ -147,6 +149,20 @@ export default function ProductCard1({
         qty: amount,
       },
     });
+  };
+
+  const product: Product = {
+    id,
+    name: title,
+    price,
+    description: "", // Provide an actual description
+    sale_price: 0, // Provide an actual sale_price if needed
+    sku: 0, // Provide an actual sku if needed
+    quantity: 0, // Provide an actual quantity if needed
+    gallery: images,
+    slug,
+    status: ProductStatus.Published, // Use the enum value
+    product_type: ProductType.Simple, // Use the enum value
   };
 
   return (
@@ -264,13 +280,7 @@ export default function ProductCard1({
       <ProductQuickView
         open={open}
         onClose={toggleDialog}
-        product={{
-          id: id.toString(),
-          slug,
-          name: title,
-          price,
-          image: imgUrl,
-        }}
+        product={product} // Pass the full product object
       />
     </>
   );

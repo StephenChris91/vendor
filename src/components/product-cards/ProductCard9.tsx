@@ -18,6 +18,8 @@ import { H5, SemiSpan } from "../Typography";
 import ProductQuickView from "@component/products/ProductQuickView";
 import { useAppContext } from "@context/app-context";
 import { calculateDiscount, currency, getTheme } from "@utils/utils";
+import Product from "@models/product.model";
+import { ProductStatus, ProductType } from "@prisma/client";
 
 // STYLED COMPONENT
 const Wrapper = styled(Card)`
@@ -102,7 +104,7 @@ type ProductCard9Props = {
   imgUrl: string;
   rating: number;
   images: string[];
-  id: string | number;
+  id: string;
   categories: string[];
   [key: string]: unknown;
 };
@@ -129,8 +131,22 @@ export default function ProductCard9({
   const handleCartAmountChange = (qty: number) => () => {
     dispatch({
       type: "CHANGE_CART_AMOUNT",
-      payload: { price, imgUrl, id, qty, slug, name: title }
+      payload: { price, imgUrl, id, qty, slug, name: title },
     });
+  };
+
+  const product: Product = {
+    id,
+    name: title,
+    price,
+    description: "", // Provide an actual description
+    sale_price: 0, // Provide an actual sale_price if needed
+    sku: 0, // Provide an actual sku if needed
+    quantity: 0, // Provide an actual quantity if needed
+    gallery: images,
+    slug,
+    status: ProductStatus.Published, // Use the enum value
+    product_type: ProductType.Simple, // Use the enum value
   };
 
   return (
@@ -147,25 +163,45 @@ export default function ProductCard9({
                 fontWeight="600"
                 bg="primary.main"
                 position="absolute"
-                color="primary.text">
+                color="primary.text"
+              >
                 {off}% off
               </Chip>
             )}
 
-            <Icon color="secondary" variant="small" className="quick-view" onClick={toggleDialog}>
+            <Icon
+              color="secondary"
+              variant="small"
+              className="quick-view"
+              onClick={toggleDialog}
+            >
               eye-alt
             </Icon>
 
-            <Image src={imgUrl} alt={title} width="100%" borderRadius="0.5rem" />
+            <Image
+              src={imgUrl}
+              alt={title}
+              width="100%"
+              borderRadius="0.5rem"
+            />
           </Box>
         </Grid>
 
         <Grid item md={8} sm={8} xs={12}>
-          <FlexBox flexDirection="column" justifyContent="center" height="100%" p="1rem">
+          <FlexBox
+            flexDirection="column"
+            justifyContent="center"
+            height="100%"
+            p="1rem"
+          >
             {!!categories && (
               <div className="categories">
                 {categories.map((item) => (
-                  <NavLink className="link" href={`/product/search/${item}`} key={item}>
+                  <NavLink
+                    className="link"
+                    href={`/product/search/${item}`}
+                    key={item}
+                  >
                     {item}
                   </NavLink>
                 ))}
@@ -197,7 +233,8 @@ export default function ProductCard9({
                 height="30px"
                 alignItems="center"
                 flexDirection="row-reverse"
-                justifyContent="space-between">
+                justifyContent="space-between"
+              >
                 <Icon className="favorite-icon outlined-icon" variant="small">
                   heart
                 </Icon>
@@ -209,7 +246,8 @@ export default function ProductCard9({
                     color="primary"
                     variant="outlined"
                     borderColor="primary.light"
-                    onClick={handleCartAmountChange((cartItem?.qty || 0) + 1)}>
+                    onClick={handleCartAmountChange((cartItem?.qty || 0) + 1)}
+                  >
                     <Icon variant="small">plus</Icon>
                   </Button>
 
@@ -225,7 +263,8 @@ export default function ProductCard9({
                         color="primary"
                         variant="outlined"
                         borderColor="primary.light"
-                        onClick={handleCartAmountChange(cartItem.qty - 1)}>
+                        onClick={handleCartAmountChange(cartItem.qty - 1)}
+                      >
                         <Icon variant="small">minus</Icon>
                       </Button>
                     </Fragment>
@@ -244,7 +283,8 @@ export default function ProductCard9({
             minWidth="30px"
             alignItems="center"
             flexDirection="column"
-            justifyContent="space-between">
+            justifyContent="space-between"
+          >
             <Icon className="favorite-icon outlined-icon" variant="small">
               heart
             </Icon>
@@ -252,14 +292,16 @@ export default function ProductCard9({
             <FlexBox
               alignItems="center"
               className="add-cart"
-              flexDirection={cartItem?.qty ? "column" : "column-reverse"}>
+              flexDirection={cartItem?.qty ? "column" : "column-reverse"}
+            >
               <Button
                 size="none"
                 padding="5px"
                 color="primary"
                 variant="outlined"
                 borderColor="primary.light"
-                onClick={handleCartAmountChange((cartItem?.qty || 0) + 1)}>
+                onClick={handleCartAmountChange((cartItem?.qty || 0) + 1)}
+              >
                 <Icon variant="small">plus</Icon>
               </Button>
 
@@ -275,7 +317,8 @@ export default function ProductCard9({
                     color="primary"
                     variant="outlined"
                     borderColor="primary.light"
-                    onClick={handleCartAmountChange(cartItem.qty - 1)}>
+                    onClick={handleCartAmountChange(cartItem.qty - 1)}
+                  >
                     <Icon variant="small">minus</Icon>
                   </Button>
                 </Fragment>
@@ -288,7 +331,7 @@ export default function ProductCard9({
       <ProductQuickView
         open={open}
         onClose={toggleDialog}
-        product={{ id, images, price, title, slug }}
+        product={product} // Pass the full product object
       />
     </Wrapper>
   );
