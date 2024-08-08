@@ -1,5 +1,4 @@
 import { cart, order } from "@prisma/client";
-import Order from "./order.model";
 import Product from "./product.model";
 import Shop from "./shop.model";
 
