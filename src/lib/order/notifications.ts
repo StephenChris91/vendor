@@ -6,7 +6,7 @@ import VendorNotificationEmail from '@lib/emails/vendorNotifications';
 import OrderConfirmation from '@lib/emails/orderConfirmation';
 
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_KEY);
 
 type OrderWithDetails = order & {
     orderItems: orderItem[];

@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY!;
+const PAYSTACK_SECRET_KEY = process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY!;
 const PAYSTACK_API_URL = 'https://api.paystack.co';
 
 interface PaystackTransactionResult {
