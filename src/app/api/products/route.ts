@@ -5,7 +5,7 @@ import { db } from '../../../../prisma/prisma';
 export async function GET(req: NextRequest) {
   try {
     const products = await db.product.findMany(
-      { include: { categories: true, shop: true } }
+      { include: { categories: true, shop: true, orderItems: true } }
     );
 
     return NextResponse.json(products);

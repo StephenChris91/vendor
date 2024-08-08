@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import FlexBox from "@component/FlexBox";
 import Pagination from "@component/pagination";
 import OrderRow from "@sections/customer-dashboard/orders/OrderRow";
-import Order from "@models/order.model";
+import { Order } from "@models/order.model";
 
 // ==============================================================
 type Props = {

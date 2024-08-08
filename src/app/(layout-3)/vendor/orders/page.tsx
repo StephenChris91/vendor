@@ -8,8 +8,8 @@ import TableRow from "@component/TableRow";
 import { H5 } from "@component/Typography";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
 import OrderList from "@sections/vendor-dashboard/orders/OrderList";
-import Order from "@models/order.model";
 import Spinner from "@component/Spinner";
+import { Order, OrderStatus } from "@models/order.model";
 
 interface OrdersResponse {
   orders: Order[];
@@ -25,7 +25,7 @@ const fetchVendorOrders = async (
   page = 1,
   pageSize = 10
 ): Promise<OrdersResponse> => {
-  const { data } = await axios.get(`/api/products/vendor`, {
+  const { data } = await axios.get<OrdersResponse>(`/api/products/vendor`, {
     params: { page, pageSize },
   });
   return data;

@@ -1,26 +1,30 @@
 // models/order.model.ts
 
-import User from "./user.model";
+export type OrderStatus = "Pending" | "Processing" | "Complete";
 
-
-export type OrderItem = {
+export interface Order {
   id: string;
+  userId: string;
+  status: OrderStatus;
+  subtotal: number;
+  tax: number;
+  shippingCost: number;
+  totalPrice: number;
+  paymentIntentId: string | null;
+  paymentMethod: string;
+  createdAt: string;
+  updatedAt: string;
+  shopId: string;
+  paymentReference: string | null;
+  orderItems: OrderItem[];
+}
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
   productId: string;
   quantity: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type Order = {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  status: 'Pending' | 'Processing' | 'Complete';
-  totalPrice: number;
-  orderItems: OrderItem[];
-  userId: string;
-  user?: User;  // Optional, in case we need to populate user details
-  shopId?: string;
-};
-
-export default Order;
+  price: number;
+  name: string;
+  sku: string;
+}
