@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image, { ImageProps } from "next/image";
+import Image, { ImageProps, StaticImageData } from "next/image";
 import styled from "styled-components";
 import {
   space,
@@ -11,10 +11,11 @@ import {
   BorderRadiusProps,
 } from "styled-system";
 
+// Update the type definition for src to include StaticImageData
 type NextImageProps = Omit<ImageProps, "src"> &
   SpaceProps &
   BorderRadiusProps & {
-    src: string | null | undefined;
+    src: string | StaticImageData | null | undefined;
     fallbackSrc?: string;
   };
 
@@ -29,7 +30,10 @@ const NextImage = ({
   alt,
   ...props
 }: NextImageProps) => {
-  const [imgSrc, setImgSrc] = useState(src || fallbackSrc);
+  // Ensure imgSrc can handle both string and StaticImageData types
+  const [imgSrc, setImgSrc] = useState<string | StaticImageData>(
+    src || fallbackSrc
+  );
 
   return (
     <StyledImage
