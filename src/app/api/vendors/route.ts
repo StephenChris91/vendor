@@ -1,4 +1,3 @@
-import { getAllProducts } from 'actions/products';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../prisma/prisma';

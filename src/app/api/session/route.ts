@@ -1,3 +1,6 @@
+export const dynamic = 'force-dynamic'; // Add this line to mark the route as dynamic
+
+
 import { auth } from "auth"; // Use the correct import for auth function
 import { NextResponse } from "next/server";
 
