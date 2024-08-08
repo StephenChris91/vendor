@@ -1,6 +1,7 @@
 // app/api/admin/vendors/route.ts
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../prisma/prisma';
+import { Prisma } from '@prisma/client';
 
 export async function GET(request: Request) {
     console.log("Vendors API route called");
@@ -11,17 +12,19 @@ export async function GET(request: Request) {
 
         console.log("Search params:", { search, status });
 
+        const where: Prisma.userWhereInput = {
+            role: 'Vendor',
+            ...(search && {
+                OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { email: { contains: search, mode: 'insensitive' } },
+                ],
+            }),
+            ...(status && { isOnboardedVendor: status === 'active' }),
+        };
+
         const vendors = await db.user.findMany({
-            where: {
-                role: 'Vendor',
-                ...(search && {
-                    OR: [
-                        { name: { contains: search, mode: 'insensitive' } },
-                        { email: { contains: search, mode: 'insensitive' } },
-                    ],
-                }),
-                ...(status && { isOnboardedVendor: status === 'active' }),
-            },
+            where,
             select: {
                 id: true,
                 name: true,
@@ -61,6 +64,9 @@ export async function GET(request: Request) {
         if (error instanceof Error) {
             console.error('Error message:', error.message);
             console.error('Error stack:', error.stack);
+        }
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            return NextResponse.json({ error: 'Database Error', details: error.message }, { status: 500 });
         }
         return NextResponse.json({ error: 'Internal Server Error', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
     }

@@ -25,9 +25,9 @@ const fetchVendorOrders = async (
   page = 1,
   pageSize = 10
 ): Promise<OrdersResponse> => {
-  const { data } = await axios.get(
-    `/api/products/vendor?page=${page}&pageSize=${pageSize}`
-  );
+  const { data } = await axios.get(`/api/products/vendor`, {
+    params: { page, pageSize },
+  });
   return data;
 };
 
@@ -36,7 +36,6 @@ export default function Orders() {
   const { data, isLoading, error } = useQuery<OrdersResponse, Error>({
     queryKey: ["vendorOrders", page],
     queryFn: () => fetchVendorOrders(page),
-    // keepPreviousData: true, // Keeps the previous data while fetching the new data
   });
 
   if (isLoading) return <Spinner />;
