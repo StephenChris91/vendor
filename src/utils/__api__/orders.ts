@@ -1,5 +1,5 @@
 import axios from "@lib/axios";
-import Order from "@models/order.model";
+import { Order } from "@models/order.model";
 // CUSTOM DATA MODEL
 import { IDParams } from "interfaces";
 
