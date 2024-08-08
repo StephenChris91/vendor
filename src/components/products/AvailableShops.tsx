@@ -6,10 +6,10 @@ import Avatar from "@component/avatar";
 import Grid from "@component/grid/Grid";
 import FlexBox from "@component/FlexBox";
 import { H3, H4 } from "@component/Typography";
-import Shop from "@models/shop.model";
+import { shop } from "@prisma/client";
 
 // ============================================================
-type Props = { shops: Shop[] };
+type Props = { shops: Partial<shop>[] };
 // ============================================================
 
 export default function AvailableShops({ shops }: Props) {
@@ -19,7 +19,7 @@ export default function AvailableShops({ shops }: Props) {
 
       <Grid container spacing={8}>
         {shops.map((item) => (
-          <Grid item lg={2} md={4} sm={6} xs={12} key={item.shopName}>
+          <Grid item lg={2} md={4} sm={6} xs={12} key={item.id}>
             <Link href={`/shops/${item.slug}`}>
               <FlexBox
                 as={Card}
@@ -30,7 +30,7 @@ export default function AvailableShops({ shops }: Props) {
                 flexDirection="column"
                 justifyContent="center"
               >
-                <Avatar src={item.logo} />
+                <Avatar src={item.logo || ""} />
                 <H4
                   textAlign="center"
                   width="inherit"

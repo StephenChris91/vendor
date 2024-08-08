@@ -10,11 +10,11 @@ import RelatedProducts from "@component/products/RelatedProducts";
 import FrequentlyBought from "@component/products/FrequentlyBought";
 import ProductDescription from "@component/products/ProductDescription";
 import Product from "@models/product.model";
-import Shop from "@models/shop.model";
+import { shop } from "@prisma/client";
 
 type Props = {
   product: Product;
-  shops: Shop[];
+  shops: Partial<shop>[];
   relatedProducts: Product[];
   frequentlyBought: Product[];
 };

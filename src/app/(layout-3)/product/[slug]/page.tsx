@@ -23,6 +23,8 @@ export default function ProductDetails() {
     }
   );
 
+  // In ProductDetails component
+  // In ProductDetails component
   const { data: shops, isLoading: shopsLoading } = useQuery<
     Partial<shop>[],
     Error

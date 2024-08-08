@@ -10,17 +10,7 @@ export async function getAvailableShop(): Promise<Partial<shop>[]> {
             where: {
                 status: 'Approved', // Assuming you have a status field and 'Approved' is a valid status
             },
-            select: {
-                id: true,
-                shopName: true,
-                description: true,
-                logo: true,
-                slug: true,
-                user: true,
-                products: true,
-                orders: true
-                // Add any other fields you need
-            },
+
         });
 
         return shops;
