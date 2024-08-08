@@ -1,7 +1,7 @@
 import { PaymentInfo, product, ShopSettings, ShopStatus } from "@prisma/client";
 import Address from "./address.model";
-import Order from "./order.model";
 import User from "./user.model";
+import { Order } from "./order.model";
 
 interface Shop {
   id: string;
