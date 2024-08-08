@@ -47,7 +47,7 @@ export default function Section3({ title, products }: Props) {
                 title={item.name}
                 price={item.price}
                 off={item.sale_price}
-                rating={5}
+                rating={5} // You might want to pass the actual rating if available
                 images={item.gallery}
                 imgUrl={item.image}
               />

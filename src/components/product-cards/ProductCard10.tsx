@@ -5,14 +5,15 @@ import Card from "@component/Card";
 import Modal from "@component/Modal";
 import Icon from "@component/icon/Icon";
 import ProductIntro from "@component/products/ProductIntro";
+import Product from "@models/product.model";
 
-type Product = {
-  id: string;
-  images: string[];
-  slug: string;
-  price: number;
-  name: string;
-};
+// type Product = {
+//   id: string;
+//   images: string[];
+//   slug: string;
+//   price: number;
+//   name: string;
+// };
 
 type Props = {
   open: boolean;
@@ -20,34 +21,57 @@ type Props = {
   product: Product;
 };
 
-export default function ProductQuickView({ open, onClose, product }: Props) {
+type ProductCardProps = {
+  id: string;
+  slug: string;
+  unit: string;
+  title: string;
+  price: number;
+  off: number;
+  rating: number;
+  images: string[];
+  imgUrl: string;
+};
+
+export default function ProductCard10({
+  id,
+  slug,
+  unit,
+  title,
+  price,
+  off,
+  rating,
+  images,
+  imgUrl,
+}: ProductCardProps) {
   return (
-    <Modal open={open} onClose={onClose}>
-      <Card
-        p="1rem"
-        width="100%"
-        maxWidth="800px"
-        borderRadius={8}
-        position="relative"
-      >
-        <ProductIntro
-          id={product.id}
-          title={product.name}
-          price={product.price}
-          images={product.images}
+    <Card>
+      {/* Render the product card with these props */}
+      <div>
+        {/* Product Image */}
+        <img
+          src={imgUrl}
+          alt={title}
+          style={{ width: "100%", height: "auto" }}
         />
 
-        <Box position="absolute" top="0.75rem" right="0.75rem" cursor="pointer">
-          <Icon
-            className="close"
-            color="primary"
-            variant="small"
-            onClick={onClose}
-          >
-            close
-          </Icon>
-        </Box>
-      </Card>
-    </Modal>
+        {/* Product Title */}
+        <h3>{title}</h3>
+
+        {/* Unit Information */}
+        <p>{unit}</p>
+
+        {/* Product Price */}
+        <p>Price: ${price.toFixed(2)}</p>
+
+        {/* Discount Information */}
+        {off > 0 && <p>Discount: {off}% off</p>}
+
+        {/* Product Rating */}
+        <p>Rating: {rating}/5</p>
+
+        {/* Additional rendering logic can go here */}
+      </div>
+    </Card>
   );
 }
