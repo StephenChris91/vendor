@@ -27,6 +27,7 @@ export default function ProductCard1List({ products }: Props) {
               rating={item.ratings}
               off={item.sale_price}
               images={item?.gallery}
+              shopId={item.shop.id}
             />
           </Grid>
         ))}

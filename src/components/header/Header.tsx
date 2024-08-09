@@ -16,7 +16,7 @@ import { IconButton } from "@component/buttons";
 import Sidenav from "@component/sidenav/Sidenav";
 import Categories from "@component/categories/Categories";
 import { SearchInputWithCategory } from "@component/search-box";
-import { useAppContext } from "@context/app-context";
+import { useCart } from "hooks/useCart"; // Import the new useCart hook
 import StyledHeader from "./styles";
 import UserLoginDialog from "./LoginDialog";
 import { LogoutButton } from "@component/logout-button";
@@ -27,7 +27,7 @@ type HeaderProps = { isFixed?: boolean; className?: string };
 // =====================================================================
 
 export default function Header({ isFixed, className }: HeaderProps) {
-  const { state } = useAppContext();
+  const { cartItems } = useCart(); // Use the new useCart hook
   const [open, setOpen] = useState(false);
   const toggleSidenav = () => setOpen(!open);
   const { user, signIn } = useAuth();
@@ -38,7 +38,7 @@ export default function Header({ isFixed, className }: HeaderProps) {
         <Icon size="20px">bag</Icon>
       </IconButton>
 
-      {!!state.cart.length && (
+      {!!cartItems.length && (
         <FlexBox
           top={-5}
           right={-5}
@@ -51,7 +51,7 @@ export default function Header({ isFixed, className }: HeaderProps) {
           justifyContent="center"
         >
           <Tiny color="white" fontWeight="600" lineHeight={1}>
-            {state.cart.length}
+            {cartItems.length}
           </Tiny>
         </FlexBox>
       )}

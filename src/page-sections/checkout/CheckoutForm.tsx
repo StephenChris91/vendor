@@ -9,7 +9,7 @@ import TextField from "@component/text-field";
 import { H6 } from "@component/Typography";
 import { Card1 } from "@component/Card1";
 import Grid from "@component/grid/Grid";
-import { useAppContext } from "@context/app-context";
+import { useCart } from "hooks/useCart"; // Import the new useCart hook
 
 export default function CheckoutForm() {
   const [shippingAddress, setShippingAddress] = useState({
@@ -24,16 +24,13 @@ export default function CheckoutForm() {
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { state, dispatch } = useAppContext();
+  const [outOfStockItems, setOutOfStockItems] = useState<string[]>([]); // New state to track out-of-stock items
+  const { cartItems, cartTotal } = useCart(); // Use the new useCart hook
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setShippingAddress((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const calculateTotal = () => {
-    return state.cart.reduce((total, item) => total + item.price * item.qty, 0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,19 +39,27 @@ export default function CheckoutForm() {
     setError(null);
 
     try {
-      // Create order
       const response = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cartItems: state.cart,
+          cartItems,
           shippingAddress,
-          email: shippingAddress.email, // Make sure to include email
+          email: shippingAddress.email,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create order");
+        const errorData = await response.json();
+        if (errorData.outOfStockItems) {
+          setError(
+            "Some items in your cart are out of stock or have insufficient quantity."
+          );
+          setOutOfStockItems(errorData.outOfStockItems);
+        } else {
+          throw new Error(errorData.error || "Failed to create order");
+        }
+        return;
       }
 
       const { order, paymentDetails } = await response.json();
@@ -66,8 +71,6 @@ export default function CheckoutForm() {
       setError(
         error instanceof Error ? error.message : "An unexpected error occurred"
       );
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -183,7 +186,7 @@ export default function CheckoutForm() {
         fullwidth
         disabled={isProcessing}
       >
-        {isProcessing ? "Processing..." : `Pay ₦${calculateTotal().toFixed(2)}`}
+        {isProcessing ? "Processing..." : `Pay ₦${cartTotal.toFixed(2)}`}
       </Button>
 
       {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}

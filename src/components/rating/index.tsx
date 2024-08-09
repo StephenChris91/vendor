@@ -29,7 +29,7 @@ export default function Rating({
 }: RatingProps) {
   const [state, setState] = useState<number>(value as number);
 
-  let fullStar = parseInt(state.toString());
+  let fullStar = parseInt(state?.toString());
   let halfStar = Math.ceil(state - fullStar);
   let emptyStar = (outof as number) - Math.ceil(state);
   let starList = [];
@@ -47,7 +47,12 @@ export default function Rating({
     let inputValue = i + 1;
 
     starList.push(
-      <Star key={i} value={5} color={color} onClick={() => handleStarClick(inputValue)} />
+      <Star
+        key={i}
+        value={5}
+        color={color}
+        onClick={() => handleStarClick(inputValue)}
+      />
     );
   }
 
@@ -69,7 +74,12 @@ export default function Rating({
     let inputValue = i + halfStar + fullStar + 1;
 
     starList.push(
-      <Star key={inputValue} value={0} color={color} onClick={() => handleStarClick(inputValue)} />
+      <Star
+        key={inputValue}
+        value={0}
+        color={color}
+        onClick={() => handleStarClick(inputValue)}
+      />
     );
   }
 

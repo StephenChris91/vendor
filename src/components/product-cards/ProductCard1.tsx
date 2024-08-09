@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Fragment, useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { useAppContext } from "@context/app-context";
+import { useCart } from "hooks/useCart";
 
 import Box from "@component/Box";
 import Rating from "@component/rating";
@@ -117,6 +117,7 @@ interface ProductCard1Props extends CardProps {
   rating: number;
   off?: number;
   images: string[];
+  shopId: string;
 }
 // =======================================================================
 
@@ -129,26 +130,29 @@ export default function ProductCard1({
   rating,
   off,
   images,
+  shopId,
   ...props
 }: ProductCard1Props) {
   const [open, setOpen] = useState(false);
-  const { state, dispatch } = useAppContext();
-  const cartItem = state.cart.find((item) => item.id === id);
+  const { cartItems, addToCart, removeFromCart } = useCart();
+  const cartItem = cartItems.find((item) => item.id === id);
 
   const toggleDialog = useCallback(() => setOpen((open) => !open), []);
 
   const handleCartAmountChange = (amount: number) => () => {
-    dispatch({
-      type: "CHANGE_CART_AMOUNT",
-      payload: {
+    if (amount === 0) {
+      removeFromCart(id);
+    } else {
+      addToCart({
         id,
-        slug,
-        price,
-        imgUrl,
+        productId: id,
         name: title,
-        qty: amount,
-      },
-    });
+        price,
+        image: imgUrl,
+        quantity: amount,
+        shopId: shopId, // You might need to add shopId to your ProductCard1Props
+      });
+    }
   };
 
   const product: Product = {
@@ -161,8 +165,8 @@ export default function ProductCard1({
     quantity: 0, // Provide an actual quantity if needed
     gallery: images,
     slug,
-    status: ProductStatus.Published, // Use the enum value
-    product_type: ProductType.Simple, // Use the enum value
+    status: ProductStatus.Published,
+    product_type: ProductType.Simple,
   };
 
   return (
@@ -241,7 +245,9 @@ export default function ProductCard1({
               width="30px"
               alignItems="center"
               flexDirection="column-reverse"
-              justifyContent={!!cartItem?.qty ? "space-between" : "flex-start"}
+              justifyContent={
+                !!cartItem?.quantity ? "space-between" : "flex-start"
+              }
             >
               <Button
                 size="none"
@@ -249,15 +255,15 @@ export default function ProductCard1({
                 color="primary"
                 variant="outlined"
                 borderColor="primary.light"
-                onClick={handleCartAmountChange((cartItem?.qty || 0) + 1)}
+                onClick={handleCartAmountChange((cartItem?.quantity || 0) + 1)}
               >
                 <Icon variant="small">plus</Icon>
               </Button>
 
-              {!!cartItem?.qty && (
+              {!!cartItem?.quantity && (
                 <Fragment>
                   <SemiSpan color="text.primary" fontWeight="600">
-                    {cartItem.qty}
+                    {cartItem.quantity}
                   </SemiSpan>
 
                   <Button
@@ -266,7 +272,7 @@ export default function ProductCard1({
                     color="primary"
                     variant="outlined"
                     borderColor="primary.light"
-                    onClick={handleCartAmountChange(cartItem.qty - 1)}
+                    onClick={handleCartAmountChange(cartItem.quantity - 1)}
                   >
                     <Icon variant="small">minus</Icon>
                   </Button>
@@ -277,11 +283,7 @@ export default function ProductCard1({
         </div>
       </Wrapper>
 
-      <ProductQuickView
-        open={open}
-        onClose={toggleDialog}
-        product={product} // Pass the full product object
-      />
+      <ProductQuickView open={open} onClose={toggleDialog} product={product} />
     </>
   );
 }

@@ -13,6 +13,7 @@ import { useCurrentSession, useCurrentUser } from '@lib/use-session-server';
 export async function POST(req: Request) {
     try {
         const session = await useCurrentSession();
+        const user = await useCurrentUser();
 
         if (!session || !session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -23,11 +24,20 @@ export async function POST(req: Request) {
         // Validate inventory
         const inventoryCheck = await validateInventory(cartItems);
         if (!inventoryCheck.success) {
-            return NextResponse.json({ error: inventoryCheck.error }, { status: 400 });
+            return NextResponse.json({
+                error: inventoryCheck.error,
+                outOfStockItems: inventoryCheck.outOfStockItems
+            }, { status: 400 });
         }
 
-        // Group cart items by shop
-        const itemsByShop = await groupCartItemsByShop(cartItems);
+        // Rest of the order creation process remains the same...
+
+        // Group cart items by shop and validate shops
+        const { itemsByShop, validShops } = await groupAndValidateCartItemsByShop(cartItems);
+
+        if (Object.keys(validShops).length === 0) {
+            return NextResponse.json({ error: 'No valid shops found for the items in the cart' }, { status: 400 });
+        }
 
         const existingUser = await getUserByEmail(session.user?.email);
         if (!existingUser) {
@@ -36,17 +46,28 @@ export async function POST(req: Request) {
 
         // Calculate totals
         const subtotal = cartItems.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
-        const taxAmount = await calculateTax(subtotal, shippingAddress.state);
+        let taxAmount;
+        try {
+            taxAmount = await calculateTax(subtotal, shippingAddress.state);
+        } catch (error) {
+            console.error('Error calculating tax:', error);
+            taxAmount = 0; // Set a default value or handle this case as appropriate
+        }
         const shippingCost = await calculateShipping(cartItems, shippingAddress);
         const totalAmount = subtotal + taxAmount + shippingCost;
 
         // Initialize Paystack transaction
         const paystackTransaction = await initializePaystackTransaction(totalAmount, email);
 
+        // Choose the first valid shop as the primary shop for the main order
+        const primaryShopId = Object.keys(validShops)[0];
+        const primaryShop = validShops[primaryShopId];
+
         // Create main order
         const mainOrder = await db.order.create({
             data: {
                 user: { connect: { id: existingUser.id } },
+                shop: { connect: { id: primaryShop.id } },
                 status: 'Pending Payment',
                 subtotal,
                 tax: taxAmount,
@@ -68,18 +89,19 @@ export async function POST(req: Request) {
             }
         });
 
-        const shopOrders = [];
-
         // Create shopOrders and orderItems for each shop
         for (const [shopId, items] of Object.entries(itemsByShop)) {
+            const shop = validShops[shopId];
+            if (!shop) continue; // Skip if shop is not valid
+
             const shopSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
             const shopTax = await calculateTax(shopSubtotal, shippingAddress.state);
             const shopShippingCost = await calculateShipping(items, shippingAddress);
 
-            const shopOrder = await db.shopOrder.create({
+            await db.shopOrder.create({
                 data: {
                     order: { connect: { id: mainOrder.id } },
-                    shop: { connect: { id: shopId } },
+                    shop: { connect: { id: shop.id } },
                     status: 'Pending Payment',
                     subtotal: shopSubtotal,
                     tax: shopTax,
@@ -92,16 +114,11 @@ export async function POST(req: Request) {
                             quantity: item.quantity,
                             price: item.price,
                             name: item.name,
-                            sku: item.sku
+                            sku: item.sku || '' // Ensure sku is a string
                         }))
                     }
-                },
-                include: {
-                    orderItems: true
                 }
             });
-
-            shopOrders.push(shopOrder);
         }
 
         // Fetch the complete order with all relations
@@ -130,20 +147,35 @@ export async function POST(req: Request) {
     }
 }
 
-async function groupCartItemsByShop(cartItems: any[]) {
+async function groupAndValidateCartItemsByShop(cartItems: any[]) {
     const itemsByShop: { [key: string]: any[] } = {};
+    const validShops: { [key: string]: { id: string, slug: string, userId: string } } = {};
+
     for (const item of cartItems) {
         const product = await db.product.findUnique({
             where: { id: item.id },
-            select: { shop: { select: { id: true } } }
+            select: { shop: { select: { id: true, slug: true, userId: true } } }
         });
+
         if (product && product.shop) {
             const shopId = product.shop.id;
             if (!itemsByShop[shopId]) {
                 itemsByShop[shopId] = [];
             }
             itemsByShop[shopId].push(item);
+
+            // Validate and store shop information
+            if (!validShops[shopId]) {
+                const shop = await db.shop.findUnique({
+                    where: { id: shopId },
+                    select: { id: true, slug: true, userId: true }
+                });
+                if (shop) {
+                    validShops[shopId] = shop;
+                }
+            }
         }
     }
-    return itemsByShop;
+
+    return { itemsByShop, validShops };
 }
