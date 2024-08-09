@@ -24,6 +24,7 @@ interface SelectProps
   errorText?: string;
   options: SelectOption[];
   isMulti?: boolean;
+  onCreateOption?: (option: SelectOption) => void;
   onChange?: (option: SelectOption | SelectOption[] | null) => void;
 }
 

@@ -7,11 +7,14 @@ import { validateInventory } from '@lib/order/inventory';
 import { calculateTax } from '@lib/order/calculateTax';
 import { calculateShipping } from '@lib/order/calculateShipping';
 import { initializePaystackTransaction } from '@lib/order/createPayment';
+import { getUserByEmail, getUserById } from '@lib/data/user';
+import { useCurrentSession, useCurrentUser } from '@lib/use-session-server';
 
 export async function POST(req: Request) {
     try {
-        const session = await auth();
-        if (!session || !session.user) {
+        const session = await useCurrentSession();
+
+        if (!session || !session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -26,6 +29,11 @@ export async function POST(req: Request) {
         // Group cart items by shop
         const itemsByShop = await groupCartItemsByShop(cartItems);
 
+        const existingUser = await getUserByEmail(session.user?.email);
+        if (!existingUser) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
         // Calculate totals
         const subtotal = cartItems.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
         const taxAmount = await calculateTax(subtotal, shippingAddress.state);
@@ -35,10 +43,10 @@ export async function POST(req: Request) {
         // Initialize Paystack transaction
         const paystackTransaction = await initializePaystackTransaction(totalAmount, email);
 
-        // Create order
-        const order = await db.order.create({
+        // Create main order
+        const mainOrder = await db.order.create({
             data: {
-                user: session.user.id,
+                user: { connect: { id: existingUser.id } },
                 status: 'Pending Payment',
                 subtotal,
                 tax: taxAmount,
@@ -56,39 +64,49 @@ export async function POST(req: Request) {
                         country: shippingAddress.country,
                         phone: shippingAddress.phone
                     }
-                },
-                shopOrders: {
-                    create: await Promise.all(Object.entries(itemsByShop).map(async ([shopId, items]) => {
-                        const shopSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-                        const shopTax = await calculateTax(shopSubtotal, shippingAddress.state);
-                        const shopShippingCost = await calculateShipping(items, shippingAddress);
-                        return {
-                            shop: {
-                                connect: { id: shopId }
-                            },
-                            order: {
-                                connect: { id: order.id }
-                            },
-                            status: 'Pending Payment',
-                            subtotal: shopSubtotal,
-                            tax: shopTax,
-                            shippingCost: shopShippingCost,
-                            totalPrice: shopSubtotal + shopTax + shopShippingCost,
-                            orderItems: {
-                                create: items.map(item => ({
-                                    product: {
-                                        connect: { id: item.id }
-                                    },
-                                    quantity: item.quantity,
-                                    price: item.price,
-                                    name: item.name,
-                                    sku: item.sku
-                                }))
-                            }
-                        };
-                    }))
                 }
-            },
+            }
+        });
+
+        const shopOrders = [];
+
+        // Create shopOrders and orderItems for each shop
+        for (const [shopId, items] of Object.entries(itemsByShop)) {
+            const shopSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const shopTax = await calculateTax(shopSubtotal, shippingAddress.state);
+            const shopShippingCost = await calculateShipping(items, shippingAddress);
+
+            const shopOrder = await db.shopOrder.create({
+                data: {
+                    order: { connect: { id: mainOrder.id } },
+                    shop: { connect: { id: shopId } },
+                    status: 'Pending Payment',
+                    subtotal: shopSubtotal,
+                    tax: shopTax,
+                    shippingCost: shopShippingCost,
+                    totalPrice: shopSubtotal + shopTax + shopShippingCost,
+                    orderItems: {
+                        create: items.map(item => ({
+                            order: { connect: { id: mainOrder.id } },
+                            product: { connect: { id: item.id } },
+                            quantity: item.quantity,
+                            price: item.price,
+                            name: item.name,
+                            sku: item.sku
+                        }))
+                    }
+                },
+                include: {
+                    orderItems: true
+                }
+            });
+
+            shopOrders.push(shopOrder);
+        }
+
+        // Fetch the complete order with all relations
+        const completeOrder = await db.order.findUnique({
+            where: { id: mainOrder.id },
             include: {
                 shopOrders: {
                     include: {
@@ -100,7 +118,7 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json({
-            order,
+            order: completeOrder,
             paymentDetails: {
                 authorizationUrl: paystackTransaction.authorizationUrl,
                 reference: paystackTransaction.reference

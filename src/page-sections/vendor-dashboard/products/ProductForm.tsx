@@ -66,6 +66,7 @@ const productTypeOptions: SelectOption[] = [
 
 export default function ProductUpdateForm({ product, categoryOptions }: Props) {
   const [cateOptions, setCateOptions] = useState<SelectOption[]>([]);
+  const [isSlugUnique, setIsSlugUnique] = useState(true);
 
   useEffect(() => {
     fetchCategories();
@@ -89,6 +90,27 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
     return Math.floor(Math.random() * 1000000000);
   };
 
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^-+|-+$/g, "");
+  };
+
+  const checkSlugUniqueness = async (slug: string) => {
+    try {
+      const response = await fetch(`/api/products/check-slug?slug=${slug}`);
+      if (!response.ok) throw new Error("Failed to check slug uniqueness");
+      const { isUnique } = await response.json();
+      setIsSlugUnique(isUnique);
+      return isUnique;
+    } catch (error) {
+      console.error("Error checking slug uniqueness:", error);
+      toast.error("Failed to check slug uniqueness");
+      return false;
+    }
+  };
+
   const initialValues: FormValues = {
     name: product?.name || "",
     price: product?.price || 0,
@@ -109,7 +131,7 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
   };
 
   const validationSchema = yup.object().shape({
-    name: yup.string().optional(),
+    name: yup.string().required("Name is required"),
     categories: yup.array().min(1, "At least one category is required"),
     description: yup.string().required("Description is required"),
     stock: yup
@@ -144,9 +166,14 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
     values: FormValues,
     { setSubmitting }: FormikHelpers<FormValues>
   ) => {
+    if (!isSlugUnique) {
+      toast.error("Slug is not unique. Please modify the product name.");
+      setSubmitting(false);
+      return;
+    }
+
     console.log(values, "form submitting started");
 
-    // Transform categories to match the expected format
     const transformedValues = {
       ...values,
       categories: values.categories.map((cat) => cat.value),
@@ -181,6 +208,17 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
             setFieldValue("image", url);
           };
 
+          const handleNameChange = async (
+            e: React.ChangeEvent<HTMLInputElement>
+          ) => {
+            const name = e.target.value;
+            handleChange(e);
+            const newSlug = generateSlug(name);
+            setFieldValue("slug", newSlug);
+            const isUnique = await checkSlugUniqueness(newSlug);
+            setIsSlugUnique(isUnique);
+          };
+
           return (
             <Form>
               <Grid container spacing={6}>
@@ -192,24 +230,8 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
                     placeholder="Product Name"
                     value={values.name}
                     onBlur={handleBlur}
-                    onChange={handleChange}
+                    onChange={handleNameChange}
                     errorText={touched.name && errors.name}
-                  />
-                </Grid>
-
-                <Grid item sm={6} xs={12}>
-                  <Select
-                    isMulti
-                    options={categoryOptions}
-                    value={values.categories}
-                    onChange={(newValue) =>
-                      setFieldValue("categories", newValue)
-                    }
-                    label="Categories"
-                    placeholder="Select Categories"
-                    errorText={
-                      touched.categories && (errors.categories as string)
-                    }
                   />
                 </Grid>
 
@@ -223,6 +245,29 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
                     onBlur={handleBlur}
                     onChange={handleChange}
                     errorText={touched.slug && errors.slug}
+                    disabled
+                  />
+                  {!isSlugUnique && (
+                    <p style={{ color: "red" }}>
+                      This slug is not unique. Please modify the product name.
+                    </p>
+                  )}
+                </Grid>
+
+                <Grid item sm={6} xs={12}>
+                  <Select
+                    label="Categories"
+                    name="categories"
+                    options={cateOptions}
+                    isMulti
+                    value={values.categories}
+                    onChange={(newValue) =>
+                      setFieldValue("categories", newValue)
+                    }
+                    placeholder="Select Categories"
+                    errorText={
+                      touched.categories && (errors.categories as string)
+                    }
                   />
                 </Grid>
 
@@ -261,38 +306,6 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
                     errorText={touched.quantity && errors.quantity}
                   />
                 </Grid>
-
-                {/* <Grid item sm={6} xs={12}>
-                  <Select
-                    isMulti
-                    options={categoryOptions}
-                    value={values.categories}
-                    onChange={(newValue) =>
-                      setFieldValue("categories", newValue)
-                    }
-                    label="Categories"
-                    placeholder="Select Categories"
-                    errorText={
-                      touched.categories && (errors.categories as string)
-                    }
-                  />
-                </Grid> */}
-
-                {/* <Grid item sm={6} xs={12}>
-                  <Select
-                    isMulti
-                    options={categoryOptions}
-                    value={values.categories}
-                    onChange={(newValue) =>
-                      setFieldValue("categories", newValue)
-                    }
-                    label="Categories"
-                    placeholder="Select Categories"
-                    errorText={
-                      touched.categories && (errors.categories as string)
-                    }
-                  />
-                </Grid> */}
 
                 <Grid item xs={12}>
                   <DropZone
@@ -393,6 +406,40 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
                     }
                   />
                 </Grid>
+
+                <Grid item sm={6} xs={12}>
+                  <Select
+                    options={statusOptions}
+                    value={
+                      statusOptions.find(
+                        (option) => option.value === values.status
+                      ) || null
+                    }
+                    onChange={(newValue) =>
+                      setFieldValue("status", newValue || "")
+                    }
+                    label="Status"
+                    placeholder="Select Status"
+                    errorText={touched.status && errors.status}
+                  />
+                </Grid>
+
+                <Grid item sm={6} xs={12}>
+                  <Select
+                    options={productTypeOptions}
+                    value={
+                      productTypeOptions.find(
+                        (option) => option.value === values.product_type
+                      ) || null
+                    }
+                    onChange={(newValue) =>
+                      setFieldValue("product_type", newValue || "")
+                    }
+                    label="Product Type"
+                    placeholder="Select Product Type"
+                    errorText={touched.product_type && errors.product_type}
+                  />
+                </Grid>
               </Grid>
 
               <Button
@@ -400,9 +447,9 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
                 variant="contained"
                 color="primary"
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !isSlugUnique}
               >
-                Save Product
+                {product ? "Update Product" : "Create Product"}
               </Button>
             </Form>
           );
