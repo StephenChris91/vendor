@@ -1,5 +1,4 @@
-import { db } from "../../prisma/prisma";
-
+// cartUtils.ts
 
 export async function getVendorsFromCart(cartItems: any[]) {
     console.log('Getting vendors from cart items:', cartItems);
@@ -9,50 +8,20 @@ export async function getVendorsFromCart(cartItems: any[]) {
         return [];
     }
 
-    const productIds = cartItems.map(item => item.id);
-    console.log('Product IDs:', productIds);
-
     try {
-        const vendorsWithProducts = await db.shop.findMany({
-            where: {
-                products: {
-                    some: {
-                        id: {
-                            in: productIds
-                        }
-                    }
-                }
+        const response = await fetch('/api/vendors/get-vendors', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
-            include: {
-                user: true,
-                address: true,
-                shopSettings: true,
-                products: {
-                    where: {
-                        id: {
-                            in: productIds
-                        }
-                    }
-                }
-            }
+            body: JSON.stringify({ cartItems }),
         });
 
-        console.log('Vendors with products:', vendorsWithProducts);
+        if (!response.ok) {
+            throw new Error('Failed to fetch vendors');
+        }
 
-        const vendors = vendorsWithProducts.map(shop => ({
-            id: shop.id,
-            name: shop.shopName,
-            email: shop.user.email,
-            phone: shop.shopSettings?.phoneNumber,
-            address: {
-                street: shop.address?.street,
-                city: shop.address?.city,
-                state: shop.address?.state,
-                country: shop.address?.country
-            },
-            products: shop.products
-        }));
-
+        const vendors = await response.json();
         console.log('Processed vendors:', vendors);
 
         return vendors;

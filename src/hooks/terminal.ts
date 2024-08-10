@@ -1,3 +1,5 @@
+import { formatPhoneNumber } from "utils/phoneUtils";
+
 const API_KEY = "sk_test_nfkFJs8y9KARbAEfIzxZC4DBwpFE6Hcr";
 const API_URL = 'https://sandbox.terminal.africa/v1';
 
@@ -20,11 +22,19 @@ async function makeRequest(endpoint: string, method: string, body: any = null) {
 }
 
 export async function createPickupAddress(vendor: any) {
+    console.log('Creating pickup address for vendor:', vendor);
+
+    // Ensure phone number is in international format
+    const formattedPhone = formatPhoneNumber(vendor.phone);
+    if (!formattedPhone) {
+        throw new Error(`Invalid phone number for vendor ${vendor.id}`);
+    }
+
     const body = {
-        first_name: vendor.name,
-        last_name: '',
+        first_name: vendor.name.split(' ')[0] || '',
+        last_name: vendor.name.split(' ').slice(1).join(' ') || '',
         email: vendor.email,
-        phone: vendor.phone,
+        phone: formattedPhone,
         line1: vendor.address.street,
         city: vendor.address.city,
         state: vendor.address.state as string,
@@ -32,8 +42,14 @@ export async function createPickupAddress(vendor: any) {
         shop_id: vendor.id
     };
 
-    const response = await makeRequest('/addresses', 'POST', body);
-    return response.data.id;
+    try {
+        const response = await makeRequest('/addresses', 'POST', body);
+        console.log('Pickup address created:', response);
+        return response.data.id;
+    } catch (error) {
+        console.error(`Error creating pickup address for vendor ${vendor.id}:`, error);
+        throw error;
+    }
 }
 
 export async function getOrCreatePickupAddresses(vendors: any[]) {
@@ -81,9 +97,9 @@ export async function createDeliveryAddress(user: any, address: any) {
         last_name: user.lastname,
         email: user.email,
         phone: user.phone || '+2348083669100', // Fallback to a default if user.phone is not available
-        line1: '54, Abiodun Street',
-        city: 'Yaba',
-        state: 'Lagos',
+        line1: address.street,
+        city: address.city,
+        state: address.state as string,
         country: 'NG',
     };
 
@@ -96,7 +112,7 @@ export async function createDeliveryAddress(user: any, address: any) {
 
 export async function createParcel(cartItems: any[]) {
     const totalWeight = cartItems.reduce((sum, item) => {
-        const itemWeight = Math.max(item.weight || 0.1, 0.1) * item.qty;
+        const itemWeight = Math.max(item.weight || 0.1, 0.1) * item.quantity;
         return sum + itemWeight;
     }, 0);
 
@@ -114,7 +130,7 @@ export async function createParcel(cartItems: any[]) {
         description: 'Package containing ordered items',
         items: cartItems.map(item => ({
             name: item.name,
-            quantity: item.qty,
+            quantity: item.quantity,
             value: item.price,
             description: item.description || 'Product description',
             weight: Math.max(item.weight || 0.1, 0.1), // Ensure each item weighs at least 0.1 kg

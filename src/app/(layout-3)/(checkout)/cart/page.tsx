@@ -12,7 +12,7 @@ import Typography from "@component/Typography";
 import { ProductCard7 } from "@component/product-cards";
 import Select from "@component/Select";
 import TextField from "@component/text-field";
-import { useAppContext } from "@context/app-context";
+import { useCart } from "hooks/useCart";
 import { currency } from "@utils/utils";
 
 import stateList from "@data/stateList";
@@ -47,7 +47,8 @@ const ShippingRates = ({ rates, selectedRate, onSelectRate }) => (
 
 export default function Cart() {
   const router = useRouter();
-  const { state } = useAppContext();
+  const { cartItems, cartTotal, updateCartItemQuantity, removeFromCart } =
+    useCart();
   const user = useCurrentUser();
   const [selectedRate, setSelectedRate] = useState(null);
   const [vendors, setVendors] = useState([]);
@@ -68,9 +69,9 @@ export default function Cart() {
 
   useEffect(() => {
     async function fetchVendors() {
-      if (user && state.cart.length > 0) {
+      if (user && cartItems.length > 0) {
         try {
-          const fetchedVendors = await getVendorsFromCart(state.cart);
+          const fetchedVendors = await getVendorsFromCart(cartItems);
           setVendors(fetchedVendors);
         } catch (error) {
           console.error("Error fetching vendors:", error);
@@ -80,7 +81,7 @@ export default function Cart() {
     }
 
     fetchVendors();
-  }, [user, state.cart]);
+  }, [user, cartItems]);
 
   const handleAddressChange = (field, value) => {
     setAddress((prev) => ({ ...prev, [field]: value }));
@@ -93,7 +94,9 @@ export default function Cart() {
   const handleGetShippingRates = async () => {
     if (address.state && address.city && address.street) {
       try {
-        await getShippingRates(user, state.cart, vendors, address);
+        console.log("Sending address:", address);
+        console.log("Vendors:", vendors);
+        await getShippingRates(user, vendors, address);
         console.log("Shipping rates fetched successfully");
       } catch (error) {
         console.error("Error getting shipping rates:", error);
@@ -105,12 +108,8 @@ export default function Cart() {
   };
 
   const getTotalPrice = () => {
-    const itemsTotal = state.cart.reduce(
-      (accumulator, item) => accumulator + item.price * item.qty,
-      0
-    );
     const shippingCost = selectedRate ? selectedRate.amount : 0;
-    return itemsTotal + shippingCost;
+    return cartTotal + shippingCost;
   };
 
   if (!user) {
@@ -121,16 +120,23 @@ export default function Cart() {
     <Fragment>
       <Grid container spacing={6}>
         <Grid item lg={8} md={8} xs={12}>
-          {state.cart.map((item) => (
+          {cartItems.map((item) => (
             <ProductCard7
               mb="1.5rem"
               id={item.id}
               key={item.id}
-              qty={item.qty}
-              slug={item.slug}
+              quantity={item.quantity}
+              slug={item.productId}
               name={item.name}
               price={item.price}
-              imgUrl={item.imgUrl}
+              imgUrl={item.image}
+              onQuantityChange={(newQuantity) =>
+                updateCartItemQuantity({
+                  itemId: item.id,
+                  quantity: newQuantity,
+                })
+              }
+              onRemove={() => removeFromCart(item.id)}
             />
           ))}
         </Grid>
@@ -216,7 +222,11 @@ export default function Cart() {
                 onSelectRate={handleSelectRate}
               />
             ) : (
-              <Typography mt="1rem">No shipping rates available</Typography>
+              <Typography mt="1rem">
+                {isLoading
+                  ? "Fetching shipping rates..."
+                  : "No shipping rates available"}
+              </Typography>
             )}
 
             <Divider my="1rem" />

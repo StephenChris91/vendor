@@ -13,11 +13,11 @@ import Typography from "@component/Typography";
 import { IconButton } from "@component/buttons";
 
 import { currency, getTheme, isValidProp } from "@utils/utils";
-import { useAppContext } from "@context/app-context";
+import { useCart } from "hooks/useCart"; // Import the new useCart hook
 
 // STYLED COMPONENTS
 const Wrapper = styled.div.withConfig({
-  shouldForwardProp: (prop) => isValidProp(prop)
+  shouldForwardProp: (prop) => isValidProp(prop),
 })`
   display: flex;
   overflow: hidden;
@@ -47,24 +47,30 @@ const Wrapper = styled.div.withConfig({
 
 // =====================================================================
 interface ProductCard7Props extends SpaceProps {
-  qty: number;
+  id: string;
   name: string;
   slug: string;
   price: number;
   imgUrl?: string;
-  id: string | number;
+  quantity: number;
+  onQuantityChange: (quantity: number) => void;
+  onRemove: () => void;
 }
 // =====================================================================
 
-export default function ProductCard7(props: ProductCard7Props) {
-  const { id, name, qty, price, imgUrl, slug, ...others } = props;
-
-  const { dispatch } = useAppContext();
-  const handleCartAmountChange = (amount: number) => () => {
-    dispatch({
-      type: "CHANGE_CART_AMOUNT",
-      payload: { qty: amount, name, price, imgUrl, id }
-    });
+export default function ProductCard7({
+  id,
+  name,
+  quantity,
+  price,
+  imgUrl,
+  slug,
+  onQuantityChange,
+  onRemove,
+  ...others
+}: ProductCard7Props) {
+  const handleQuantityChange = (newQuantity: number) => {
+    onQuantityChange(newQuantity);
   };
 
   return (
@@ -81,15 +87,21 @@ export default function ProductCard7(props: ProductCard7Props) {
         minWidth="0px"
         flexDirection="column"
         className="product-details"
-        justifyContent="space-between">
+        justifyContent="space-between"
+      >
         <Link href={`/product/${slug}`}>
-          <Typography className="title" fontWeight="600" fontSize="18px" mb="0.5rem">
+          <Typography
+            className="title"
+            fontWeight="600"
+            fontSize="18px"
+            mb="0.5rem"
+          >
             {name}
           </Typography>
         </Link>
 
         <Box position="absolute" right="1rem" top="1rem">
-          <IconButton padding="4px" ml="12px" onClick={handleCartAmountChange(0)}>
+          <IconButton padding="4px" ml="12px" onClick={onRemove}>
             <Icon size="1.25rem">close</Icon>
           </IconButton>
         </Box>
@@ -97,11 +109,11 @@ export default function ProductCard7(props: ProductCard7Props) {
         <FlexBox justifyContent="space-between" alignItems="flex-end">
           <FlexBox flexWrap="wrap" alignItems="center">
             <Typography color="gray.600" mr="0.5rem">
-              {currency(price)} x {qty}
+              {currency(price)} x {quantity}
             </Typography>
 
             <Typography fontWeight={600} color="primary.main" mr="1rem">
-              {currency(price * qty)}
+              {currency(price * quantity)}
             </Typography>
           </FlexBox>
 
@@ -111,14 +123,15 @@ export default function ProductCard7(props: ProductCard7Props) {
               padding="5px"
               color="primary"
               variant="outlined"
-              disabled={qty === 1}
+              disabled={quantity === 1}
               borderColor="primary.light"
-              onClick={handleCartAmountChange(qty - 1)}>
+              onClick={() => handleQuantityChange(quantity - 1)}
+            >
               <Icon variant="small">minus</Icon>
             </Button>
 
             <Typography mx="0.5rem" fontWeight="600" fontSize="15px">
-              {qty}
+              {quantity}
             </Typography>
 
             <Button
@@ -127,7 +140,8 @@ export default function ProductCard7(props: ProductCard7Props) {
               color="primary"
               variant="outlined"
               borderColor="primary.light"
-              onClick={handleCartAmountChange(qty + 1)}>
+              onClick={() => handleQuantityChange(quantity + 1)}
+            >
               <Icon variant="small">plus</Icon>
             </Button>
           </FlexBox>
