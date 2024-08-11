@@ -6,9 +6,9 @@ import { db } from '../../../../prisma/prisma';
 import { validateInventory } from '@lib/order/inventory';
 import { calculateTax } from '@lib/order/calculateTax';
 import { calculateShipping } from '@lib/order/calculateShipping';
-import { initializePaystackTransaction } from '@lib/order/createPayment';
-import { getUserByEmail, getUserById } from '@lib/data/user';
+import { getUserByEmail } from '@lib/data/user';
 import { useCurrentSession, useCurrentUser } from '@lib/use-session-server';
+import { initializePaystackTransaction, verifyPaystackTransaction } from '@lib/order/createPayment';
 
 export async function POST(req: Request) {
     try {
@@ -19,18 +19,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { cartItems, shippingAddress, email } = await req.json();
+        const { cartItems, shippingAddress } = await req.json();
 
         // Validate inventory
         const inventoryCheck = await validateInventory(cartItems);
         if (!inventoryCheck.success) {
-            return NextResponse.json({
-                error: inventoryCheck.error,
-                outOfStockItems: inventoryCheck.outOfStockItems
-            }, { status: 400 });
+            return NextResponse.json({ error: inventoryCheck.error }, { status: 400 });
         }
-
-        // Rest of the order creation process remains the same...
 
         // Group cart items by shop and validate shops
         const { itemsByShop, validShops } = await groupAndValidateCartItemsByShop(cartItems);
@@ -57,7 +52,7 @@ export async function POST(req: Request) {
         const totalAmount = subtotal + taxAmount + shippingCost;
 
         // Initialize Paystack transaction
-        const paystackTransaction = await initializePaystackTransaction(totalAmount, email);
+        const paystackTransaction = await initializePaystackTransaction(totalAmount, session.user.email);
 
         // Choose the first valid shop as the primary shop for the main order
         const primaryShopId = Object.keys(validShops)[0];
@@ -146,6 +141,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 }
+
+
 
 async function groupAndValidateCartItemsByShop(cartItems: any[]) {
     const itemsByShop: { [key: string]: any[] } = {};

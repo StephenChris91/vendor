@@ -1,75 +1,101 @@
-import { useState, useCallback } from 'react';
-import { getOrCreatePickupAddresses, createDeliveryAddress, createParcel, fetchShippingRates } from 'hooks/terminal';
+import { useState, useCallback, useMemo } from 'react';
 import { useCart } from 'hooks/useCart';
-import User from '@models/user.model';
 
 interface ShippingRate {
-    amount: number;
     carrier_name: string;
-    // Add other properties as needed
+    amount: number;
+    currency: string;
+}
+
+interface User {
+    id: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+    phone?: string;
+}
+
+interface CartItem {
+    id: string;
+    quantity: number;
+    price: number;
+    // Add other necessary properties
 }
 
 export const useShippingRates = () => {
     const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
+    const [selectedRate, setSelectedRate] = useState<ShippingRate | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const { cartItems } = useCart();
+    const { cartItems, cartTotal } = useCart();
 
     const getShippingRates = useCallback(async (user: User, vendors: any[], address: any) => {
         setIsLoading(true);
         setError(null);
 
         try {
-            console.log('Address received:', address);
-            console.log('Vendors:', vendors);
+            console.log('Fetching shipping rates for:', { user, vendors, address });
 
-            if (!vendors || vendors.length === 0) {
-                throw new Error('No vendors found for the items in your cart.');
-            }
+            // Here you would typically call your API function to get shipping rates
+            // For example:
+            // const rates = await fetchShippingRatesFromAPI(user, vendors, address);
+            // setShippingRates(rates);
 
-            const pickupAddresses = await getOrCreatePickupAddresses(vendors);
-            console.log('Pickup Addresses:', pickupAddresses);
+            // For demonstration, we'll use the fallback rate
+            const fallbackRate = calculateFallbackShippingRate(cartItems);
+            const rates = [
+                {
+                    carrier_name: 'Standard Shipping',
+                    amount: fallbackRate,
+                    currency: 'NGN'
+                },
+                {
+                    carrier_name: 'Express Shipping',
+                    amount: fallbackRate * 1.5,
+                    currency: 'NGN'
+                }
+            ];
+            setShippingRates(rates);
+            setSelectedRate(rates[0]); // Automatically select the first rate
 
-            if (pickupAddresses.length === 0) {
-                throw new Error('No valid pickup addresses found. Please ensure vendors have valid addresses and phone numbers.');
-            }
-
-            const deliveryAddress = {
-                ...address,
-                state: address.state?.label || address.state
-            };
-            console.log('Delivery address being sent:', deliveryAddress);
-
-            const deliveryAddressId = await createDeliveryAddress(user, deliveryAddress);
-            const parcelId = await createParcel(cartItems);
-
-            console.log('Delivery Address ID:', deliveryAddressId);
-            console.log('Parcel ID:', parcelId);
-
-            const ratesPromises = pickupAddresses.map(({ addressId }) =>
-                fetchShippingRates(addressId, deliveryAddressId, parcelId)
-            );
-
-            const allRates = await Promise.all(ratesPromises);
-            console.log('All Rates:', allRates);
-
-            const combinedRates = allRates
-                .flat()
-                .sort((a, b) => a.amount - b.amount);
-
-            console.log('Combined Rates:', combinedRates);
-            setShippingRates(combinedRates);
         } catch (err) {
-            console.error('Detailed error:', err);
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('An unknown error occurred while fetching shipping rates.');
-            }
+            console.error('Error fetching shipping rates:', err);
+            const fallbackRate = calculateFallbackShippingRate(cartItems);
+            const rates = [{
+                carrier_name: 'Standard Shipping',
+                amount: fallbackRate,
+                currency: 'NGN'
+            }];
+            setShippingRates(rates);
+            setSelectedRate(rates[0]);
+            setError('Unable to fetch accurate shipping rates. Using estimated rate.');
         } finally {
             setIsLoading(false);
         }
     }, [cartItems]);
 
-    return { shippingRates, isLoading, error, getShippingRates };
+    const selectShippingRate = useCallback((rate: ShippingRate) => {
+        setSelectedRate(rate);
+    }, []);
+
+    const total = useMemo(() => {
+        return cartTotal + (selectedRate?.amount || 0);
+    }, [cartTotal, selectedRate]);
+
+    return {
+        shippingRates,
+        selectedRate,
+        isLoading,
+        error,
+        getShippingRates,
+        selectShippingRate,
+        total
+    };
 };
+
+function calculateFallbackShippingRate(cartItems: CartItem[]): number {
+    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const baseRate = 1500; // Base rate in Naira
+    const perItemRate = 100; // Additional rate per item
+    return baseRate + (totalItems * perItemRate);
+}

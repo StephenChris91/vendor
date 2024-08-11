@@ -10,25 +10,47 @@ import { useCart } from "hooks/useCart";
 import { useState } from "react";
 
 export default function CheckoutSummary() {
-  const { cartItems, cartTotal } = useCart();
+  const {
+    cartItems,
+    cartTotal,
+    selectedShippingRate,
+    totalWithShipping,
+    fallbackShippingRate,
+  } = useCart();
   const [voucher, setVoucher] = useState("");
 
-  const shipping = 100; // For now, we'll assume free shipping
-  const tax = cartTotal * 0.05; // Assuming 5% tax
-  const discount = 100; // For now, no discount
+  const shippingRate = selectedShippingRate || fallbackShippingRate;
+  const shipping = shippingRate.amount;
+  const tax = totalWithShipping * 0.05; // Calculating tax based on total including shipping
+  const discount = 0; // For now, no discount
 
-  const total = cartTotal + shipping + tax - discount;
+  const total = totalWithShipping + tax - discount;
 
   const handleApplyVoucher = () => {
     // Implement voucher logic here
     console.log("Applying voucher:", voucher);
   };
 
+  const renderShippingInfo = () => {
+    if (selectedShippingRate) {
+      return (
+        <Typography fontSize="18px" fontWeight="600" lineHeight="1">
+          ₦{shipping.toFixed(2)} ({selectedShippingRate.carrier_name})
+        </Typography>
+      );
+    } else {
+      return (
+        <Typography fontSize="18px" fontWeight="600" lineHeight="1">
+          ₦{shipping.toFixed(2)}
+        </Typography>
+      );
+    }
+  };
+
   return (
     <Card1>
       <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
         <Typography color="text.hint">Subtotal:</Typography>
-
         <FlexBox alignItems="flex-end">
           <Typography fontSize="18px" fontWeight="600" lineHeight="1">
             ₦{cartTotal.toFixed(2)}
@@ -38,17 +60,11 @@ export default function CheckoutSummary() {
 
       <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
         <Typography color="text.hint">Shipping:</Typography>
-
-        <FlexBox alignItems="flex-end">
-          <Typography fontSize="18px" fontWeight="600" lineHeight="1">
-            {!shipping ? "Free" : `₦${shipping.toFixed(2)}`}
-          </Typography>
-        </FlexBox>
+        <FlexBox alignItems="flex-end">{renderShippingInfo()}</FlexBox>
       </FlexBox>
 
       <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
-        <Typography color="text.hint">Tax:</Typography>
-
+        <Typography color="text.hint">Tax (5%):</Typography>
         <FlexBox alignItems="flex-end">
           <Typography fontSize="18px" fontWeight="600" lineHeight="1">
             ₦{tax.toFixed(2)}
@@ -58,10 +74,9 @@ export default function CheckoutSummary() {
 
       <FlexBox justifyContent="space-between" alignItems="center" mb="1rem">
         <Typography color="text.hint">Discount:</Typography>
-
         <FlexBox alignItems="flex-end">
           <Typography fontSize="18px" fontWeight="600" lineHeight="1">
-            {!discount ? "-" : `₦${discount.toFixed(2)}`}
+            {discount > 0 ? `₦${discount.toFixed(2)}` : "-"}
           </Typography>
         </FlexBox>
       </FlexBox>

@@ -25,9 +25,16 @@ export interface ShippingAddress {
     zipCode: string;
 }
 
+export interface ShippingRate {
+    carrier_name: string;
+    amount: number;
+    currency: string;
+}
+
 // Atoms
 export const cartItemsAtom = atomWithStorage<CartItem[]>('cartItems', []);
 export const shippingAddressAtom = atomWithStorage<ShippingAddress | null>('shippingAddress', null);
+export const selectedShippingRateAtom = atomWithStorage<ShippingRate | null>('selectedShippingRate', null);
 
 // Derived atoms
 export const cartTotalAtom = atom((get) => {
@@ -35,11 +42,23 @@ export const cartTotalAtom = atom((get) => {
     return items.reduce((total, item) => total + item.price * item.quantity, 0);
 });
 
+export const fallbackShippingRateAtom = atom<ShippingRate>({
+    carrier_name: 'Standard Shipping',
+    amount: 1500, // Set your default fallback amount
+    currency: 'NGN'
+});
+
 export const cartItemCountAtom = atom((get) => {
     const items = get(cartItemsAtom);
     return items.reduce((count, item) => count + item.quantity, 0);
 });
 
+export const totalWithShippingAtom = atom((get) => {
+    const cartTotal = get(cartTotalAtom);
+    const selectedShippingRate = get(selectedShippingRateAtom);
+    const fallbackRate = get(fallbackShippingRateAtom);
+    return cartTotal + (selectedShippingRate?.amount || fallbackRate.amount);
+});
 // Actions
 export const addToCartAtom = atom(
     null,
@@ -80,6 +99,7 @@ export const clearCartAtom = atom(
     null,
     (get, set) => {
         set(cartItemsAtom, []);
+        set(selectedShippingRateAtom, null);
     }
 );
 
@@ -90,12 +110,20 @@ export const setShippingAddressAtom = atom(
     }
 );
 
+export const setShippingRateAtom = atom(
+    null,
+    (get, set, rate: ShippingRate | null) => {
+        set(selectedShippingRateAtom, rate);
+    }
+);
+
 // Order management
 export interface Order {
     id: string;
     userId: string;
     items: CartItem[];
     shippingAddress: ShippingAddress;
+    shippingRate: ShippingRate | null;
     totalAmount: number;
     status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
     createdAt: Date;
@@ -108,7 +136,8 @@ export const createOrderAtom = atom(
     async (get, set) => {
         const cartItems = get(cartItemsAtom);
         const shippingAddress = get(shippingAddressAtom);
-        const totalAmount = get(cartTotalAtom);
+        const shippingRate = get(selectedShippingRateAtom);
+        const totalAmount = get(totalWithShippingAtom);
 
         if (cartItems.length === 0) {
             throw new Error('Cart is empty');
@@ -125,6 +154,7 @@ export const createOrderAtom = atom(
             userId: 'user-id', // This should be the actual user ID
             items: cartItems,
             shippingAddress,
+            shippingRate,
             totalAmount,
             status: 'Pending',
             createdAt: new Date(),
@@ -133,6 +163,7 @@ export const createOrderAtom = atom(
         set(ordersAtom, (prevOrders) => [...prevOrders, newOrder]);
         set(cartItemsAtom, []); // Clear the cart
         set(shippingAddressAtom, null); // Clear the shipping address
+        set(selectedShippingRateAtom, null); // Clear the selected shipping rate
 
         return newOrder;
     }

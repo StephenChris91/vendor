@@ -1,3 +1,4 @@
+import User from "@models/user.model";
 import { formatPhoneNumber } from "utils/phoneUtils";
 
 const API_KEY = "sk_test_nfkFJs8y9KARbAEfIzxZC4DBwpFE6Hcr";
@@ -45,7 +46,7 @@ export async function createPickupAddress(vendor: any) {
     try {
         const response = await makeRequest('/addresses', 'POST', body);
         console.log('Pickup address created:', response);
-        return response.data.id;
+        return response.data.address_id; // Return the correct address_id
     } catch (error) {
         console.error(`Error creating pickup address for vendor ${vendor.id}:`, error);
         throw error;
@@ -71,7 +72,7 @@ export async function getOrCreatePickupAddresses(vendors: any[]) {
             if (response.data && response.data.length > 0) {
                 // If an address exists, return it
                 console.log('Existing address found for vendor:', vendor.id);
-                return { vendorId: vendor.id, addressId: response.data[0].id };
+                return { vendorId: vendor.id, addressId: response.data[0].address_id };
             } else {
                 // If no address exists, create a new one
                 console.log('Creating new address for vendor:', vendor.id);
@@ -88,10 +89,10 @@ export async function getOrCreatePickupAddresses(vendors: any[]) {
     const validPickupAddresses = pickupAddresses.filter(address => address !== null);
     console.log('Valid pickup addresses:', validPickupAddresses);
 
-    return validPickupAddresses;
+    return validPickupAddresses
 }
 
-export async function createDeliveryAddress(user: any, address: any) {
+export async function createDeliveryAddress(user: User, address: any) {
     const body = {
         first_name: user.firstname,
         last_name: user.lastname,
@@ -99,7 +100,7 @@ export async function createDeliveryAddress(user: any, address: any) {
         phone: user.phone || '+2348083669100', // Fallback to a default if user.phone is not available
         line1: address.street,
         city: address.city,
-        state: address.state as string,
+        state: address.state,
         country: 'NG',
     };
 
@@ -107,7 +108,7 @@ export async function createDeliveryAddress(user: any, address: any) {
 
     const response = await makeRequest('/addresses', 'POST', body);
     console.log('Delivery address response:', response);
-    return response.data.id;
+    return response.data.address_id as string; // Return the correct address_id
 }
 
 export async function createParcel(cartItems: any[]) {
@@ -140,14 +141,22 @@ export async function createParcel(cartItems: any[]) {
     };
 
     const response = await makeRequest('/parcels', 'POST', body);
-    return response.data.id;
+    return response.data.parcel_id as string;
 }
 
-export async function fetchShippingRates(pickupAddressId: string, deliveryAddressId: string, parcelId: string) {
+export async function fetchShippingRates(
+    pickupAddressId: string,
+    deliveryAddressId: string,
+    parcelId: string,
+    cashOnDelivery: boolean = false,
+    currency: string = 'NGN'
+) {
     const queryParams = new URLSearchParams({
         pickup_address: pickupAddressId,
         delivery_address: deliveryAddressId,
         parcel: parcelId,
+        cash_on_delivery: cashOnDelivery.toString(),
+        currency: currency
     });
 
     console.log('Fetching shipping rates with params:', queryParams.toString());

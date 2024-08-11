@@ -14,7 +14,6 @@ import Select from "@component/Select";
 import TextField from "@component/text-field";
 import { useCart } from "hooks/useCart";
 import { currency } from "@utils/utils";
-
 import stateList from "@data/stateList";
 import { useCurrentUser } from "@lib/use-session-client";
 import { useShippingRates } from "@hook/useShippingRates";
@@ -47,19 +46,23 @@ const ShippingRates = ({ rates, selectedRate, onSelectRate }) => (
 
 export default function Cart() {
   const router = useRouter();
-  const { cartItems, cartTotal, updateCartItemQuantity, removeFromCart } =
-    useCart();
+  const {
+    cartItems,
+    cartTotal,
+    updateCartItemQuantity,
+    removeFromCart,
+    selectedShippingRate,
+    setShippingRate,
+    fallbackShippingRate,
+    totalWithShipping,
+    shippingAddress,
+    setShippingAddress,
+  } = useCart();
   const user = useCurrentUser();
-  const [selectedRate, setSelectedRate] = useState(null);
   const [vendors, setVendors] = useState([]);
   const { shippingRates, isLoading, error, getShippingRates } =
     useShippingRates();
-  const [address, setAddress] = useState({
-    country: { label: "Nigeria", value: "NG" },
-    state: null,
-    city: "",
-    street: "",
-  });
+  const [isAddressComplete, setIsAddressComplete] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -75,7 +78,6 @@ export default function Cart() {
           setVendors(fetchedVendors);
         } catch (error) {
           console.error("Error fetching vendors:", error);
-          // Handle error (e.g., show error message to user)
         }
       }
     }
@@ -83,38 +85,69 @@ export default function Cart() {
     fetchVendors();
   }, [user, cartItems]);
 
-  const handleAddressChange = (field, value) => {
-    setAddress((prev) => ({ ...prev, [field]: value }));
+  useEffect(() => {
+    // Check if all required fields of shipping address are filled
+    const isComplete = !!(
+      shippingAddress?.name &&
+      shippingAddress?.street &&
+      shippingAddress?.city &&
+      shippingAddress?.state &&
+      shippingAddress?.zipCode &&
+      shippingAddress?.country
+    );
+    setIsAddressComplete(isComplete);
+    console.log("Shipping address:", shippingAddress);
+    console.log("Is address complete:", isComplete);
+  }, [shippingAddress]);
+
+  const handleAddressChange = (field: string, value: string) => {
+    setShippingAddress({
+      ...shippingAddress,
+      [field]: value,
+    });
   };
 
   const handleSelectRate = (rate) => {
-    setSelectedRate(rate);
+    setShippingRate(rate);
   };
 
   const handleGetShippingRates = async () => {
-    if (address.state && address.city && address.street) {
+    if (
+      shippingAddress?.state &&
+      shippingAddress?.city &&
+      shippingAddress?.street
+    ) {
       try {
-        console.log("Sending address:", address);
+        console.log("Sending address:", shippingAddress);
         console.log("Vendors:", vendors);
-        await getShippingRates(user, vendors, address);
+        await getShippingRates(user, vendors, shippingAddress);
         console.log("Shipping rates fetched successfully");
       } catch (error) {
         console.error("Error getting shipping rates:", error);
-        // Handle error (e.g., show error message to user)
       }
     } else {
       alert("Please fill in all address fields");
     }
   };
 
-  const getTotalPrice = () => {
-    const shippingCost = selectedRate ? selectedRate.amount : 0;
-    return cartTotal + shippingCost;
-  };
-
   if (!user) {
-    return null; // The useEffect hook will redirect to login
+    return null;
   }
+
+  // if (cartItems.length === 0) {
+  //   return (
+  //     <Box mt="2rem" mb="2rem">
+  //       <Typography color="gray.600" mb="1rem">
+  //         Your cart is empty.
+  //       </Typography>
+  //       <Link href="/">
+  //         <Button size="small" variant="contained">
+  //           <Link href="/shop">Continue Shopping</Link>
+  //         </Button>
+  //       </Link>
+  //     </Box>
+  //   );
+  // }
 
   return (
     <Fragment>
@@ -149,9 +182,8 @@ export default function Cart() {
               mb="1rem"
             >
               <Typography color="gray.600">Total:</Typography>
-
               <Typography fontSize="18px" fontWeight="600" lineHeight="1">
-                {currency(getTotalPrice())}
+                {currency(totalWithShipping)}
               </Typography>
             </FlexBox>
 
@@ -161,42 +193,47 @@ export default function Cart() {
               Shipping Information
             </Typography>
 
-            <Select
-              mb="1rem"
-              label="Country"
-              options={[{ label: "Nigeria", value: "NG" }]}
-              value={address.country}
-              onChange={(option) => handleAddressChange("country", option)}
-            />
-
-            <Select
-              mb="1rem"
-              label="State"
-              options={stateList.map((state) => ({
-                label: state.label,
-                value: state.value,
-              }))}
-              placeholder="Select State"
-              value={address.state}
-              onChange={(option) => handleAddressChange("state", option)}
-            />
-
             <TextField
-              mb="1rem"
-              label="City"
-              placeholder="Enter City"
               fullwidth
-              value={address.city}
+              mb={2}
+              label="Full Name"
+              value={shippingAddress?.name || ""}
+              onChange={(e) => handleAddressChange("name", e.target.value)}
+            />
+            <TextField
+              fullwidth
+              mb={2}
+              label="Street Address"
+              value={shippingAddress?.street || ""}
+              onChange={(e) => handleAddressChange("street", e.target.value)}
+            />
+            <TextField
+              fullwidth
+              mb={2}
+              label="City"
+              value={shippingAddress?.city || ""}
               onChange={(e) => handleAddressChange("city", e.target.value)}
             />
-
             <TextField
-              mb="1rem"
-              label="Street Address"
-              placeholder="Enter Street Address"
               fullwidth
-              value={address.street}
-              onChange={(e) => handleAddressChange("street", e.target.value)}
+              mb={2}
+              label="State"
+              value={shippingAddress?.state || ""}
+              onChange={(e) => handleAddressChange("state", e.target.value)}
+            />
+            <TextField
+              fullwidth
+              mb={2}
+              label="Zip Code"
+              value={shippingAddress?.zipCode || ""}
+              onChange={(e) => handleAddressChange("zipCode", e.target.value)}
+            />
+            <TextField
+              fullwidth
+              mb={2}
+              label="Country"
+              value={shippingAddress?.country || ""}
+              onChange={(e) => handleAddressChange("country", e.target.value)}
             />
 
             <Button
@@ -204,7 +241,7 @@ export default function Cart() {
               color="primary"
               fullwidth
               onClick={handleGetShippingRates}
-              disabled={isLoading}
+              disabled={isLoading || !isAddressComplete}
             >
               {isLoading ? "Calculating..." : "Calculate Shipping"}
             </Button>
@@ -217,8 +254,8 @@ export default function Cart() {
 
             {shippingRates.length > 0 ? (
               <ShippingRates
-                rates={shippingRates}
-                selectedRate={selectedRate}
+                rates={[...shippingRates, fallbackShippingRate]}
+                selectedRate={selectedShippingRate || fallbackShippingRate}
                 onSelectRate={handleSelectRate}
               />
             ) : (
@@ -231,14 +268,18 @@ export default function Cart() {
 
             <Divider my="1rem" />
 
-            <Link href="/checkout">
+            <Link href="/checkout" passHref>
               <Button
                 variant="contained"
                 color="primary"
                 fullwidth
-                disabled={!selectedRate}
+                disabled={
+                  !isAddressComplete ||
+                  cartItems.length === 0 ||
+                  !selectedShippingRate
+                }
               >
-                Checkout Now
+                Proceed to Checkout ({currency(totalWithShipping)})
               </Button>
             </Link>
           </Card1>

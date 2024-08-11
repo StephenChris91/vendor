@@ -45,7 +45,7 @@ export async function initializePaystackTransaction(
     }
 }
 
-export async function verifyPaystackTransaction(reference: string): Promise<boolean> {
+export async function verifyPaystackTransaction(reference: string): Promise<{ verified: boolean; message: string }> {
     try {
         const response = await axios.get(
             `${PAYSTACK_API_URL}/transaction/verify/${reference}`,
@@ -58,15 +58,22 @@ export async function verifyPaystackTransaction(reference: string): Promise<bool
 
         const { data } = response.data;
 
-        // Check if the transaction was successful
         if (data.status === 'success') {
-            return true;
+            return { verified: true, message: 'Payment verified successfully' };
         } else {
             console.warn(`Payment not successful. Status: ${data.status}`);
-            return false;
+            return { verified: false, message: `Payment verification failed. Status: ${data.status}` };
         }
     } catch (error) {
-        console.error('Error verifying Paystack transaction:', error);
-        throw new Error('Failed to verify payment');
+        if (axios.isAxiosError(error) && error.response) {
+            if (error.response.data.code === 'transaction_not_found') {
+                return { verified: false, message: 'Transaction not found. The payment may not have been completed yet.' };
+            }
+            console.error('Paystack API error:', error.response.data);
+            return { verified: false, message: error.response.data.message || 'Failed to verify payment' };
+        } else {
+            console.error('Error verifying Paystack transaction:', error);
+            return { verified: false, message: 'An unexpected error occurred during payment verification' };
+        }
     }
 }

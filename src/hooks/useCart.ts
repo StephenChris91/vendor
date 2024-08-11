@@ -1,4 +1,4 @@
-// src/hooks/useCart.ts
+// hooks/useCart.ts
 
 import { useAtom } from 'jotai';
 import {
@@ -7,29 +7,48 @@ import {
     addToCartAtom,
     removeFromCartAtom,
     updateCartItemQuantityAtom,
-    CartItem
+    selectedShippingRateAtom,
+    setShippingRateAtom,
+    totalWithShippingAtom,
+    fallbackShippingRateAtom,
+    shippingAddressAtom,
+    setShippingAddressAtom,
+    CartItem,
+    ShippingRate,
+    ShippingAddress,
+    clearCartAtom
 } from '../store/cartStore';
 
-interface UseCartReturn {
-    cartItems: CartItem[];
-    cartTotal: number;
-    addToCart: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
-    removeFromCart: (id: string) => void;
-    updateCartItemQuantity: (params: { itemId: string; quantity: number }) => void;
-}
-
-export function useCart(): UseCartReturn {
+export function useCart() {
     const [cartItems] = useAtom(cartItemsAtom);
     const [cartTotal] = useAtom(cartTotalAtom);
+    const [selectedShippingRate] = useAtom(selectedShippingRateAtom);
+    const [totalWithShipping] = useAtom(totalWithShippingAtom);
+    const [fallbackShippingRate] = useAtom(fallbackShippingRateAtom);
+    const [shippingAddress] = useAtom(shippingAddressAtom);
     const [, addToCart] = useAtom(addToCartAtom);
     const [, removeFromCart] = useAtom(removeFromCartAtom);
     const [, updateCartItemQuantity] = useAtom(updateCartItemQuantityAtom);
+    const [, setShippingRate] = useAtom(setShippingRateAtom);
+    const [, setShippingAddress] = useAtom(setShippingAddressAtom);
+    const [, clearCart] = useAtom(clearCartAtom);
+
 
     return {
         cartItems,
         cartTotal,
+        selectedShippingRate,
+        totalWithShipping,
+        fallbackShippingRate,
+        shippingAddress,
         addToCart,
         removeFromCart,
-        updateCartItemQuantity
+        updateCartItemQuantity,
+        setShippingRate,
+        setShippingAddress,
+        clearCart
     };
 }
+
+// You might want to export these types if they're not already exported from cartStore
+export type { CartItem, ShippingRate, ShippingAddress };
