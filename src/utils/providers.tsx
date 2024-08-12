@@ -9,6 +9,7 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@context/authContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Provider } from "jotai";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -19,7 +20,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
           <StyledContext>
             <QueryClientProvider client={queryClient}>
-              {children}
+              <Provider>{children}</Provider>
               <ReactQueryDevtools initialIsOpen={false} />
             </QueryClientProvider>
           </StyledContext>

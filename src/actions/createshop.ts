@@ -4,14 +4,9 @@ import { shopSchema } from "schemas";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "auth";
-import { ShopStatus } from '@prisma/client';
+import { ShopStatus, Prisma } from '@prisma/client';
 import { db } from '../../prisma/prisma';
 import { redirect } from 'next/navigation';
-
-// Update paymentInfoSchema to expect a number for accountNumber
-// const updatedPaymentInfoSchema = paymentInfoSchema.extend({
-//     accountNumber: z.number().int().gte(1000000000).lte(99999999999), // 10 to 11 digit number
-// });
 
 // Extend the shopSchema to include nested objects and additional fields
 const extendedShopSchema = shopSchema.extend({
@@ -20,6 +15,7 @@ const extendedShopSchema = shopSchema.extend({
     shopSettings: shopSettingsSchema,
     status: z.nativeEnum(ShopStatus),
     hasPaid: z.boolean(),
+    categoryName: z.string(), // Change this from categoryId to categoryName
 });
 
 export async function createShop(values: z.infer<typeof extendedShopSchema>) {
@@ -50,9 +46,24 @@ export async function createShop(values: z.infer<typeof extendedShopSchema>) {
         status,
         paymentInfo,
         shopSettings,
+        categoryName, // Use categoryName instead of categoryId
     } = validInput.data;
 
     try {
+        // First, find or create the category
+        let category = await db.category.findFirst({
+            where: { name: categoryName },
+        });
+
+        if (!category) {
+            category = await db.category.create({
+                data: {
+                    name: categoryName,
+                    slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
+                },
+            });
+        }
+
         const shop = await db.shop.create({
             data: {
                 shopName,
@@ -88,15 +99,17 @@ export async function createShop(values: z.infer<typeof extendedShopSchema>) {
                         category: shopSettings.category,
                         deliveryOptions: shopSettings.deliveryOptions,
                         isActive: shopSettings.isActive,
-
-
                     },
+                },
+                category: {
+                    connect: { id: category.id },
                 },
             },
             include: {
                 address: true,
                 paymentInfo: true,
                 shopSettings: true,
+                category: true,
             },
         });
 
@@ -109,11 +122,13 @@ export async function createShop(values: z.infer<typeof extendedShopSchema>) {
             },
         });
 
-
         revalidatePath('/');
         return { status: 'success', shop, message: 'Shop has been created successfully' };
     } catch (error) {
         console.error(error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            return { status: 'error', message: `Database error: ${error.message}` };
+        }
         return { status: 'error', message: 'Failed to create shop' };
     }
 }

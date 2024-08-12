@@ -83,7 +83,7 @@ const MultiStepForm = () => {
         },
         paymentInfo: {
           accountName: formData.paymentInfo.accountName,
-          accountNumber: formData.paymentInfo.accountNumber, // Use undefined if null
+          accountNumber: formData.paymentInfo.accountNumber,
           bankName: formData.paymentInfo.bankName,
         },
         shopSettings: {
@@ -94,6 +94,7 @@ const MultiStepForm = () => {
           deliveryOptions: formData.shopSettings.deliveryOptions,
           isActive: formData.shopSettings.isActive,
         },
+        categoryName: formData.shopSettings.category, // Use the category name instead of ID
       };
 
       console.log(
@@ -108,13 +109,9 @@ const MultiStepForm = () => {
         toast.success("Shop created successfully!");
         console.log("Redirecting to confirmation page...");
         router.push("/onboarding/confirmation");
-        // // Fallback redirection
-        // setTimeout(() => {
-        //   window.location.href = "/onboarding/confirmation";
-        // }, 100);
       } else {
-        // ... (rest of the code)
         console.log(result.status, result.message);
+        toast.error(result.message || "Failed to create shop");
       }
     } catch (error) {
       console.error("Error creating shop:", error);

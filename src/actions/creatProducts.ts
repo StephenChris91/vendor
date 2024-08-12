@@ -38,17 +38,41 @@ export async function createProduct(values: z.infer<typeof productSchema>) {
     return { status: 'error', message: 'Invalid product data' };
   }
 
-  const categoryIds = validInput.data.categories ?? [];
-  const categories = await db.category.findMany({
-    where: { id: { in: categoryIds } }
-  });
-
-  if (categories.length !== categoryIds.length) {
-    console.error("Some categories not found:", { expected: categoryIds.length, found: categories.length });
-    return { status: 'error', message: 'Some categories not found' };
-  }
+  const categoryNames = validInput.data.categories ?? [];
 
   try {
+    // Check if the brand exists, if not create it
+    let brand;
+    if (validInput.data.brandId) {
+      brand = await db.brand.findFirst({
+        where: { name: validInput.data.brandId }
+      });
+
+      if (!brand) {
+        // Create a new brand if it doesn't exist
+        brand = await db.brand.create({
+          data: {
+            name: validInput.data.brandId,
+            slug: validInput.data.brandId.toLowerCase().replace(/\s+/g, '-'),
+          }
+        });
+      }
+    }
+
+    // Check if categories exist, if not create them
+    const categories = await Promise.all(categoryNames.map(async (name) => {
+      let category = await db.category.findFirst({ where: { name } });
+      if (!category) {
+        category = await db.category.create({
+          data: {
+            name,
+            slug: name.toLowerCase().replace(/\s+/g, '-'),
+          }
+        });
+      }
+      return category;
+    }));
+
     const productData: Prisma.productCreateInput = {
       name: validInput.data.name,
       slug: validInput.data.slug,
@@ -62,32 +86,57 @@ export async function createProduct(values: z.infer<typeof productSchema>) {
       status: validInput.data.status,
       product_type: validInput.data.product_type,
       image: validInput.data.image,
-      video: validInput.data.video,
       gallery: validInput.data.gallery,
       ratings: validInput.data.ratings,
       total_reviews: validInput.data.total_reviews,
       my_review: validInput.data.my_review,
       in_wishlist: validInput.data.in_wishlist,
-      shop_name: validInput.data.shop_name,
+      shop_name: shop.shopName,
+      stock: validInput.data.quantity,
+      isFlashDeal: validInput.data.isFlashDeal,
+      discountPercentage: validInput.data.discountPercentage,
       shop: {
         connect: { id: shop.id },
       },
       categories: {
-        connect: categoryIds.map(id => ({ id })),
+        create: categories.map(category => ({
+          category: { connect: { id: category.id } }
+        })),
       },
       user: {
         connect: { id: session.user.id },
       },
     };
 
+    if (brand) {
+      productData.brand = {
+        connect: { id: brand.id },
+      };
+    }
+
     const product = await db.product.create({
       data: productData,
+      include: {
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        brand: true,
+        shop: true,
+      },
     });
 
     revalidatePath('/');
     return { status: 'success', product };
   } catch (error) {
     console.error(error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        return { status: 'error', message: 'A product with this slug already exists.' };
+      }
+      return { status: 'error', message: `Database error: ${error.message}` };
+    }
     return { status: 'error', message: 'Failed to create product' };
   }
 }

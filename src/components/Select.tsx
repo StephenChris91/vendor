@@ -1,6 +1,7 @@
 import React from "react";
 import { SpaceProps } from "styled-system";
 import ReactSelect, { Props, StylesConfig } from "react-select";
+import CreatableSelect from "react-select/creatable";
 import Box from "@component/Box";
 import Typography from "@component/Typography";
 import { colors } from "@utils/themeColors";
@@ -24,7 +25,8 @@ interface SelectProps
   errorText?: string;
   options: SelectOption[];
   isMulti?: boolean;
-  onCreateOption?: (option: SelectOption) => void;
+  isCreatable?: boolean;
+  onCreateOption?: (inputValue: string) => void;
   onChange?: (option: SelectOption | SelectOption[] | null) => void;
 }
 
@@ -34,6 +36,8 @@ const Select: React.FC<SelectProps> = ({
   errorText,
   onChange,
   isMulti,
+  isCreatable,
+  onCreateOption,
   value,
   ...props
 }) => {
@@ -87,6 +91,8 @@ const Select: React.FC<SelectProps> = ({
     }),
   };
 
+  const SelectComponent = isCreatable ? CreatableSelect : ReactSelect;
+
   return (
     <Box {...spacingProps}>
       {label && (
@@ -95,7 +101,7 @@ const Select: React.FC<SelectProps> = ({
         </Typography>
       )}
 
-      <ReactSelect<SelectOption, boolean>
+      <SelectComponent<SelectOption, boolean>
         options={options}
         styles={customStyles}
         isMulti={isMulti}
@@ -107,6 +113,7 @@ const Select: React.FC<SelectProps> = ({
               : (option as SelectOption | null)
           )
         }
+        onCreateOption={onCreateOption}
         getOptionLabel={(option: SelectOption) => option.label}
         getOptionValue={(option: SelectOption) => option.value}
         theme={(theme) => ({

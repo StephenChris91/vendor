@@ -1,3 +1,5 @@
+"use client";
+
 // GLOBAL CUSTOM COMPONENTS
 import Box from "@component/Box";
 import Grid from "@component/grid/Grid";

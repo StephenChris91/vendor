@@ -16,40 +16,56 @@ import { createProduct } from "actions/creatProducts";
 import toast from "react-hot-toast";
 import CheckBox from "@component/CheckBox";
 import Select, { SelectOption } from "@component/Select";
+import Typography from "@component/Typography";
 
-const UploadImageBox = styled("div")(({ theme }) => ({
-  width: 70,
-  height: 70,
-  display: "flex",
-  overflow: "hidden",
-  borderRadius: "8px",
-  marginRight: ".5rem",
-  position: "relative",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: theme.colors.primary[100],
-}));
+// const UploadImageBox = styled("div")(({ theme }) => ({
+//   width: 70,
+//   height: 70,
+//   display: "flex",
+//   overflow: "hidden",
+//   borderRadius: "8px",
+//   marginRight: ".5rem",
+//   position: "relative",
+//   alignItems: "center",
+//   justifyContent: "center",
+//   backgroundColor: theme.colors.primary[100],
+// }));
 
+const StyledDropZone = styled(DropZone)`
+  width: 100%;
+  min-height: 200px;
+  margin-bottom: 20px;
+`;
+
+const StyledLabel = styled(Typography)`
+  margin-bottom: 10px;
+  font-weight: 600;
+`;
 interface Props {
   product?: Product;
   categoryOptions: SelectOption[];
+  brandOptions: SelectOption[];
 }
 
 interface FormValues {
   name: string;
-  price: number;
-  stock: number;
-  sale_price: number;
-  description: string;
-  categories: SelectOption[];
-  in_stock: boolean;
-  is_taxable: boolean;
-  image: string;
   slug: string;
+  description: string;
+  price: number;
+  sale_price: number;
   sku: number;
   quantity: number;
+  in_stock: boolean;
+  is_taxable: boolean;
   status: "Draft" | "Published" | "Suspended" | "OutOfStock";
   product_type: "Simple" | "Variable";
+  video: string;
+  image: string;
+  gallery: string[];
+  categories: SelectOption[];
+  brandId: string | null;
+  isFlashDeal: boolean;
+  discountPercentage: number | null;
 }
 
 const statusOptions: SelectOption[] = [
@@ -64,27 +80,14 @@ const productTypeOptions: SelectOption[] = [
   { value: "Variable", label: "Variable" },
 ];
 
-export default function ProductUpdateForm({ product, categoryOptions }: Props) {
-  const [cateOptions, setCateOptions] = useState<SelectOption[]>([]);
+export default function ProductUpdateForm({
+  product,
+  categoryOptions: initialCategoryOptions,
+  brandOptions: initialBrandOptions,
+}: Props) {
   const [isSlugUnique, setIsSlugUnique] = useState(true);
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/categories/get-categories");
-      if (!response.ok) throw new Error("Failed to fetch categories");
-      const categories = await response.json();
-      setCateOptions(
-        categories.map((cat: any) => ({ value: cat.id, label: cat.name }))
-      );
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      toast.error("Failed to load categories");
-    }
-  };
+  const [categoryOption, setCategoryOption] = useState(initialCategoryOptions);
+  const [brandOptions, setBrandOptions] = useState(initialBrandOptions);
 
   const generateSKU = () => {
     return Math.floor(Math.random() * 1000000000);
@@ -95,6 +98,22 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "_")
       .replace(/^-+|-+$/g, "");
+  };
+
+  const handleCreateCategory = (inputValue: string) => {
+    const newCategory = { value: inputValue.toLowerCase(), label: inputValue };
+    setCategoryOption((prev) => [...prev, newCategory]);
+    return newCategory;
+  };
+
+  const handleCreateBrand = (inputValue: string) => {
+    const newBrand = { value: inputValue.toLowerCase(), label: inputValue };
+
+    setBrandOptions((prev) =>
+      Array.isArray(prev) ? [...prev, newBrand] : [newBrand]
+    );
+
+    return newBrand;
   };
 
   const checkSlugUniqueness = async (slug: string) => {
@@ -113,45 +132,43 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
 
   const initialValues: FormValues = {
     name: product?.name || "",
-    price: product?.price || 0,
-    stock: product?.stock || 0,
-    sale_price: product?.sale_price || 0,
+    slug: product?.slug || "",
     description: product?.description || "",
+    price: product?.price || 0,
+    sale_price: product?.sale_price || 0,
+    sku: product?.sku || 0,
+    quantity: product?.quantity || 0,
+    in_stock: product?.in_stock || false,
+    is_taxable: product?.is_taxable || false,
+    status: product?.status || "Draft",
+    product_type: product?.product_type || "Simple",
+    video: product?.video || "",
+    image: product?.image || "",
+    gallery: product?.gallery || [],
     categories:
       product?.categories?.map((cat) => ({ value: cat.id, label: cat.name })) ||
       [],
-    in_stock: product?.in_stock || false,
-    is_taxable: product?.is_taxable || false,
-    image: product?.image || "",
-    slug: product?.slug || "",
-    sku: product?.sku || 0,
-    quantity: product?.quantity || 0,
-    status: product?.status || "Draft",
-    product_type: product?.product_type || "Simple",
+    brandId: product?.brandId || null,
+    isFlashDeal: product?.isFlashDeal || false,
+    discountPercentage: product?.discountPercentage || null,
   };
 
   const validationSchema = yup.object().shape({
     name: yup.string().required("Name is required"),
-    categories: yup.array().min(1, "At least one category is required"),
+    slug: yup.string().required("Slug is required"),
     description: yup.string().required("Description is required"),
-    stock: yup
-      .number()
-      .required("Stock is required")
-      .positive("Stock must be positive"),
     price: yup
       .number()
       .required("Price is required")
       .positive("Price must be positive"),
     sale_price: yup.number().positive("Sale price must be positive"),
-    in_stock: yup.boolean().required("In Stock status is required"),
-    is_taxable: yup.boolean().required("Taxable status is required"),
-    image: yup.string().required("Product image is required"),
-    slug: yup.string().required("Slug is required"),
     sku: yup.number().required("SKU is required"),
     quantity: yup
       .number()
       .required("Quantity is required")
       .positive("Quantity must be positive"),
+    in_stock: yup.boolean().required("In Stock status is required"),
+    is_taxable: yup.boolean().required("Taxable status is required"),
     status: yup
       .string()
       .oneOf(["Draft", "Published", "Suspended", "OutOfStock"])
@@ -160,6 +177,12 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
       .string()
       .oneOf(["Simple", "Variable"])
       .required("Product type is required"),
+    image: yup.string().required("Product image is required"),
+    gallery: yup.array().of(yup.string()),
+    categories: yup.array().min(1, "At least one category is required"),
+    brandId: yup.string().nullable(),
+    isFlashDeal: yup.boolean(),
+    discountPercentage: yup.number().nullable().min(0).max(100),
   });
 
   const handleFormSubmit = async (
@@ -208,6 +231,22 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
             setFieldValue("image", url);
           };
 
+          const handleGalleryUpload = async (files: File[]) => {
+            // This function should handle file uploads and return URLs
+            const uploadFile = async (file: File): Promise<string> => {
+              return URL.createObjectURL(file);
+            };
+
+            try {
+              const uploadPromises = files.map((file) => uploadFile(file));
+              const urls = await Promise.all(uploadPromises);
+              setFieldValue("gallery", [...values.gallery, ...urls]);
+            } catch (error) {
+              console.error("Error uploading files:", error);
+              toast.error("Failed to upload one or more files");
+            }
+          };
+
           const handleNameChange = async (
             e: React.ChangeEvent<HTMLInputElement>
           ) => {
@@ -254,20 +293,45 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
                   )}
                 </Grid>
 
+                <Grid item xs={12}>
+                  <TextArea
+                    rows={6}
+                    fullwidth
+                    name="description"
+                    label="Description"
+                    placeholder="Product Description"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.description}
+                    errorText={touched.description && errors.description}
+                  />
+                </Grid>
+
                 <Grid item sm={6} xs={12}>
-                  <Select
-                    label="Categories"
-                    name="categories"
-                    options={cateOptions}
-                    isMulti
-                    value={values.categories}
-                    onChange={(newValue) =>
-                      setFieldValue("categories", newValue)
-                    }
-                    placeholder="Select Categories"
-                    errorText={
-                      touched.categories && (errors.categories as string)
-                    }
+                  <TextField
+                    fullwidth
+                    name="price"
+                    type="number"
+                    label="Regular Price"
+                    placeholder="Regular Price"
+                    onBlur={handleBlur}
+                    value={values.price}
+                    onChange={handleChange}
+                    errorText={touched.price && errors.price}
+                  />
+                </Grid>
+
+                <Grid item sm={6} xs={12}>
+                  <TextField
+                    fullwidth
+                    type="number"
+                    name="sale_price"
+                    label="Sale Price"
+                    placeholder="Sale Price"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.sale_price}
+                    errorText={touched.sale_price && errors.sale_price}
                   />
                 </Grid>
 
@@ -307,84 +371,6 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
-                  <DropZone
-                    onChange={handleUpload}
-                    uploadType="product-image"
-                    maxSize={4 * 1024 * 1024} // 4MB limit
-                    acceptedFileTypes={{
-                      "image/png": [".png"],
-                      "image/jpeg": [".jpg", ".jpeg"],
-                      "image/gif": [".gif"],
-                      "image/webp": [".webp"],
-                    }}
-                    multiple={false}
-                  />
-                  {values.image && (
-                    <FlexBox flexDirection="row" mt={2} flexWrap="wrap">
-                      <UploadImageBox>
-                        <Image src={values.image} width="100%" />
-                      </UploadImageBox>
-                    </FlexBox>
-                  )}
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextArea
-                    rows={6}
-                    fullwidth
-                    name="description"
-                    label="Description"
-                    placeholder="Product Description"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.description}
-                    errorText={touched.description && errors.description}
-                  />
-                </Grid>
-
-                <Grid item sm={6} xs={12}>
-                  <TextField
-                    fullwidth
-                    name="stock"
-                    label="Stock"
-                    placeholder="Available Stock"
-                    type="number"
-                    onBlur={handleBlur}
-                    value={values.stock}
-                    onChange={handleChange}
-                    errorText={touched.stock && errors.stock}
-                  />
-                </Grid>
-
-                <Grid item sm={6} xs={12}>
-                  <TextField
-                    fullwidth
-                    name="price"
-                    type="number"
-                    label="Regular Price"
-                    placeholder="Regular Price"
-                    onBlur={handleBlur}
-                    value={values.price}
-                    onChange={handleChange}
-                    errorText={touched.price && errors.price}
-                  />
-                </Grid>
-
-                <Grid item sm={6} xs={12}>
-                  <TextField
-                    fullwidth
-                    type="number"
-                    name="sale_price"
-                    label="Sale Price"
-                    placeholder="Sale Price"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.sale_price}
-                    errorText={touched.sale_price && errors.sale_price}
-                  />
-                </Grid>
-
                 <Grid item sm={6} xs={12}>
                   <CheckBox
                     name="in_stock"
@@ -416,7 +402,10 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
                       ) || null
                     }
                     onChange={(newValue) =>
-                      setFieldValue("status", newValue || "")
+                      setFieldValue(
+                        "status",
+                        (newValue as SelectOption)?.value || ""
+                      )
                     }
                     label="Status"
                     placeholder="Select Status"
@@ -433,24 +422,168 @@ export default function ProductUpdateForm({ product, categoryOptions }: Props) {
                       ) || null
                     }
                     onChange={(newValue) =>
-                      setFieldValue("product_type", newValue || "")
+                      setFieldValue(
+                        "product_type",
+                        (newValue as SelectOption)?.value || ""
+                      )
                     }
                     label="Product Type"
                     placeholder="Select Product Type"
                     errorText={touched.product_type && errors.product_type}
                   />
-                </Grid>
-              </Grid>
 
-              <Button
-                mt="25px"
-                variant="contained"
-                color="primary"
-                type="submit"
-                disabled={isSubmitting || !isSlugUnique}
-              >
-                {product ? "Update Product" : "Create Product"}
-              </Button>
+                  {/* <Grid item xs={12}>
+                    <TextField
+                      fullwidth
+                      name="video"
+                      label="Video URL"
+                      placeholder="Product Video URL"
+                      value={values.video}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      errorText={touched.video && errors.video}
+                    />
+                  </Grid> */}
+
+                  <Grid item xs={12}>
+                    <StyledLabel>Product Image</StyledLabel>
+                    <StyledDropZone
+                      onChange={handleUpload}
+                      uploadType="product-image"
+                      maxSize={4 * 1024 * 1024} // 4MB limit
+                      acceptedFileTypes={{
+                        "image/png": [".png"],
+                        "image/jpeg": [".jpg", ".jpeg"],
+                        "image/gif": [".gif"],
+                        "image/webp": [".webp"],
+                      }}
+                      multiple={false}
+                    />
+                    {values.image && (
+                      <FlexBox flexDirection="row" mt={2} flexWrap="wrap">
+                        <Image src={values.image} width={100} height={100} />
+                      </FlexBox>
+                    )}
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <StyledLabel>Product Gallery</StyledLabel>
+                    <StyledDropZone
+                      onChange={handleGalleryUpload}
+                      uploadType="product-gallery"
+                      maxSize={4 * 1024 * 1024} // 4MB limit
+                      acceptedFileTypes={{
+                        "image/png": [".png"],
+                        "image/jpeg": [".jpg", ".jpeg"],
+                        "image/gif": [".gif"],
+                        "image/webp": [".webp"],
+                      }}
+                      multiple={true}
+                    />
+                    {values.gallery.length > 0 && (
+                      <FlexBox flexDirection="row" mt={2} flexWrap="wrap">
+                        {values.gallery.map((img, index) => (
+                          <Image
+                            key={index}
+                            src={img}
+                            width={100}
+                            height={100}
+                            // objectFit="cover"
+                            m={1}
+                          />
+                        ))}
+                      </FlexBox>
+                    )}
+                  </Grid>
+
+                  <Grid item sm={6} xs={12}>
+                    <Select
+                      isMulti
+                      isCreatable
+                      options={categoryOption}
+                      value={values.categories}
+                      onChange={(newValue) =>
+                        setFieldValue("categories", newValue)
+                      }
+                      onCreateOption={(inputValue) => {
+                        const newCategory = handleCreateCategory(inputValue);
+                        setFieldValue("categories", [
+                          ...values.categories,
+                          newCategory,
+                        ]);
+                      }}
+                      label="Categories"
+                      placeholder="Select or Create Categories"
+                      errorText={
+                        touched.categories && (errors.categories as string)
+                      }
+                    />
+                  </Grid>
+
+                  <Grid item sm={6} xs={12}>
+                    <Select
+                      isCreatable
+                      options={brandOptions}
+                      value={
+                        brandOptions?.find(
+                          (option) => option.value === values.brandId
+                        ) || null
+                      }
+                      onChange={(newValue) =>
+                        setFieldValue(
+                          "brandId",
+                          (newValue as SelectOption)?.value || null
+                        )
+                      }
+                      onCreateOption={(inputValue) => {
+                        const newBrand = handleCreateBrand(inputValue);
+                        setFieldValue("brandId", newBrand.value);
+                      }}
+                      label="Brand"
+                      placeholder="Select or Create Brand"
+                      errorText={touched.brandId && errors.brandId}
+                    />
+                  </Grid>
+
+                  <Grid item sm={6} xs={12}>
+                    <CheckBox
+                      name="isFlashDeal"
+                      label="Flash Deal"
+                      checked={values.isFlashDeal}
+                      onChange={(e) =>
+                        setFieldValue("isFlashDeal", e.target.checked)
+                      }
+                    />
+                  </Grid>
+
+                  <Grid item sm={6} xs={12}>
+                    <TextField
+                      fullwidth
+                      name="discountPercentage"
+                      label="Discount Percentage"
+                      placeholder="Discount Percentage"
+                      type="number"
+                      value={values.discountPercentage || ""}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      errorText={
+                        touched.discountPercentage && errors.discountPercentage
+                      }
+                      disabled={!values.isFlashDeal}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Button
+                  mt="25px"
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  disabled={isSubmitting || !isSlugUnique}
+                >
+                  {product ? "Update Product" : "Create Product"}
+                </Button>
+              </Grid>
             </Form>
           );
         }}

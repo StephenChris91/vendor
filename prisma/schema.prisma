@@ -161,6 +161,8 @@ model shop {
   paymentInfo  PaymentInfo?
   shopSettings ShopSettings?
   shopOrders   shopOrder[]
+  categoryId   String
+  category     category      @relation(fields: [categoryId], references: [id])
 }
 
 model Address {
@@ -196,46 +198,63 @@ model ShopSettings {
 }
 
 model product {
-  id            String        @id @default(uuid())
-  name          String
-  slug          String        @unique
-  description   String
-  price         Int
-  sale_price    Int
-  sku           Int           @default(autoincrement())
-  quantity      Int
-  in_stock      Boolean?
-  is_taxable    Boolean?
-  status        ProductStatus @default(Draft)
-  product_type  ProductType   @default(Simple)
-  video         String?
-  image         String?
-  user_id       String?
-  ratings       Float?
-  total_reviews Int?
-  my_review     String?
-  in_wishlist   Boolean?
-  shop_id       String?
-  categories    category[]
-  shop          shop?         @relation("ShopProducts", fields: [shop_id], references: [id], onDelete: SetNull)
-  user          user?         @relation("UserProducts", fields: [user_id], references: [id], onDelete: SetNull)
-  gallery       String[]
-  shop_name     String?
-  stock         Int?
-  wishlistedBy  Wishlist[]
-  orderItems    orderItem[]
+  id                 String            @id @default(uuid())
+  name               String
+  slug               String            @unique
+  description        String
+  price              Int
+  sale_price         Int
+  sku                Int               @default(autoincrement())
+  quantity           Int
+  in_stock           Boolean?
+  is_taxable         Boolean?
+  status             ProductStatus     @default(Draft)
+  product_type       ProductType       @default(Simple)
+  image              String?
+  user_id            String?
+  ratings            Float?
+  total_reviews      Int?
+  my_review          String?
+  in_wishlist        Boolean?
+  shop_id            String?
+  shop               shop?             @relation("ShopProducts", fields: [shop_id], references: [id], onDelete: SetNull)
+  user               user?             @relation("UserProducts", fields: [user_id], references: [id], onDelete: SetNull)
+  gallery            String[]
+  shop_name          String?
+  stock              Int?
+  wishlistedBy       Wishlist[]
+  orderItems         orderItem[]
+  isFlashDeal        Boolean           @default(false)
+  discountPercentage Float?
+  brand              Brand?            @relation(fields: [brandId], references: [id])
+  brandId            String?
+  categories         ProductCategory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model category {
-  id       String    @id @unique @default(uuid())
-  name     String    @unique
-  slug     String
-  products product[]
+  id            String            @id @unique @default(uuid())
+  name          String            @unique
+  slug          String
+  isTopCategory Boolean           @default(false)
+  shops         shop[]
+  parentId      String?
+  parent        category?         @relation("SubCategories", fields: [parentId], references: [id])
+  subCategories category[]        @relation("SubCategories")
+  products      ProductCategory[]
 
   @@unique([name, slug])
+}
+
+model ProductCategory {
+  product    product  @relation(fields: [productId], references: [id])
+  productId  String
+  category   category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@id([productId, categoryId])
 }
 
 model verificationToken {
@@ -269,18 +288,19 @@ model order {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  user             user             @relation(fields: [userId], references: [id])
-  orderItems       orderItem[]
-  shippingAddress  shippingAddress?
-  shopOrders       shopOrder[]
-  shopId           String
-  shop             shop?            @relation(fields: [shopId], references: [id])
-  paymentReference String?          @unique
+  user              user             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderItems        orderItem[]
+  shippingAddressId String?          @unique
+  shippingAddress   shippingAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: Cascade)
+  shopOrders        shopOrder[]
+  shopId            String
+  shop              shop?            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  paymentReference  String?          @unique
 }
 
 model shippingAddress {
   id      String  @id @default(uuid())
-  orderId String  @unique
+  orderId String? @unique
   name    String
   street  String
   city    String
@@ -289,7 +309,7 @@ model shippingAddress {
   country String
   phone   String?
 
-  order order @relation(fields: [orderId], references: [id])
+  order order?
 }
 
 model shopOrder {
@@ -304,7 +324,7 @@ model shopOrder {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  order      order       @relation(fields: [orderId], references: [id])
+  order      order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
   shop       shop        @relation(fields: [shopId], references: [id])
   orderItems orderItem[]
 }
@@ -331,8 +351,8 @@ model orderItem {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  order     order     @relation(fields: [orderId], references: [id])
-  shopOrder shopOrder @relation(fields: [shopOrderId], references: [id])
+  order     order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shopOrder shopOrder @relation(fields: [shopOrderId], references: [id], onDelete: Cascade)
   product   product   @relation(fields: [productId], references: [id])
 }
 
@@ -357,4 +377,39 @@ model cart {
 
   userId String @unique
   user   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Brand {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  logo        String?
+  website     String?
+  description String?
+  featured    Boolean   @default(false)
+  category    String?
+  rating      Float?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    product[]
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MainCarousel {
+  id          String   @id @default(cuid())
+  title       String?
+  description String?
+  buttonText  String?
+  buttonLink  String?
+  image       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

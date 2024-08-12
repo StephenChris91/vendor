@@ -1,7 +1,6 @@
 // app/api/orders/route.ts
 
 import { NextResponse } from 'next/server';
-import { auth } from 'auth';
 import { db } from '../../../../prisma/prisma';
 import { validateInventory } from '@lib/order/inventory';
 import { calculateTax } from '@lib/order/calculateTax';

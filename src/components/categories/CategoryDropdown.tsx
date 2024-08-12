@@ -11,7 +11,10 @@ type CategoryDropdownProps = {
 };
 // =========================================
 
-export default function CategoryDropdown({ open, position = "absolute" }: CategoryDropdownProps) {
+export default function CategoryDropdown({
+  open,
+  position = "absolute",
+}: CategoryDropdownProps) {
   const megaMenu = { MegaMenu1, MegaMenu2 };
 
   return (
@@ -25,7 +28,8 @@ export default function CategoryDropdown({ open, position = "absolute" }: Catego
             href={item.href}
             icon={item.icon}
             title={item.title}
-            caret={!!item.menuData}>
+            caret={!!item.menuData}
+          >
             <MegaMenu data={item.menuData || {}} />
           </CategoryMenuItem>
         );

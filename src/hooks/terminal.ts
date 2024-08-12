@@ -148,13 +148,13 @@ export async function fetchShippingRates(
     pickupAddressId: string,
     deliveryAddressId: string,
     parcelId: string,
-    cashOnDelivery: boolean = false,
+    cashOnDelivery: boolean = true,
     currency: string = 'NGN'
 ) {
     const queryParams = new URLSearchParams({
         pickup_address: pickupAddressId,
         delivery_address: deliveryAddressId,
-        parcel: parcelId,
+        parcel_id: parcelId,
         cash_on_delivery: cashOnDelivery.toString(),
         currency: currency
     });

@@ -151,7 +151,6 @@ export const productSchema = z.object({
   status: z.enum(['Draft', 'Published', 'Suspended', 'OutOfStock']),
   product_type: z.enum(['Simple', 'Variable']),
   image: z.string().url().optional(),
-  video: z.string().url().optional(),
   gallery: z.array(z.string().url()).optional(),
   // author_id: z.string().optional(),
   ratings: z.number().min(0).max(5).optional(),
@@ -161,6 +160,9 @@ export const productSchema = z.object({
   categories: z.array(z.string()).optional(),
   // shop_id: z.string(),
   shop_name: z.string().optional(),
+  isFlashDeal: z.boolean().optional(),
+  discountPercentage: z.number().min(0).max(100).optional(),
+  brandId: z.string().optional(),
 });
 
 
