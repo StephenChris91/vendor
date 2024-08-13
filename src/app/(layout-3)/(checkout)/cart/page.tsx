@@ -10,11 +10,9 @@ import FlexBox from "@component/FlexBox";
 import { Button } from "@component/buttons";
 import Typography from "@component/Typography";
 import { ProductCard7 } from "@component/product-cards";
-import Select from "@component/Select";
 import TextField from "@component/text-field";
 import { useCart } from "hooks/useCart";
 import { currency } from "@utils/utils";
-import stateList from "@data/stateList";
 import { useCurrentUser } from "@lib/use-session-client";
 import { useShippingRates } from "@hook/useShippingRates";
 import { getVendorsFromCart } from "@lib/cartUtils";
@@ -53,7 +51,6 @@ export default function Cart() {
     removeFromCart,
     selectedShippingRate,
     setShippingRate,
-    fallbackShippingRate,
     totalWithShipping,
     shippingAddress,
     setShippingAddress,
@@ -133,21 +130,6 @@ export default function Cart() {
   if (!user) {
     return null;
   }
-
-  // if (cartItems.length === 0) {
-  //   return (
-  //     <Box mt="2rem" mb="2rem">
-  //       <Typography color="gray.600" mb="1rem">
-  //         Your cart is empty.
-  //       </Typography>
-  //       <Link href="/">
-  //         <Button size="small" variant="contained">
-  //           <Link href="/shop">Continue Shopping</Link>
-  //         </Button>
-  //       </Link>
-  //     </Box>
-  //   );
-  // }
 
   return (
     <Fragment>
@@ -254,8 +236,8 @@ export default function Cart() {
 
             {shippingRates.length > 0 ? (
               <ShippingRates
-                rates={[...shippingRates, fallbackShippingRate]}
-                selectedRate={selectedShippingRate || fallbackShippingRate}
+                rates={[...shippingRates]}
+                selectedRate={selectedShippingRate}
                 onSelectRate={handleSelectRate}
               />
             ) : (

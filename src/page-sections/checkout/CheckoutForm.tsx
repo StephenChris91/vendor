@@ -11,9 +11,6 @@ import { currency } from "@utils/utils";
 import FlexBox from "@component/FlexBox";
 import Divider from "@component/Divider";
 import { useCurrentUser } from "@lib/use-session-client";
-import Box from "@component/Box";
-import Link from "next/link";
-
 export default function CheckoutForm() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,21 +91,6 @@ export default function CheckoutForm() {
   if (!shippingAddress) {
     return null; // Return null to avoid rendering anything while redirecting
   }
-
-  // if (cartItems.length === 0) {
-  //   return (
-  //     <Box mt="2rem" mb="2rem">
-  //       <Typography color="gray.600" mb="1rem">
-  //         Your cart is empty.
-  //       </Typography>
-  //       <Link href="/">
-  //         <Button size="small" variant="contained">
-  //           <Link href="/shop">Continue Shopping</Link>
-  //         </Button>
-  //       </Link>
-  //     </Box>
-  //   );
-  // }
 
   return (
     <form onSubmit={handleSubmit}>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card1 } from "@component/Card1";
 import Divider from "@component/Divider";
 import FlexBox from "@component/FlexBox";
@@ -7,45 +8,75 @@ import { Button } from "@component/buttons";
 import TextField from "@component/text-field";
 import Typography from "@component/Typography";
 import { useCart } from "hooks/useCart";
-import { useState } from "react";
+import { useShippingRates } from "hooks/useShippingRates";
+import Select, { SelectOption } from "@component/Select";
+import { currency } from "@utils/utils";
+import { useCurrentUser } from "@lib/use-session-client";
 
 export default function CheckoutSummary() {
   const {
     cartItems,
     cartTotal,
     selectedShippingRate,
+    setShippingRate,
+    shippingAddress,
     totalWithShipping,
-    fallbackShippingRate,
   } = useCart();
+  const { shippingRates, isLoading, error, getShippingRates } =
+    useShippingRates();
+  const user = useCurrentUser();
+
   const [voucher, setVoucher] = useState("");
 
-  const shippingRate = selectedShippingRate || fallbackShippingRate;
-  const shipping = shippingRate.amount;
-  const tax = totalWithShipping * 0.05; // Calculating tax based on total including shipping
-  const discount = 0; // For now, no discount
+  useEffect(() => {
+    if (
+      user &&
+      shippingAddress &&
+      cartItems.length > 0 &&
+      !selectedShippingRate
+    ) {
+      const vendors = cartItems.map((item) => ({ id: item.shopId }));
+      getShippingRates(user, vendors, shippingAddress);
+    }
+  }, [
+    user,
+    shippingAddress,
+    cartItems,
+    getShippingRates,
+    selectedShippingRate,
+  ]);
 
-  const total = totalWithShipping + tax - discount;
+  const tax = totalWithShipping * 0.05;
+  const total = totalWithShipping + tax;
 
-  const handleApplyVoucher = () => {
-    // Implement voucher logic here
-    console.log("Applying voucher:", voucher);
-  };
-
-  const renderShippingInfo = () => {
-    if (selectedShippingRate) {
-      return (
-        <Typography fontSize="18px" fontWeight="600" lineHeight="1">
-          ₦{shipping.toFixed(2)} ({selectedShippingRate.carrier_name})
-        </Typography>
+  const handleShippingRateChange = (option: SelectOption | null) => {
+    if (option) {
+      const selectedRate = shippingRates.find(
+        (rate) => rate.carrier_name === option.value
       );
-    } else {
-      return (
-        <Typography fontSize="18px" fontWeight="600" lineHeight="1">
-          ₦{shipping.toFixed(2)}
-        </Typography>
-      );
+      if (selectedRate) {
+        setShippingRate(selectedRate);
+      }
     }
   };
+
+  const handleApplyVoucher = () => {
+    console.log("handleApplyVoucher");
+  };
+
+  const shippingOptions: SelectOption[] = shippingRates.map((rate) => ({
+    label: `${rate.carrier_name} - ${currency(rate.amount)}`,
+    value: rate.carrier_name,
+  }));
+
+  const selectedOption: SelectOption | null = selectedShippingRate
+    ? {
+        label: `${selectedShippingRate.carrier_name} - ${currency(
+          selectedShippingRate.amount
+        )}`,
+        value: selectedShippingRate.carrier_name,
+      }
+    : null;
 
   return (
     <Card1>
@@ -53,30 +84,39 @@ export default function CheckoutSummary() {
         <Typography color="text.hint">Subtotal:</Typography>
         <FlexBox alignItems="flex-end">
           <Typography fontSize="18px" fontWeight="600" lineHeight="1">
-            ₦{cartTotal.toFixed(2)}
+            {currency(cartTotal)}
           </Typography>
         </FlexBox>
       </FlexBox>
 
       <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
         <Typography color="text.hint">Shipping:</Typography>
-        <FlexBox alignItems="flex-end">{renderShippingInfo()}</FlexBox>
+        {isLoading ? (
+          <Typography>Loading rates...</Typography>
+        ) : error ? (
+          <Typography color="error">{error}</Typography>
+        ) : selectedShippingRate ? (
+          <Typography fontSize="18px" fontWeight="600" lineHeight="1">
+            {currency(selectedShippingRate.amount)}
+            {/* {selectedShippingRate.carrier_name}) */}
+          </Typography>
+        ) : shippingRates.length > 0 ? (
+          <Select
+            options={shippingOptions}
+            value={selectedOption}
+            onChange={handleShippingRateChange}
+            placeholder="Select shipping method"
+          />
+        ) : (
+          <Typography>No shipping rates available</Typography>
+        )}
       </FlexBox>
 
       <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
         <Typography color="text.hint">Tax (5%):</Typography>
         <FlexBox alignItems="flex-end">
           <Typography fontSize="18px" fontWeight="600" lineHeight="1">
-            ₦{tax.toFixed(2)}
-          </Typography>
-        </FlexBox>
-      </FlexBox>
-
-      <FlexBox justifyContent="space-between" alignItems="center" mb="1rem">
-        <Typography color="text.hint">Discount:</Typography>
-        <FlexBox alignItems="flex-end">
-          <Typography fontSize="18px" fontWeight="600" lineHeight="1">
-            {discount > 0 ? `₦${discount.toFixed(2)}` : "-"}
+            {currency(tax)}
           </Typography>
         </FlexBox>
       </FlexBox>
@@ -90,7 +130,7 @@ export default function CheckoutSummary() {
         textAlign="right"
         mb="1.5rem"
       >
-        ₦{total.toFixed(2)}
+        {currency(total)}
       </Typography>
 
       <TextField
