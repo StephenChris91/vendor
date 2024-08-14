@@ -6,9 +6,10 @@ import {
     addToCartAtom,
     removeFromCartAtom,
     updateCartItemQuantityAtom,
-    selectedShippingRateAtom,
+    selectedShippingRatesAtom,
     setShippingRateAtom,
     totalWithShippingAtom,
+    totalShippingCostAtom,
     shippingAddressAtom,
     setShippingAddressAtom,
     clearCartAtom,
@@ -20,8 +21,9 @@ import {
 export function useCart() {
     const [cartItems] = useAtom(cartItemsAtom);
     const [cartTotal] = useAtom(cartTotalAtom);
-    const [selectedShippingRate] = useAtom(selectedShippingRateAtom);
+    const [selectedShippingRates] = useAtom(selectedShippingRatesAtom);
     const [totalWithShipping] = useAtom(totalWithShippingAtom);
+    const [totalShippingCost] = useAtom(totalShippingCostAtom);
     const [shippingAddress] = useAtom(shippingAddressAtom);
     const [, addToCart] = useAtom(addToCartAtom);
     const [, removeFromCart] = useAtom(removeFromCartAtom);
@@ -30,18 +32,32 @@ export function useCart() {
     const [, setShippingAddress] = useAtom(setShippingAddressAtom);
     const [, clearCart] = useAtom(clearCartAtom);
 
+    const getVendorIds = () => Array.from(new Set(cartItems.map(item => item.shopId)));
+
+    const getVendorItems = (vendorId: string) => cartItems.filter(item => item.shopId === vendorId);
+
+    const getVendorTotal = (vendorId: string) =>
+        getVendorItems(vendorId).reduce((total, item) => total + item.price * item.quantity, 0);
+
+    const getVendorShippingRate = (vendorId: string) => selectedShippingRates[vendorId] || null;
+
     return {
         cartItems,
         cartTotal,
-        selectedShippingRate,
+        selectedShippingRates,
         totalWithShipping,
+        totalShippingCost,
         shippingAddress,
         addToCart,
         removeFromCart,
         updateCartItemQuantity,
         setShippingRate,
         setShippingAddress,
-        clearCart
+        clearCart,
+        getVendorIds,
+        getVendorItems,
+        getVendorTotal,
+        getVendorShippingRate
     };
 }
 

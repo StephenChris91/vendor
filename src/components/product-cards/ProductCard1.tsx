@@ -14,7 +14,7 @@ import FlexBox from "@component/FlexBox";
 import { Button } from "@component/buttons";
 import NextImage from "@component/NextImage";
 import Card, { CardProps } from "@component/Card";
-import { H3, SemiSpan } from "@component/Typography";
+import Typography, { H3, SemiSpan } from "@component/Typography";
 import ProductQuickView from "@component/products/ProductQuickView";
 
 import { calculateDiscount, currency, getTheme } from "@utils/utils";
@@ -118,7 +118,12 @@ interface ProductCard1Props extends CardProps {
   off?: number;
   images: string[];
   shopId: string;
+  shop: {
+    shopName?: string; // Update to match your `Product` model
+  };
+  sale_price: number;
 }
+
 // =======================================================================
 
 export default function ProductCard1({
@@ -128,9 +133,11 @@ export default function ProductCard1({
   price,
   imgUrl,
   rating,
-  off,
+  off = 0,
   images,
   shopId,
+  shop = { shopName: "Default Shop Name" },
+  sale_price,
   ...props
 }: ProductCard1Props) {
   const [open, setOpen] = useState(false);
@@ -150,7 +157,7 @@ export default function ProductCard1({
         price,
         image: imgUrl,
         quantity: amount,
-        shopId: shopId, // You might need to add shopId to your ProductCard1Props
+        shopId: shopId,
       });
     }
   };
@@ -159,14 +166,20 @@ export default function ProductCard1({
     id,
     name: title,
     price,
-    description: "", // Provide an actual description
-    sale_price: 0, // Provide an actual sale_price if needed
-    sku: 0, // Provide an actual sku if needed
-    quantity: 0, // Provide an actual quantity if needed
+    description: "", // Use a default or placeholder value
+    discountPercentage: off,
+    sku: 0, // Provide default values if needed
+    quantity: 0,
+    in_stock: false,
+    image: imgUrl,
     gallery: images,
     slug,
     status: ProductStatus.Published,
     product_type: ProductType.Simple,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    shop,
+    sale_price, // Ensure shop is correctly assigned
   };
 
   return (
@@ -224,18 +237,23 @@ export default function ProductCard1({
                 >
                   {title}
                 </H3>
+                <Typography as="p" text-muted fontSize="12px">
+                  Sold by: {shop?.shopName}
+                </Typography>{" "}
+                {/* Ensure shopName is correctly accessed */}
               </Link>
 
               <Rating value={rating} outof={5} color="warn" readOnly />
 
               <FlexBox alignItems="center" mt="10px">
                 <SemiSpan pr="0.5rem" fontWeight="600" color="primary.main">
-                  {calculateDiscount(price, off)}
+                  {/* {calculateDiscount(price, off)} */}
+                  {currency(price)}
                 </SemiSpan>
 
                 {!!off && (
-                  <SemiSpan color="text.muted" fontWeight="600">
-                    <del>{currency(price)}</del>
+                  <SemiSpan fontSize="14px" color="text.muted" fontWeight="500">
+                    <del> {currency(sale_price)}</del>
                   </SemiSpan>
                 )}
               </FlexBox>

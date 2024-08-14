@@ -4,19 +4,19 @@ import User from "./user.model";
 import { Order } from "./order.model";
 
 interface Shop {
-  id: string;
-  shopName: string;
-  description: string;
+  id?: string;
+  shopName?: string;
+  description?: string;
   logo?: string;
   banner?: string;
-  slug: string;
-  status: ShopStatus
-  createdAt: Date;
-  updatedAt: Date;
+  slug?: string;
+  status?: ShopStatus
+  createdAt?: Date;
+  updatedAt?: Date;
   deletedAt?: Date;
-  user: User;
-  products: product[];
-  orders: Order[];
+  user?: User;
+  products?: product[];
+  orders?: Order[];
   address?: Address;
   paymentInfo?: PaymentInfo;
   shopSettings?: ShopSettings;

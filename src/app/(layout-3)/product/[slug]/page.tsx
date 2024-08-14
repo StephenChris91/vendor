@@ -5,28 +5,27 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import ProductIntro from "@component/products/ProductIntro";
 import ProductView from "@component/products/ProductView";
+import { getProduct } from "actions/products/clientProductActions";
 import {
-  getProduct,
-  getRelatedProducts,
-  getFrequentlyBought,
-} from "actions/products/clientProductActions";
-import { getAvailableShop } from "actions/products/getAvailableShops";
-import { product, shop } from "@prisma/client";
+  getAvailableShop,
+  PartialShop,
+} from "actions/products/getAvailableShops";
+import { getRelatedProducts } from "actions/products/getRelatedProducts";
+import { getFrequentlyBought } from "actions/products/getFrequentlyBought";
+import Product from "@models/product.model";
 
 export default function ProductDetails() {
-  const { slug } = useParams();
+  const { id } = useParams();
 
-  const { data: product, isLoading: productLoading } = useQuery<product, Error>(
+  const { data: product, isLoading: productLoading } = useQuery<Product, Error>(
     {
-      queryKey: ["product", slug],
-      queryFn: () => getProduct(slug as string),
+      queryKey: ["product", id],
+      queryFn: () => getProduct(id as string),
     }
   );
 
-  // In ProductDetails component
-  // In ProductDetails component
   const { data: shops, isLoading: shopsLoading } = useQuery<
-    Partial<shop>[],
+    PartialShop[],
     Error
   >({
     queryKey: ["availableShops"],
@@ -34,17 +33,19 @@ export default function ProductDetails() {
   });
 
   const { data: relatedProducts, isLoading: relatedLoading } = useQuery<
-    product[],
+    Product[],
     Error
   >({
-    queryKey: ["relatedProducts", slug],
-    queryFn: () => getRelatedProducts(slug as string),
+    queryKey: ["relatedProducts", id],
+    queryFn: () => getRelatedProducts(id as string),
+    enabled: !!product,
   });
 
   const { data: frequentlyBought, isLoading: frequentlyBoughtLoading } =
-    useQuery<product[], Error>({
-      queryKey: ["frequentlyBought", slug],
-      queryFn: () => getFrequentlyBought(slug as string),
+    useQuery<Product[], Error>({
+      queryKey: ["frequentlyBought", id],
+      queryFn: () => getFrequentlyBought(id as string),
+      enabled: !!product,
     });
 
   if (
@@ -66,14 +67,16 @@ export default function ProductDetails() {
         id={product.id}
         price={product.price}
         title={product.name}
-        images={product.gallery}
+        image={product.image}
+        gallery={product.gallery}
+        shop={product.shop || undefined}
       />
 
       <ProductView
         product={product}
-        shops={shops || []}
-        relatedProducts={relatedProducts || []}
-        frequentlyBought={frequentlyBought || []}
+        shops={shops ?? []}
+        relatedProducts={relatedProducts ?? []}
+        frequentlyBought={frequentlyBought ?? []}
       />
     </Fragment>
   );

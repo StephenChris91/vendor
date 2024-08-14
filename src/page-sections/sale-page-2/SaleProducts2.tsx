@@ -6,17 +6,18 @@ import Pagination from "@component/pagination";
 import { SemiSpan } from "@component/Typography";
 import { ProductCard1 } from "@component/product-cards";
 import { renderProductCount } from "@utils/utils";
+import Product from "@models/product.model";
 
-type Product = {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  sale_price: number;
-  image: string;
-  gallery: string[];
-  ratings: number;
-};
+// type Product = {
+//   id: string;
+//   name: string;
+//   slug: string;
+//   price: number;
+//   sale_price: number;
+//   image: string;
+//   gallery: string[];
+//   ratings: number;
+// };
 
 type Meta = {
   page: number;
@@ -45,11 +46,14 @@ export default function SaleProducts2({ products, meta, onPageChange }: Props) {
               id={item.id}
               slug={item.slug}
               price={item.price}
-              title={item.name}
-              off={item.sale_price}
-              images={item.gallery}
               imgUrl={item.image}
-              rating={item.ratings}
+              rating={item.ratings || 0}
+              off={item.discountPercentage || 0}
+              images={item.gallery}
+              shopId={item.shop?.id || ""} // Handle cases where shopId might be undefined
+              title={item.name}
+              shop={{ shopName: item.shop?.shopName || "Default Shop Name" }}
+              sale_price={item.sale_price} // Ensure shopName is provided
             />
           </Grid>
         ))}

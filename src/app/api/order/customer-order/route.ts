@@ -1,15 +1,14 @@
-"use server"
-
+import { NextResponse } from "next/server";
 import { useCurrentSession } from "@lib/use-session-server";
-import { db } from "../../../prisma/prisma";
 import { OrderStatus } from "@models/order.model"; // Ensure this is a plain enum or object
+import { db } from "../../../../../prisma/prisma";
 
-export async function getOrders(): Promise<{ orders: any[] } | { error: string }> {
+export async function GET() {
     try {
         const session = await useCurrentSession();
 
         if (!session || !session.user || !session.user.id) {
-            return { error: 'User not authenticated' };
+            return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
         }
 
         const orders = await db.order.findMany({
@@ -39,10 +38,9 @@ export async function getOrders(): Promise<{ orders: any[] } | { error: string }
             })),
         }));
 
-        // Convert the orders to plain objects by serializing and deserializing
-        return { orders: JSON.parse(JSON.stringify(plainOrders)) };
+        return NextResponse.json({ orders: plainOrders }, { status: 200 });
     } catch (error) {
         console.error("Failed to fetch orders:", error);
-        return { error: 'Failed to fetch orders' };
+        return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
     }
 }

@@ -1,65 +1,56 @@
 'use server'
 
 // actions/products/getProducts.ts
-
 import { db } from "../../../prisma/prisma";
+import Product from "@models/product.model";
 
+export async function getAllProducts(page: number, pageSize: number) {
+    const products = await db.product.findMany({
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+            shop: true,
+            categories: true,
+            user: true,
+        },
+    });
 
-export async function getAllProducts(page: number = 1, pageSize: number = 28) {
-    const skip = (page - 1) * pageSize;
-
-    try {
-        console.log(`Fetching products: page ${page}, pageSize ${pageSize}`);
-
-        const [products, total] = await Promise.all([
-            db.product.findMany({
-                skip,
-                take: pageSize,
-                where: {
-                    status: 'Published',
-                },
-                select: {
-                    id: true,
-                    name: true,
-                    slug: true,
-                    price: true,
-                    sale_price: true,
-                    image: true,
-                    gallery: true,
-                    ratings: true,
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-            }),
-            db.product.count({
-                where: {
-                    status: 'Published',
-                },
-            }),
-        ]);
-
-        console.log(`Fetched ${products.length} products out of ${total} total`);
-
-        const totalPages = Math.ceil(total / pageSize);
-
-        return {
-            products: products.map(product => ({
-                ...product,
-                sale_price: product.sale_price ?? 0,
-                image: product.image ?? "",
-                gallery: product.gallery ?? [],
-                ratings: product.ratings ?? 0,
-            })),
-            meta: {
-                page,
-                pageSize,
-                total,
-                totalPage: totalPages,
-            },
-        };
-    } catch (error) {
-        console.error("Error fetching products:", error);
-        throw new Error(`Failed to fetch products: ${error instanceof Error ? error.message : String(error)}`);
-    }
+    return {
+        products: products.map((product) => ({
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            description: product.description,
+            price: product.price,
+            sale_price: product.sale_price,
+            sku: product.sku,
+            quantity: product.quantity,
+            in_stock: product.in_stock,
+            is_taxable: product.is_taxable,
+            status: product.status,
+            product_type: product.product_type,
+            image: product.image,
+            ratings: product.ratings,
+            total_reviews: product.total_reviews,
+            my_review: product.my_review,
+            in_wishlist: product.in_wishlist,
+            gallery: product.gallery,
+            shop_name: product.shop?.shopName,
+            stock: product.stock,
+            categories: product.categories,
+            shop: product.shop,
+            user: product.user,
+            brandId: product.brandId,
+            isFlashDeal: product.isFlashDeal,
+            discountPercentage: product.discountPercentage,
+            createdAt: product.createdAt,
+            updatedAt: product.updatedAt,
+        })),
+        meta: {
+            page,
+            pageSize,
+            total: await db.product.count(),
+            totalPage: Math.ceil((await db.product.count()) / pageSize),
+        },
+    };
 }

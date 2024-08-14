@@ -16,29 +16,41 @@ import { currency } from "@utils/utils";
 import { useCurrentUser } from "@lib/use-session-client";
 import { useShippingRates } from "@hook/useShippingRates";
 import { getVendorsFromCart } from "@lib/cartUtils";
+import Select from "@component/Select";
 
 const ShippingRates = ({ rates, selectedRate, onSelectRate }) => (
   <Box mt="1rem">
     <Typography fontWeight="600" mb="0.5rem">
       Shipping Rates
     </Typography>
-    {rates.map((rate) => (
-      <Box key={rate.carrier_name + rate.amount} mb="0.5rem">
-        <input
-          type="radio"
-          id={rate.carrier_name}
-          name="shippingRate"
-          value={rate.amount}
-          checked={
-            selectedRate && selectedRate.carrier_name === rate.carrier_name
+    <Select
+      options={rates.map((rate) => ({
+        label: `${rate.carrier_name} - ${currency(rate.amount)}`,
+        value: rate.carrier_name,
+      }))}
+      value={
+        selectedRate
+          ? {
+              label: `${selectedRate.carrier_name} - ${currency(
+                selectedRate.amount
+              )}`,
+              value: selectedRate.carrier_name,
+            }
+          : null
+      }
+      onChange={(option) => {
+        if (option && "value" in option) {
+          const selectedRate = rates.find(
+            (r) => r.carrier_name === option.value
+          );
+          if (selectedRate) {
+            onSelectRate(selectedRate);
           }
-          onChange={() => onSelectRate(rate)}
-        />
-        <label htmlFor={rate.carrier_name}>
-          {rate.carrier_name} - {currency(rate.amount)}
-        </label>
-      </Box>
-    ))}
+        }
+      }}
+      placeholder="Select shipping method"
+      isMulti={false}
+    />
   </Box>
 );
 
@@ -49,7 +61,6 @@ export default function Cart() {
     cartTotal,
     updateCartItemQuantity,
     removeFromCart,
-    selectedShippingRate,
     setShippingRate,
     totalWithShipping,
     shippingAddress,
@@ -57,9 +68,10 @@ export default function Cart() {
   } = useCart();
   const user = useCurrentUser();
   const [vendors, setVendors] = useState([]);
-  const { shippingRates, isLoading, error, getShippingRates } =
+  const { aggregatedRates, isLoading, error, getShippingRates } =
     useShippingRates();
   const [isAddressComplete, setIsAddressComplete] = useState(false);
+  const [selectedAggregatedRate, setSelectedAggregatedRate] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -83,7 +95,6 @@ export default function Cart() {
   }, [user, cartItems]);
 
   useEffect(() => {
-    // Check if all required fields of shipping address are filled
     const isComplete = !!(
       shippingAddress?.name &&
       shippingAddress?.street &&
@@ -93,8 +104,6 @@ export default function Cart() {
       shippingAddress?.country
     );
     setIsAddressComplete(isComplete);
-    console.log("Shipping address:", shippingAddress);
-    console.log("Is address complete:", isComplete);
   }, [shippingAddress]);
 
   const handleAddressChange = (field: string, value: string) => {
@@ -105,20 +114,23 @@ export default function Cart() {
   };
 
   const handleSelectRate = (rate) => {
-    setShippingRate(rate);
+    setSelectedAggregatedRate(rate);
+    const vendorIds = vendors.map((v) => v.id);
+    vendorIds.forEach((vendorId) => {
+      setShippingRate({
+        vendorId,
+        rate: {
+          ...rate,
+          amount: rate.vendor_rates[vendorId] || 0,
+        },
+      });
+    });
   };
 
   const handleGetShippingRates = async () => {
-    if (
-      shippingAddress?.state &&
-      shippingAddress?.city &&
-      shippingAddress?.street
-    ) {
+    if (isAddressComplete) {
       try {
-        console.log("Sending address:", shippingAddress);
-        console.log("Vendors:", vendors);
         await getShippingRates(user, vendors, shippingAddress);
-        console.log("Shipping rates fetched successfully");
       } catch (error) {
         console.error("Error getting shipping rates:", error);
       }
@@ -126,6 +138,9 @@ export default function Cart() {
       alert("Please fill in all address fields");
     }
   };
+
+  const calculatedTotalWithShipping =
+    cartTotal + (selectedAggregatedRate ? selectedAggregatedRate.amount : 0);
 
   if (!user) {
     return null;
@@ -165,7 +180,7 @@ export default function Cart() {
             >
               <Typography color="gray.600">Total:</Typography>
               <Typography fontSize="18px" fontWeight="600" lineHeight="1">
-                {currency(totalWithShipping)}
+                {currency(calculatedTotalWithShipping)}
               </Typography>
             </FlexBox>
 
@@ -234,10 +249,10 @@ export default function Cart() {
               </Typography>
             )}
 
-            {shippingRates.length > 0 ? (
+            {aggregatedRates.length > 0 ? (
               <ShippingRates
-                rates={[...shippingRates]}
-                selectedRate={selectedShippingRate}
+                rates={aggregatedRates}
+                selectedRate={selectedAggregatedRate}
                 onSelectRate={handleSelectRate}
               />
             ) : (
@@ -258,10 +273,10 @@ export default function Cart() {
                 disabled={
                   !isAddressComplete ||
                   cartItems.length === 0 ||
-                  !selectedShippingRate
+                  !selectedAggregatedRate
                 }
               >
-                Proceed to Checkout ({currency(totalWithShipping)})
+                Proceed to Checkout ({currency(calculatedTotalWithShipping)})
               </Button>
             </Link>
           </Card1>

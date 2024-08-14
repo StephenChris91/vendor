@@ -29,12 +29,13 @@ export interface ShippingRate {
     carrier_name: string;
     amount: number;
     currency: string;
+    vendorId: string;
 }
 
 // Atoms
 export const cartItemsAtom = atomWithStorage<CartItem[]>('cartItems', []);
 export const shippingAddressAtom = atomWithStorage<ShippingAddress | null>('shippingAddress', null);
-export const selectedShippingRateAtom = atomWithStorage<ShippingRate | null>('selectedShippingRate', null);
+export const selectedShippingRatesAtom = atomWithStorage<Record<string, ShippingRate>>('selectedShippingRates', {});
 
 // Derived atoms
 export const cartTotalAtom = atom((get) => {
@@ -42,23 +43,22 @@ export const cartTotalAtom = atom((get) => {
     return items.reduce((total, item) => total + item.price * item.quantity, 0);
 });
 
-export const fallbackShippingRateAtom = atom<ShippingRate>({
-    carrier_name: 'Standard Shipping',
-    amount: 1500, // Set your default fallback amount
-    currency: 'NGN'
-});
-
 export const cartItemCountAtom = atom((get) => {
     const items = get(cartItemsAtom);
     return items.reduce((count, item) => count + item.quantity, 0);
 });
 
+export const totalShippingCostAtom = atom((get) => {
+    const selectedRates = get(selectedShippingRatesAtom);
+    return Object.values(selectedRates).reduce((total, rate) => total + rate?.amount, 0);
+});
+
 export const totalWithShippingAtom = atom((get) => {
     const cartTotal = get(cartTotalAtom);
-    const selectedShippingRate = get(selectedShippingRateAtom);
-    const fallbackRate = get(fallbackShippingRateAtom);
-    return cartTotal + (selectedShippingRate?.amount || fallbackRate.amount);
+    const totalShipping = get(totalShippingCostAtom);
+    return cartTotal + totalShipping;
 });
+
 // Actions
 export const addToCartAtom = atom(
     null,
@@ -80,7 +80,21 @@ export const removeFromCartAtom = atom(
     null,
     (get, set, itemId: string) => {
         const currentItems = get(cartItemsAtom);
-        set(cartItemsAtom, currentItems.filter(item => item.id !== itemId));
+        const updatedItems = currentItems.filter(item => item.id !== itemId);
+        set(cartItemsAtom, updatedItems);
+
+        // Remove shipping rate for vendor if no items left
+        const removedItem = currentItems.find(item => item.id === itemId);
+        if (removedItem) {
+            const vendorItems = updatedItems.filter(item => item.shopId === removedItem.shopId);
+            if (vendorItems.length === 0) {
+                set(selectedShippingRatesAtom, (prev) => {
+                    const updated = { ...prev };
+                    delete updated[removedItem.shopId];
+                    return updated;
+                });
+            }
+        }
     }
 );
 
@@ -90,8 +104,21 @@ export const updateCartItemQuantityAtom = atom(
         const currentItems = get(cartItemsAtom);
         const updatedItems = currentItems.map(item =>
             item.id === itemId ? { ...item, quantity: Math.max(0, quantity) } : item
-        );
-        set(cartItemsAtom, updatedItems.filter(item => item.quantity > 0));
+        ).filter(item => item.quantity > 0);
+        set(cartItemsAtom, updatedItems);
+
+        // Remove shipping rate for vendor if no items left
+        const removedItem = currentItems.find(item => item.id === itemId && item.quantity > 0 && quantity === 0);
+        if (removedItem) {
+            const vendorItems = updatedItems.filter(item => item.shopId === removedItem.shopId);
+            if (vendorItems.length === 0) {
+                set(selectedShippingRatesAtom, (prev) => {
+                    const updated = { ...prev };
+                    delete updated[removedItem.shopId];
+                    return updated;
+                });
+            }
+        }
     }
 );
 
@@ -99,7 +126,7 @@ export const clearCartAtom = atom(
     null,
     (get, set) => {
         set(cartItemsAtom, []);
-        set(selectedShippingRateAtom, null);
+        set(selectedShippingRatesAtom, {});
     }
 );
 
@@ -112,8 +139,11 @@ export const setShippingAddressAtom = atom(
 
 export const setShippingRateAtom = atom(
     null,
-    (get, set, rate: ShippingRate | null) => {
-        set(selectedShippingRateAtom, rate);
+    (get, set, { vendorId, rate }: { vendorId: string; rate: ShippingRate | null }) => {
+        set(selectedShippingRatesAtom, (prev) => ({
+            ...prev,
+            [vendorId]: rate
+        }));
     }
 );
 
@@ -123,7 +153,7 @@ export interface Order {
     userId: string;
     items: CartItem[];
     shippingAddress: ShippingAddress;
-    shippingRate: ShippingRate | null;
+    shippingRates: Record<string, ShippingRate>;
     totalAmount: number;
     status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
     createdAt: Date;
@@ -136,7 +166,7 @@ export const createOrderAtom = atom(
     async (get, set) => {
         const cartItems = get(cartItemsAtom);
         const shippingAddress = get(shippingAddressAtom);
-        const shippingRate = get(selectedShippingRateAtom);
+        const shippingRates = get(selectedShippingRatesAtom);
         const totalAmount = get(totalWithShippingAtom);
 
         if (cartItems.length === 0) {
@@ -154,7 +184,7 @@ export const createOrderAtom = atom(
             userId: 'user-id', // This should be the actual user ID
             items: cartItems,
             shippingAddress,
-            shippingRate,
+            shippingRates,
             totalAmount,
             status: 'Pending',
             createdAt: new Date(),
@@ -163,7 +193,7 @@ export const createOrderAtom = atom(
         set(ordersAtom, (prevOrders) => [...prevOrders, newOrder]);
         set(cartItemsAtom, []); // Clear the cart
         set(shippingAddressAtom, null); // Clear the shipping address
-        set(selectedShippingRateAtom, null); // Clear the selected shipping rate
+        set(selectedShippingRatesAtom, {}); // Clear the selected shipping rates
 
         return newOrder;
     }

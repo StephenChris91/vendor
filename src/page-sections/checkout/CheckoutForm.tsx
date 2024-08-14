@@ -18,7 +18,7 @@ export default function CheckoutForm() {
   const {
     cartItems,
     cartTotal,
-    selectedShippingRate,
+    selectedShippingRates,
     totalWithShipping,
     shippingAddress,
     clearCart,
@@ -27,6 +27,11 @@ export default function CheckoutForm() {
 
   const tax = totalWithShipping * 0.05; // Assuming 5% tax
   const totalAmount = totalWithShipping + tax;
+
+  const totalShippingCost = Object.values(selectedShippingRates).reduce(
+    (sum, rate) => sum + rate?.amount,
+    0
+  );
 
   const config = {
     reference: new Date().getTime().toString(),
@@ -111,7 +116,7 @@ export default function CheckoutForm() {
         </FlexBox>
         <FlexBox justifyContent="space-between" mb="0.5rem">
           <Paragraph>Shipping:</Paragraph>
-          <Paragraph>{currency(selectedShippingRate?.amount || 0)}</Paragraph>
+          <Paragraph>{currency(totalShippingCost)}</Paragraph>
         </FlexBox>
         <FlexBox justifyContent="space-between" mb="0.5rem">
           <Paragraph>Tax (5%):</Paragraph>

@@ -19,18 +19,28 @@ import { currency } from "@utils/utils";
 type ProductIntroProps = {
   price: number;
   title: string;
-  images: string[];
+  image: string;
+  gallery: string[];
   id: string | number;
+  shop: {};
 };
 // ========================================
 
-export default function ProductIntro({ images, title, price, id }: ProductIntroProps) {
+export default function ProductIntro({
+  image,
+  title,
+  price,
+  id,
+  gallery,
+}: ProductIntroProps) {
   const param = useParams();
   const { state, dispatch } = useAppContext();
   const [selectedImage, setSelectedImage] = useState(0);
 
   const routerId = param.slug as string;
-  const cartItem = state.cart.find((item) => item.id === id || item.id === routerId);
+  const cartItem = state.cart.find(
+    (item) => item.id === id || item.id === routerId
+  );
 
   const handleImageClick = (ind: number) => () => setSelectedImage(ind);
 
@@ -41,9 +51,9 @@ export default function ProductIntro({ images, title, price, id }: ProductIntroP
         price,
         qty: amount,
         name: title,
-        imgUrl: images[0],
-        id: id || routerId
-      }
+        imgUrl: image,
+        id: id || routerId,
+      },
     });
   };
 
@@ -52,17 +62,22 @@ export default function ProductIntro({ images, title, price, id }: ProductIntroP
       <Grid container justifyContent="center" spacing={16}>
         <Grid item md={6} xs={12} alignItems="center">
           <div>
-            <FlexBox mb="50px" overflow="hidden" borderRadius={16} justifyContent="center">
+            <FlexBox
+              mb="50px"
+              overflow="hidden"
+              borderRadius={16}
+              justifyContent="center"
+            >
               <Image
                 width={300}
                 height={300}
-                src={images[selectedImage]}
+                src={image}
                 style={{ display: "block", width: "100%", height: "auto" }}
               />
             </FlexBox>
 
             <FlexBox overflow="auto">
-              {images.map((url, ind) => (
+              {gallery?.map((url, ind) => (
                 <Box
                   key={ind}
                   size={70}
@@ -75,9 +90,12 @@ export default function ProductIntro({ images, title, price, id }: ProductIntroP
                   alignItems="center"
                   justifyContent="center"
                   ml={ind === 0 ? "auto" : ""}
-                  mr={ind === images.length - 1 ? "auto" : "10px"}
-                  borderColor={selectedImage === ind ? "primary.main" : "gray.400"}
-                  onClick={handleImageClick(ind)}>
+                  mr={ind === gallery.length - 1 ? "auto" : "10px"}
+                  borderColor={
+                    selectedImage === ind ? "primary.main" : "gray.400"
+                  }
+                  onClick={handleImageClick(ind)}
+                >
                   <Avatar src={url} borderRadius="10px" size={65} />
                 </Box>
               ))}
@@ -115,7 +133,8 @@ export default function ProductIntro({ images, title, price, id }: ProductIntroP
               size="small"
               color="primary"
               variant="contained"
-              onClick={handleCartAmountChange(1)}>
+              onClick={handleCartAmountChange(1)}
+            >
               Add to Cart
             </Button>
           ) : (
@@ -125,7 +144,8 @@ export default function ProductIntro({ images, title, price, id }: ProductIntroP
                 size="small"
                 color="primary"
                 variant="outlined"
-                onClick={handleCartAmountChange(cartItem?.qty - 1)}>
+                onClick={handleCartAmountChange(cartItem?.qty - 1)}
+              >
                 <Icon variant="small">minus</Icon>
               </Button>
 
@@ -138,7 +158,8 @@ export default function ProductIntro({ images, title, price, id }: ProductIntroP
                 size="small"
                 color="primary"
                 variant="outlined"
-                onClick={handleCartAmountChange(cartItem?.qty + 1)}>
+                onClick={handleCartAmountChange(cartItem?.qty + 1)}
+              >
                 <Icon variant="small">plus</Icon>
               </Button>
             </FlexBox>
@@ -148,7 +169,7 @@ export default function ProductIntro({ images, title, price, id }: ProductIntroP
             <SemiSpan>Sold By:</SemiSpan>
             <Link href="/shops/scarlett-beauty">
               <H6 lineHeight="1" ml="8px">
-                Mobile Store
+                {}
               </H6>
             </Link>
           </FlexBox>

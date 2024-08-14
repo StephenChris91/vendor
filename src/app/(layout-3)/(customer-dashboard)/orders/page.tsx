@@ -11,20 +11,38 @@ import {
   OrdersPagination,
 } from "@sections/customer-dashboard/orders";
 import { Order } from "@models/order.model";
-import { getOrders } from "actions/orders/getOrders";
 
 type OrdersResponse = { orders: Order[] } | { error: string };
+
+async function fetchCustomerOrders(): Promise<OrdersResponse> {
+  const response = await fetch("/api/order/customer-order", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch orders");
+  }
+
+  return response.json();
+}
 
 export default function OrderList() {
   const { data, isLoading, error } = useQuery<OrdersResponse, Error>({
     queryKey: ["orders"],
-    queryFn: getOrders,
+    queryFn: fetchCustomerOrders,
   });
 
   if (isLoading) return <div>Loading...</div>;
 
   if (error) {
     return <div>An error occurred: {error.message}</div>;
+  }
+
+  if (!data) {
+    return <div>An unknown error occurred. Please try again later.</div>;
   }
 
   if ("error" in data) {
