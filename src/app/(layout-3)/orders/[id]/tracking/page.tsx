@@ -1,3 +1,5 @@
+"use client";
+
 // app/orders/[id]/tracking/page.tsx
 
 import { useEffect, useState } from "react";
@@ -21,7 +23,7 @@ export default function OrderTrackingPage() {
         try {
           setLoading(true);
           const fetchedOrder = await getOrder(id as string);
-          setOrder(fetchedOrder);
+          // setOrder(fetchedOrder);
         } catch (err) {
           setError("Failed to fetch order details. Please try again.");
         } finally {
@@ -45,7 +47,7 @@ export default function OrderTrackingPage() {
           <p>Order Date: {new Date(order.createdAt).toLocaleDateString()}</p>
           <p>Status: {order.status}</p>
         </div>
-        <OrderTrackingTimeline order={order} />
+        {/* <OrderTrackingTimeline order={order} /> */}
       </div>
     </ErrorBoundary>
   );

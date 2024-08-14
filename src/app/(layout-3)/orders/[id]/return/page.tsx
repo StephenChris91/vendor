@@ -1,9 +1,11 @@
+"use client";
+
 // app/orders/[id]/return/page.tsx
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { getOrder } from "actions/orders/getOrder";
-import { Order } from "@models/order.model";
+import { Order, OrderItem } from "@models/order.model";
 import Spinner from "@component/Spinner";
 import { Button } from "@component/buttons";
 import ErrorBoundary from "@component/ErrorBoundary";
@@ -16,22 +18,22 @@ export default function ReturnRequestPage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [reason, setReason] = useState("");
 
-  useEffect(() => {
-    async function fetchOrder() {
-      if (id) {
-        try {
-          setLoading(true);
-          const fetchedOrder = await getOrder(id as string);
-          setOrder(fetchedOrder);
-        } catch (err) {
-          setError("Failed to fetch order details. Please try again.");
-        } finally {
-          setLoading(false);
-        }
-      }
-    }
-    fetchOrder();
-  }, [id]);
+  // useEffect(() => {
+  //   async function fetchOrder() {
+  //     if (id) {
+  //       try {
+  //         setLoading(true);
+  //         const fetchedOrder = await getOrder(id as string);
+  //         setOrder(fetchedOrder);
+  //       } catch (err) {
+  //         setError("Failed to fetch order details. Please try again.");
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     }
+  //   }
+  //   fetchOrder();
+  // }, [id]);
 
   const handleItemSelect = (itemId: string) => {
     setSelectedItems((prev) =>
@@ -41,21 +43,29 @@ export default function ReturnRequestPage() {
     );
   };
 
-  const handleSubmit = async () => {
-    if (selectedItems.length === 0) {
-      setError("Please select at least one item to return.");
-      return;
-    }
-    try {
-      setLoading(true);
-      await submitReturnRequest(id as string, selectedItems, reason);
-      router.push(`/orders/${id}?returnRequestSubmitted=true`);
-    } catch (err) {
-      setError("Failed to submit return request. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  const submitReturnRequest = (
+    orderId: string,
+    selectedItems: Order[],
+    reason: string
+  ) => {
+    console.log("returning order");
   };
+
+  // const handleSubmit = async () => {
+  //   if (selectedItems.length === 0) {
+  //     setError("Please select at least one item to return.");
+  //     return;
+  //   }
+  //   try {
+  //     setLoading(true);
+  //     await submitReturnRequest(id as string, selectedItems, reason);
+  //     router.push(`/orders/${id}?returnRequestSubmitted=true`);
+  //   } catch (err) {
+  //     setError("Failed to submit return request. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   if (loading) return <Spinner />;
   if (error) return <div className="error-message">{error}</div>;
@@ -96,7 +106,7 @@ export default function ReturnRequestPage() {
           />
         </div>
         <Button
-          onClick={handleSubmit}
+          // onClick={handleSubmit}
           variant="contained"
           color="primary"
           disabled={loading}

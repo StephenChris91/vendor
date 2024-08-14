@@ -1,16 +1,16 @@
-// app/orders/[id]/feedback/page.tsx
+"use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { getOrder } from "actions/orders/getOrder";
 import { Order, OrderItem } from "@models/order.model";
 import Spinner from "@component/Spinner";
 import ErrorBoundary from "@component/ErrorBoundary";
 import { Button } from "@component/buttons";
 import StarRating from "@component/orders/starRating";
+
 export default function OrderFeedbackPage() {
   const router = useRouter();
-  const { id } = router.query;
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,20 +20,25 @@ export default function OrderFeedbackPage() {
 
   useEffect(() => {
     async function fetchOrder() {
+      const id = window.location.pathname.split("/").pop(); // Get the ID from the URL
       if (id) {
         try {
           setLoading(true);
-          const fetchedOrder = await getOrder(id as string);
-          setOrder(fetchedOrder);
-          // Initialize item ratings
-          const initialItemRatings = fetchedOrder.orderItems.reduce(
-            (acc, item) => {
-              acc[item.id] = 0;
-              return acc;
-            },
-            {}
-          );
-          setItemRatings(initialItemRatings);
+          const result = await getOrder(id);
+          if ("error" in result) {
+            setError(result.error);
+          } else {
+            setOrder(result.order);
+            // Initialize item ratings
+            const initialItemRatings = result.order.orderItems.reduce(
+              (acc, item) => {
+                acc[item.id] = 0;
+                return acc;
+              },
+              {} as { [key: string]: number }
+            );
+            setItemRatings(initialItemRatings);
+          }
         } catch (err) {
           setError("Failed to fetch order details. Please try again.");
         } finally {
@@ -42,17 +47,28 @@ export default function OrderFeedbackPage() {
       }
     }
     fetchOrder();
-  }, [id]);
+  }, []);
+
+  const submitOrderFeedback = async (orderId: string, data: any) => {
+    const itemsToRate = Object.entries(itemRatings).filter(
+      ([_, rating]) => rating > 0
+    );
+    if (itemsToRate.length === 0) {
+      throw new Error("Please rate at least one item");
+    }
+    // Implement your feedback submission logic here
+  };
 
   const handleSubmit = async () => {
+    if (!order) return;
     try {
       setLoading(true);
-      await submitOrderFeedback(id as string, {
+      await submitOrderFeedback(order.id, {
         overallRating,
         itemRatings,
         comment,
       });
-      router.push(`/orders/${id}?feedbackSubmitted=true`);
+      router.push(`/orders/${order.id}?feedbackSubmitted=true`);
     } catch (err) {
       setError("Failed to submit feedback. Please try again.");
     } finally {
