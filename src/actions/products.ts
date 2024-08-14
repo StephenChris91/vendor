@@ -1,6 +1,6 @@
 'use server'
 
-import { category, shop, user } from "@prisma/client";
+import { ProductStatus, ProductType, category, shop } from "@prisma/client";
 import { db } from "../../prisma/prisma";
 
 // Define a type for the returned product
@@ -15,17 +15,19 @@ type ProductWithDetails = {
   quantity: number;
   in_stock: boolean;
   is_taxable: boolean;
-  image: string;
-  video: string;
+  image: string | null;
   gallery: string[];
-  ratings: number;
-  total_reviews: number;
-  my_review: string;
-  in_wishlist: boolean;
-  categories: category[]; // List of Category objects
-  shop_name: string;
-  status: 'Published' | 'Draft' | 'Suspended' | 'OutOfStock';
-  product_type: 'Simple' | 'Variable';
+  ratings: number | null;
+  total_reviews: number | null;
+  my_review: string | null;
+  in_wishlist: boolean | null;
+  categories: category[];
+  shop_name: string | null;
+  status: ProductStatus;
+  product_type: ProductType;
+  isFlashDeal: boolean;
+  discountPercentage: number | null;
+  brand: { id: string; name: string } | null;
 };
 
 // Get all products
@@ -34,7 +36,17 @@ export const getAllProducts = async (): Promise<ProductWithDetails[]> => {
     const products = await db.product.findMany({
       include: {
         shop: true,
-        categories: true,
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        brand: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -49,22 +61,24 @@ export const getAllProducts = async (): Promise<ProductWithDetails[]> => {
       slug: product.slug,
       description: product.description,
       price: product.price,
-      sale_price: product.sale_price ?? 0,
-      sku: product.sku ?? 0,
+      sale_price: product.sale_price,
+      sku: product.sku,
       quantity: product.quantity,
       in_stock: product.in_stock ?? false,
       is_taxable: product.is_taxable ?? false,
-      image: product.image ?? "",
-      video: product.video ?? "",
-      gallery: product.gallery ?? [],
-      ratings: product.ratings ?? 0,
-      total_reviews: product.total_reviews ?? 0,
-      my_review: product.my_review ?? "",
-      in_wishlist: product.in_wishlist ?? false,
-      categories: product.categories ?? [], // Directly use categories as Category[]
-      shop_name: product.shop?.shopName ?? "Unknown",
-      status: product.status as 'Published' | 'Draft' | 'Suspended' | 'OutOfStock',
-      product_type: product.product_type as 'Simple' | 'Variable',
+      image: product.image,
+      gallery: product.gallery,
+      ratings: product.ratings,
+      total_reviews: product.total_reviews,
+      my_review: product.my_review,
+      in_wishlist: product.in_wishlist,
+      categories: product.categories.map(pc => pc.category),
+      shop_name: product.shop?.shopName ?? null,
+      status: product.status,
+      product_type: product.product_type,
+      isFlashDeal: product.isFlashDeal,
+      discountPercentage: product.discountPercentage,
+      brand: product.brand,
     }));
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -81,7 +95,17 @@ export const getProductById = async (id: string): Promise<ProductWithDetails | n
       },
       include: {
         shop: true,
-        categories: true,
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        brand: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -96,22 +120,24 @@ export const getProductById = async (id: string): Promise<ProductWithDetails | n
       slug: product.slug,
       description: product.description,
       price: product.price,
-      sale_price: product.sale_price ?? 0,
-      sku: product.sku ?? 0,
+      sale_price: product.sale_price,
+      sku: product.sku,
       quantity: product.quantity,
       in_stock: product.in_stock ?? false,
       is_taxable: product.is_taxable ?? false,
-      image: product.image ?? "",
-      video: product.video ?? "",
-      gallery: product.gallery ?? [],
-      ratings: product.ratings ?? 0,
-      total_reviews: product.total_reviews ?? 0,
-      my_review: product.my_review ?? "",
-      in_wishlist: product.in_wishlist ?? false,
-      categories: product.categories ?? [], // Directly use categories as Category[]
-      shop_name: product.shop?.shopName ?? "Unknown",
-      status: product.status as 'Published' | 'Draft' | 'Suspended' | 'OutOfStock',
-      product_type: product.product_type as 'Simple' | 'Variable',
+      image: product.image,
+      gallery: product.gallery,
+      ratings: product.ratings,
+      total_reviews: product.total_reviews,
+      my_review: product.my_review,
+      in_wishlist: product.in_wishlist,
+      categories: product.categories.map(pc => pc.category),
+      shop_name: product.shop?.shopName ?? null,
+      status: product.status,
+      product_type: product.product_type,
+      isFlashDeal: product.isFlashDeal,
+      discountPercentage: product.discountPercentage,
+      brand: product.brand,
     };
   } catch (error) {
     console.error(`Error fetching product with ID ${id}:`, error);
@@ -122,14 +148,23 @@ export const getProductById = async (id: string): Promise<ProductWithDetails | n
 // Delete a product by ID
 export const deleteProductById = async (id: string): Promise<ProductWithDetails | null> => {
   try {
-    // Fetch the product by ID
-    const product = await db.product.findUnique({
+    const product = await db.product.delete({
       where: {
         id,
       },
       include: {
         shop: true,
-        categories: true,
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        brand: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -138,58 +173,58 @@ export const deleteProductById = async (id: string): Promise<ProductWithDetails 
       return null;
     }
 
-    // Store the necessary details
-    const productDetails: ProductWithDetails = {
+    return {
       id: product.id,
       name: product.name,
       slug: product.slug,
       description: product.description,
       price: product.price,
-      sale_price: product.sale_price ?? 0,
-      sku: product.sku ?? 0,
+      sale_price: product.sale_price,
+      sku: product.sku,
       quantity: product.quantity,
       in_stock: product.in_stock ?? false,
       is_taxable: product.is_taxable ?? false,
-      image: product.image ?? "",
-      video: product.video ?? "",
-      gallery: product.gallery ?? [],
-      ratings: product.ratings ?? 0,
-      total_reviews: product.total_reviews ?? 0,
-      my_review: product.my_review ?? "",
-      in_wishlist: product.in_wishlist ?? false,
-      categories: product.categories ?? [], // Directly use categories as Category[]
-      shop_name: product.shop?.shopName ?? "Unknown",
-      status: product.status as 'Published' | 'Draft' | 'Suspended' | 'OutOfStock',
-      product_type: product.product_type as 'Simple' | 'Variable',
+      image: product.image,
+      gallery: product.gallery,
+      ratings: product.ratings,
+      total_reviews: product.total_reviews,
+      my_review: product.my_review,
+      in_wishlist: product.in_wishlist,
+      categories: product.categories.map(pc => pc.category),
+      shop_name: product.shop?.shopName ?? null,
+      status: product.status,
+      product_type: product.product_type,
+      isFlashDeal: product.isFlashDeal,
+      discountPercentage: product.discountPercentage,
+      brand: product.brand,
     };
-
-    // Delete the product
-    await db.product.delete({
-      where: {
-        id,
-      },
-    });
-
-    // Return the stored details
-    return productDetails;
   } catch (error) {
     console.error(`Error deleting product with ID ${id}:`, error);
     return null;
   }
 };
 
-
 export async function getProduct(slug: string) {
   try {
     const product = await db.product.findFirst({
       where: { slug },
       include: {
-        categories: true,
+        categories: {
+          include: {
+            category: true,
+          },
+        },
         shop: {
           select: {
             id: true,
             shopName: true,
             slug: true,
+          },
+        },
+        brand: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },
@@ -201,10 +236,7 @@ export async function getProduct(slug: string) {
 
     return {
       ...product,
-      sale_price: product.sale_price ?? 0,
-      image: product.image ?? "",
-      gallery: product.gallery ?? [],
-      ratings: product.ratings ?? 0,
+      categories: product.categories.map(pc => pc.category),
     };
   } catch (error) {
     console.error("Error fetching product:", error);
