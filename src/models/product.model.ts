@@ -36,8 +36,8 @@ export interface Product {
   brandId: string | null;
   isFlashDeal: boolean;
   discountPercentage: number | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export default Product;

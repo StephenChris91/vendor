@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-
 import Box from "@component/Box";
 import Card from "@component/Card";
 import Select from "@component/Select";
@@ -11,35 +10,49 @@ import FlexBox from "@component/FlexBox";
 import { IconButton } from "@component/buttons";
 import Sidenav from "@component/sidenav/Sidenav";
 import { H5, Paragraph } from "@component/Typography";
-
 import ProductGridView from "@component/products/ProductCard1List";
 import ProductListView from "@component/products/ProductCard9List";
 import ProductFilterCard from "@component/products/ProductFilterCard";
 import useWindowSize from "@hook/useWindowSize";
-import Product from "@models/product.model";
+import Product, { Category } from "@models/product.model";
 import { getAllProducts } from "actions/products";
 
-// ==============================================================
 type Props = {
   sortOptions: { label: string; value: string }[];
 };
-// ==============================================================
+
+// Define a type that matches the structure returned by getAllProducts
+type ProductWithDetails = Awaited<ReturnType<typeof getAllProducts>>[number];
 
 export default function SearchResult({ sortOptions }: Props) {
   const width = useWindowSize();
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithDetails[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       const data = await getAllProducts();
-      setProducts(data as Product[]);
+      setProducts(data);
     };
     fetchProducts();
   }, []);
 
   const isTablet = width < 1025;
-  const toggleView = useCallback((v: any) => () => setView(v), []);
+  const toggleView = useCallback((v: "grid" | "list") => () => setView(v), []);
+
+  // Transform ProductWithDetails to Product
+  const transformedProducts: Product[] = products.map((p) => ({
+    ...p,
+    stock: p.quantity,
+    shop: { id: "", shopName: p.shop_name || "" },
+    user: null,
+    brandId: p.brand?.id || null,
+    categories: p.categories.map((cat) => ({
+      productId: p.id,
+      categoryId: cat.id,
+      ...cat,
+    })) as Category[],
+  }));
 
   return (
     <>
@@ -120,9 +133,9 @@ export default function SearchResult({ sortOptions }: Props) {
 
         <Grid item lg={9} xs={12}>
           {view === "grid" ? (
-            <ProductGridView products={products} />
+            <ProductGridView products={transformedProducts} />
           ) : (
-            <ProductListView products={products} />
+            <ProductListView products={transformedProducts} />
           )}
         </Grid>
       </Grid>

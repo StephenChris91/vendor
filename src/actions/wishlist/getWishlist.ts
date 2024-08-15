@@ -1,3 +1,4 @@
+import { shop } from '@prisma/client';
 "use server"
 import { db } from '../../../prisma/prisma';
 // app/actions/getWishlist.ts

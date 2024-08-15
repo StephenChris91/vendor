@@ -30,6 +30,8 @@ type ProductWithDetails = {
   brand: { id: string; name: string } | null;
 };
 
+
+
 // Get all products
 export const getAllProducts = async (): Promise<ProductWithDetails[]> => {
   try {
