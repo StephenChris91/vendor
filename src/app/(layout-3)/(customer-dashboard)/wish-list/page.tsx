@@ -10,8 +10,26 @@ import ProductCard1 from "@component/product-cards/ProductCard1";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
 import { getWishlist } from "actions/wishlist/getWishlist";
 
+interface WishlistItem {
+  id: string;
+  productId: string;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    price: number;
+    image: string;
+    rating: number;
+    discount: number;
+    images: string[];
+  };
+}
+
 export default function WishList() {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<
+    { wishlist: WishlistItem[] },
+    Error
+  >({
     queryKey: ["wishlist"],
     queryFn: async () => {
       const result = await getWishlist();
@@ -51,12 +69,17 @@ export default function WishList() {
             <ProductCard1
               id={item.product.id}
               slug={item.product.slug}
-              price={item.product.price}
               title={item.product.name}
+              price={item.product.price}
               imgUrl={item.product.image}
               rating={item.product.rating}
-              images={item.product.images}
               off={item.product.discount}
+              images={item.product.images}
+              shopId="" // We don't have shop info in the current data structure
+              shop={null} // We don't have shop info in the current data structure
+              sale_price={
+                item.product.price * (1 - item.product.discount / 100)
+              } // Calculate sale price
             />
           </Grid>
         ))}

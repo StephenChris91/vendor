@@ -1,10 +1,9 @@
 'use server'
 
-// actions/products/getProducts.ts
 import { db } from "../../../prisma/prisma";
 import Product from "@models/product.model";
 
-export async function getAllProducts(page: number, pageSize: number) {
+export async function getAllProducts(page: number, pageSize: number): Promise<{ products: Product[], meta: any }> {
     const products = await db.product.findMany({
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -16,7 +15,7 @@ export async function getAllProducts(page: number, pageSize: number) {
     });
 
     return {
-        products: products.map((product) => ({
+        products: products.map((product): Product => ({
             id: product.id,
             name: product.name,
             slug: product.slug,
@@ -35,10 +34,13 @@ export async function getAllProducts(page: number, pageSize: number) {
             my_review: product.my_review,
             in_wishlist: product.in_wishlist,
             gallery: product.gallery,
-            shop_name: product.shop?.shopName,
+            shop_name: product.shop?.shopName ?? null,
             stock: product.stock,
             categories: product.categories,
-            shop: product.shop,
+            shop: product.shop ? {
+                id: product.shop.id,
+                shopName: product.shop.shopName
+            } : null,
             user: product.user,
             brandId: product.brandId,
             isFlashDeal: product.isFlashDeal,

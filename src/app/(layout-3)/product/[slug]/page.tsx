@@ -67,16 +67,20 @@ export default function ProductDetails() {
         id={product.id}
         price={product.price}
         title={product.name}
-        image={product.image}
-        gallery={product.gallery}
-        shop={product.shop || undefined}
+        image={product.image || ""}
+        gallery={product.gallery || []}
+        shop={
+          product.shop
+            ? { id: product.shop.id, shopName: product.shop.shopName }
+            : undefined
+        }
       />
 
       <ProductView
         product={product}
-        shops={shops ?? []}
-        relatedProducts={relatedProducts ?? []}
-        frequentlyBought={frequentlyBought ?? []}
+        shops={shops || []}
+        relatedProducts={relatedProducts || []}
+        frequentlyBought={frequentlyBought || []}
       />
     </Fragment>
   );

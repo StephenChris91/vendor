@@ -119,8 +119,9 @@ interface ProductCard1Props extends CardProps {
   images: string[];
   shopId: string;
   shop: {
-    shopName?: string; // Update to match your `Product` model
-  };
+    id: string;
+    shopName: string;
+  } | null;
   sale_price: number;
 }
 
@@ -136,7 +137,7 @@ export default function ProductCard1({
   off = 0,
   images,
   shopId,
-  shop = { shopName: "Default Shop Name" },
+  shop = null,
   sale_price,
   ...props
 }: ProductCard1Props) {
@@ -171,15 +172,26 @@ export default function ProductCard1({
     sku: 0, // Provide default values if needed
     quantity: 0,
     in_stock: false,
-    image: imgUrl,
-    gallery: images,
-    slug,
+    is_taxable: false,
     status: ProductStatus.Published,
     product_type: ProductType.Simple,
+    image: imgUrl,
+    ratings: rating,
+    total_reviews: 0,
+    my_review: null,
+    in_wishlist: false,
+    gallery: images,
+    shop_name: shop?.shopName || null,
+    stock: 0,
+    categories: [],
+    shop: shop ? { id: shop.id, shopName: shop.shopName } : null,
+    user: null,
+    brandId: null,
+    isFlashDeal: false,
+    slug,
+    sale_price,
     createdAt: new Date(),
     updatedAt: new Date(),
-    shop,
-    sale_price, // Ensure shop is correctly assigned
   };
 
   return (

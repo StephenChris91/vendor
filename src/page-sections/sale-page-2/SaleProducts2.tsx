@@ -8,17 +8,6 @@ import { ProductCard1 } from "@component/product-cards";
 import { renderProductCount } from "@utils/utils";
 import Product from "@models/product.model";
 
-// type Product = {
-//   id: string;
-//   name: string;
-//   slug: string;
-//   price: number;
-//   sale_price: number;
-//   image: string;
-//   gallery: string[];
-//   ratings: number;
-// };
-
 type Meta = {
   page: number;
   pageSize: number;
@@ -46,14 +35,18 @@ export default function SaleProducts2({ products, meta, onPageChange }: Props) {
               id={item.id}
               slug={item.slug}
               price={item.price}
-              imgUrl={item.image}
+              imgUrl={item.image || ""}
               rating={item.ratings || 0}
               off={item.discountPercentage || 0}
-              images={item.gallery}
-              shopId={item.shop?.id || ""} // Handle cases where shopId might be undefined
+              images={item.gallery || []}
+              shopId={item.shop?.id || ""}
               title={item.name}
-              shop={{ shopName: item.shop?.shopName || "Default Shop Name" }}
-              sale_price={item.sale_price} // Ensure shopName is provided
+              shop={
+                item.shop
+                  ? { id: item.shop.id, shopName: item.shop.shopName }
+                  : null
+              }
+              sale_price={item.sale_price}
             />
           </Grid>
         ))}
