@@ -52,8 +52,8 @@ export default function Section5() {
     >
       <Card p="1rem" borderRadius={8}>
         <Grid container spacing={6}>
-          {newArrivalsList.length > 0 ? (
-            newArrivalsList.map((item) => (
+          {productList.length > 0 ? (
+            productList.map((item) => (
               <Grid item lg={2} md={3} sm={4} xs={6} key={item.id}>
                 <ProductCard2
                   slug={item.slug}
