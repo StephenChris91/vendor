@@ -140,6 +140,9 @@ export default function Section7({ shops, brands, title, productList }: Props) {
                   rating={4}
                   images={item.gallery}
                   imgUrl={item.image}
+                  shop={item.shop}
+                  sale_price={item.sale_price}
+                  shopId={item.shop.id}
                 />
               </Grid>
             ))}

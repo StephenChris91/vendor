@@ -83,6 +83,9 @@ export default function Section6({ carList, carBrands }: Props) {
                   rating={4}
                   images={item.gallery}
                   imgUrl={item.image}
+                  shop={item.shop}
+                  shopId={item.shop.id}
+                  sale_price={item.sale_price}
                 />
               </Grid>
             ))}
