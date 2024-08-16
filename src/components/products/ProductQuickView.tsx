@@ -27,7 +27,10 @@ export default function ProductQuickView({ open, onClose, product }: Props) {
           id={product.id}
           title={product.name}
           price={product.price}
-          images={product.gallery} // Use gallery instead of image for multiple images
+          // images={product.gallery} // Use gallery instead of image for multiple images
+          gallery={product.gallery}
+          image={product.image}
+          shop={product.shop}
         />
 
         <Box position="absolute" top="0.75rem" right="0.75rem" cursor="pointer">
