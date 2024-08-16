@@ -4,8 +4,8 @@ import Grid from "@component/grid/Grid";
 import Container from "@component/Container";
 import NextImage from "@component/NextImage";
 // IMAGES
-import banner1 from "../../../public/assets/images/banners/banner-1.png";
-import banner2 from "../../../public/assets/images/banners/banner-2.png";
+import banner1 from "../../../public/assets/images/banners/banner-26.png";
+import banner2 from "../../../public/assets/images/banners/banner-27.png";
 
 export default function Section8() {
   return (

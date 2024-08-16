@@ -14,12 +14,28 @@ import CategorySectionCreator from "@component/CategorySectionCreator";
 import { calculateDiscount, currency } from "@utils/utils";
 import useWindowSize from "@hook/useWindowSize";
 import Product from "@models/product.model";
+import axios from "axios";
+import Spinner from "@component/Spinner";
+import { useQuery } from "@tanstack/react-query";
 
 // ========================================================
-type Props = { bigDiscountList: Product[] };
+const fetchBigDiscounts = async (): Promise<Product[]> => {
+  try {
+    const response = await axios.get("/api/data/new-arrivals");
+    console.log("New arrivals response:", response);
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error("Error fetching new arrivals:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Response data:", error.response?.data);
+      console.error("Response status:", error.response?.status);
+    }
+    return [];
+  }
+};
 // ========================================================
 
-export default function Section13({ bigDiscountList }: Props) {
+export default function Section13() {
   const width = useWindowSize();
   const [visibleSlides, setVisibleSlides] = useState(6);
 
@@ -29,6 +45,21 @@ export default function Section13({ bigDiscountList }: Props) {
     else if (width < 950) setVisibleSlides(4);
     else setVisibleSlides(6);
   }, [width]);
+
+  const {
+    data: bigDiscountList,
+    isLoading,
+    error,
+  } = useQuery<Product[], Error>({
+    queryKey: ["newArrivals"],
+    queryFn: fetchBigDiscounts,
+  });
+
+  if (isLoading) return <Spinner />;
+  if (error) return <div>An error occurred: {error.message}</div>;
+
+  // Ensure newArrivalsList is an array
+  const productList = Array.isArray(bigDiscountList) ? bigDiscountList : [];
 
   return (
     <CategorySectionCreator
@@ -41,7 +72,7 @@ export default function Section13({ bigDiscountList }: Props) {
           totalSlides={bigDiscountList.length}
           visibleSlides={visibleSlides}
         >
-          {bigDiscountList.map((item) => (
+          {productList.map((item) => (
             <Box py="0.25rem" key={item.id}>
               <Card p="1rem" borderRadius={8}>
                 <Link href={`/product/${item.slug}`}>

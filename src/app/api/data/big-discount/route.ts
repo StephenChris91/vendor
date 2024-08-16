@@ -3,14 +3,10 @@ import { db } from '../../../../../prisma/prisma';
 
 export async function GET() {
     try {
-        const mobileProducts = await db.product.findMany({
+        const discountedProducts = await db.product.findMany({
             where: {
-                categories: {
-                    some: {
-                        category: {
-                            name: 'Mobile'
-                        }
-                    }
+                discountPercentage: {
+                    gt: 1 // This filters for products with discount greater than 1
                 }
             },
             include: {
@@ -24,7 +20,7 @@ export async function GET() {
             }
         });
 
-        const formattedProducts = mobileProducts.map(product => ({
+        const formattedProducts = discountedProducts.map(product => ({
             ...product,
             categories: product.categories.map(pc => ({
                 id: pc.category.id,
@@ -41,7 +37,7 @@ export async function GET() {
 
         return NextResponse.json(formattedProducts);
     } catch (error) {
-        console.error('Error fetching mobile products:', error);
-        return NextResponse.json({ error: 'Failed to fetch mobile products' }, { status: 500 });
+        console.error('Error fetching discounted products:', error);
+        return NextResponse.json({ error: 'Failed to fetch discounted products' }, { status: 500 });
     }
 }

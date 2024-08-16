@@ -21,17 +21,12 @@ const nextConfig = {
 
   images: {
     domains: [
-      "https://via.placeholder.com",
-      "https://via.placeholder.com/150/771796",
       "via.placeholder.com",
       "mukoxyechbobgdvpbirs.supabase.co",
-      "https://vendorspot-marketplace.s3.eu-north-1.amazonaws.com",
       "vendorspot-marketplace.s3.eu-north-1.amazonaws.com",
-      "https://picsum.photos/500/300?random=1",
       "picsum.photos",
       "res.cloudinary.com",
       "vendorspot.s3.eu-north-1.amazonaws.com",
-      // "https://mukoxyechbobgdvpbirs.supabase.co",
     ],
   },
   experimental: {
@@ -39,6 +34,28 @@ const nextConfig = {
       bodySizeLimit: "4mb", // Increase the limit to 4MB
     },
   },
+
+  // Add this new section
+  //   async headers() {
+  //     return [
+  //       {
+  //         source: "/api/data/new-arrivals",
+  //         headers: [
+  //           { key: "Access-Control-Allow-Credentials", value: "true" },
+  //           { key: "Access-Control-Allow-Origin", value: "*" },
+  //           {
+  //             key: "Access-Control-Allow-Methods",
+  //             value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+  //           },
+  //           {
+  //             key: "Access-Control-Allow-Headers",
+  //             value:
+  //               "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+  //           },
+  //         ],
+  //       },
+  //     ];
+  //   },
 };
 
 module.exports = nextConfig;

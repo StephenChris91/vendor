@@ -1,20 +1,51 @@
+"use client";
+
 import Grid from "@component/grid/Grid";
 import Container from "@component/Container";
 import ProductCard1 from "@component/product-cards/ProductCard1";
 import CategorySectionHeader from "@component/CategorySectionHeader";
 import Product from "@models/product.model";
+import axios from "axios";
+import Spinner from "@component/Spinner";
+import { useQuery } from "@tanstack/react-query";
 
 // ====================================================
-type Props = { moreItems: Product[] };
+const fetchMore = async (): Promise<Product[]> => {
+  try {
+    const response = await axios.get("/api/data/get-more-items");
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // console.error("Response data:", error.response?.data);
+      // console.error("Response status:", error.response?.status);
+    }
+    return [];
+  }
+};
 // ====================================================
 
-export default function Section11({ moreItems }: Props) {
+export default function Section11() {
+  const {
+    data: newArrivalsList,
+    isLoading,
+    error,
+  } = useQuery<Product[], Error>({
+    queryKey: ["moreItems"],
+    queryFn: fetchMore,
+  });
+
+  if (isLoading) return <Spinner />;
+  if (error) return <div>An error occurred: {error.message}</div>;
+
+  // Ensure newArrivalsList is an array
+  const productList = Array.isArray(newArrivalsList) ? newArrivalsList : [];
+
   return (
     <Container mb="70px">
       <CategorySectionHeader title="More For You" seeMoreLink="#" />
 
       <Grid container spacing={6}>
-        {moreItems.map((item, ind) => (
+        {productList.map((item, ind) => (
           <Grid item lg={3} md={4} sm={6} xs={12} key={ind}>
             <ProductCard1
               hoverEffect
@@ -27,7 +58,7 @@ export default function Section11({ moreItems }: Props) {
               imgUrl={item.image}
               images={item.gallery as string[]}
               shop={item.shop}
-              shopId={item.shop.id}
+              shopId={item.shop?.id}
               sale_price={item.sale_price}
             />
           </Grid>

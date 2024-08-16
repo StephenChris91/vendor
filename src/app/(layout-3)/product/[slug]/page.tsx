@@ -63,18 +63,7 @@ export default function ProductDetails() {
 
   return (
     <Fragment>
-      <ProductIntro
-        id={product.id}
-        price={product.price}
-        title={product.name}
-        image={product.image || ""}
-        gallery={product.gallery || []}
-        shop={
-          product.shop
-            ? { id: product.shop.id, shopName: product.shop.shopName }
-            : undefined
-        }
-      />
+      <ProductIntro product={product} />
 
       <ProductView
         product={product}

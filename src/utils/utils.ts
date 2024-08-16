@@ -80,15 +80,13 @@ export const calculateDiscount = (price: number, salePrice?: number): number => 
  */
 
 export function currency(price: number, fraction: number = 2) {
-  // const { publicRuntimeConfig } = getConfig();
-  // currency: publicRuntimeConfig.currency,
-
-  const formatCurrency = new Intl.NumberFormat(undefined, {
-    currency: "NGN",
-    style: "currency",
+  const formatCurrency = new Intl.NumberFormat('en-NG', { // en-NG locale ensures correct formatting for Nigeria
+    style: 'currency',
+    currency: 'NGN', // Nigerian Naira currency code
     maximumFractionDigits: fraction,
-    minimumFractionDigits: fraction
+    minimumFractionDigits: fraction,
   });
 
   return formatCurrency.format(price);
 }
+

@@ -23,6 +23,13 @@ export default auth((req) => {
     const isAdminRoute = adminRoutes.some(route => nextUrl.pathname.startsWith(route));
     const isVendorRoute = vendorRoutes.some(route => nextUrl.pathname.startsWith(route));
 
+    const isApiDataRoute = nextUrl.pathname.startsWith('/api/');
+
+    // Then in your middleware logic:
+    if (isApiAuthRoute || isApiDataRoute) {
+        return null;
+    }
+
     if (isApiAuthRoute) {
         return null;
     }
