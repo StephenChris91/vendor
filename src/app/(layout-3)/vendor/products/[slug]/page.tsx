@@ -3,17 +3,20 @@
 import Link from "next/link";
 import { Fragment } from "react";
 import axios from "@lib/axios";
-// GLOBAL CUSTOM COMPONENTS
 import { Button } from "@component/buttons";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
-// PAGE SECTION COMPONENTS
 import { ProductForm } from "@sections/vendor-dashboard/products";
-// CUSTOM DATA MODEL
 import { SlugParams } from "interfaces";
 
 const categoryOptions = [
   { label: "Fashion", value: "fashion" },
   { label: "Gadget", value: "gadget" },
+];
+
+const brandOptions = [
+  { label: "Brand 1", value: "brand1" },
+  { label: "Brand 2", value: "brand2" },
+  // Add more brands as needed
 ];
 
 export default async function ProductDetails({ params }: SlugParams) {
@@ -35,7 +38,11 @@ export default async function ProductDetails({ params }: SlugParams) {
         }
       />
 
-      <ProductForm product={data} categoryOptions={categoryOptions} />
+      <ProductForm
+        product={data}
+        categoryOptions={categoryOptions}
+        brandOptions={brandOptions}
+      />
     </Fragment>
   );
 }

@@ -59,7 +59,6 @@ interface FormValues {
   is_taxable: boolean;
   status: "Draft" | "Published" | "Suspended" | "OutOfStock";
   product_type: "Simple" | "Variable";
-  video: string;
   image: string;
   gallery: string[];
   categories: SelectOption[];
@@ -87,7 +86,8 @@ export default function ProductUpdateForm({
 }: Props) {
   const [isSlugUnique, setIsSlugUnique] = useState(true);
   const [categoryOption, setCategoryOption] = useState(initialCategoryOptions);
-  const [brandOptions, setBrandOptions] = useState(initialBrandOptions);
+  const [selectBrandOptions, setSelectBrandOptions] =
+    useState(initialBrandOptions);
 
   const generateSKU = () => {
     return Math.floor(Math.random() * 1000000000);
@@ -109,7 +109,7 @@ export default function ProductUpdateForm({
   const handleCreateBrand = (inputValue: string) => {
     const newBrand = { value: inputValue.toLowerCase(), label: inputValue };
 
-    setBrandOptions((prev) =>
+    setSelectBrandOptions((prev) =>
       Array.isArray(prev) ? [...prev, newBrand] : [newBrand]
     );
 
@@ -142,12 +142,15 @@ export default function ProductUpdateForm({
     is_taxable: product?.is_taxable || false,
     status: product?.status || "Draft",
     product_type: product?.product_type || "Simple",
-    video: product?.video || "",
     image: product?.image || "",
     gallery: product?.gallery || [],
     categories:
-      product?.categories?.map((cat) => ({ value: cat.id, label: cat.name })) ||
-      [],
+      product?.categories?.map((pc) => ({
+        value: pc.categoryId,
+        label:
+          categoryOption.find((cat) => cat.value === pc.categoryId)?.label ||
+          "",
+      })) || [],
     brandId: product?.brandId || null,
     isFlashDeal: product?.isFlashDeal || false,
     discountPercentage: product?.discountPercentage || null,
@@ -523,9 +526,9 @@ export default function ProductUpdateForm({
                   <Grid item sm={6} xs={12}>
                     <Select
                       isCreatable
-                      options={brandOptions}
+                      options={selectBrandOptions}
                       value={
-                        brandOptions?.find(
+                        selectBrandOptions?.find(
                           (option) => option.value === values.brandId
                         ) || null
                       }
@@ -537,7 +540,7 @@ export default function ProductUpdateForm({
                       }
                       onCreateOption={(inputValue) => {
                         const newBrand = handleCreateBrand(inputValue);
-                        setFieldValue("brandId", newBrand.value);
+                        setFieldValue("brandId", newBrand?.label);
                       }}
                       label="Brand"
                       placeholder="Select or Create Brand"
