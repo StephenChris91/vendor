@@ -29,7 +29,6 @@ export async function PUT(
         if (body.is_taxable !== undefined) updateData.is_taxable = body.is_taxable;
         if (body.status !== undefined) updateData.status = body.status as ProductStatus;
         if (body.product_type !== undefined) updateData.product_type = body.product_type as ProductType;
-        if (body.video !== undefined) updateData.video = body.video;
         if (body.image !== undefined) updateData.image = body.image;
         if (body.ratings !== undefined) updateData.ratings = parseFloat(body.ratings);
         if (body.total_reviews !== undefined) updateData.total_reviews = parseInt(body.total_reviews);
