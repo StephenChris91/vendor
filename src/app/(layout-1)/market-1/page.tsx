@@ -55,7 +55,7 @@ export default async function HomeLanding() {
       <Section5 newArrivalsList={newArrivalsList} />
 
       {/* BIG DISCOUNT AREA */}
-      <Section13 bigDiscountList={bigDiscountList} />
+      <Section13 />
 
       {/* CAR LIST AREA */}
       <Section6 carBrands={carBrands} carList={carList} />
@@ -83,7 +83,7 @@ export default async function HomeLanding() {
       <Section10 categories={bottomCategories} />
 
       {/* MORE PRODUCTS AREA */}
-      <Section11 moreItems={moreItems} />
+      <Section11 />
 
       {/* SERVICES AREA */}
       <Section12 serviceList={serviceList} />
