@@ -35,6 +35,9 @@ export default function Section7({ products }: Props) {
             rating={4}
             images={products[0].gallery}
             imgUrl={products[0].image}
+            shopId={products[0].shop.id}
+            sale_price={products[0].sale_price}
+            shop={products[0].shop}
           />
         </GridOne>
 
@@ -51,6 +54,9 @@ export default function Section7({ products }: Props) {
                   rating={4}
                   images={item.gallery}
                   imgUrl={item.image}
+                  shopId={item.shop.id}
+                  sale_price={item.sale_price}
+                  shop={item.shop}
                 />
               </Grid>
             ))}

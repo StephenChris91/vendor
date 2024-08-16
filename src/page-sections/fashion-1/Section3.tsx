@@ -42,6 +42,9 @@ export default function Section3({ products }: Props) {
                 images={item.gallery}
                 imgUrl={item.image}
                 rating={4}
+                shop={item.shop}
+                shopId={item.shop.id}
+                sale_price={item.sale_price}
               />
             </Box>
           ))}
