@@ -166,7 +166,7 @@ export default function ProductIntro({ product }: ProductIntroProps) {
             {shop ? (
               <Link href={`/shops/${shop.id}`}>
                 <H6 lineHeight="1" ml="8px">
-                  {shop.shopName}
+                  {shop?.shopName}
                 </H6>
               </Link>
             ) : (
