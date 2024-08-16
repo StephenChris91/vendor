@@ -1,7 +1,5 @@
-// app/api/products/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../../prisma/prisma';
-
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -15,7 +13,12 @@ export async function GET(request: NextRequest) {
             include: {
                 shop: true,
                 user: true,
-                categories: true,
+                categories: {
+                    include: {
+                        category: true
+                    }
+                },
+                brand: true,
             },
         });
 
@@ -26,7 +29,16 @@ export async function GET(request: NextRequest) {
                 ...product,
                 shop_name: product.shop?.shopName || null,
                 author_name: product.user?.name || null,
-                categories: product.categories.map(category => category.name),
+                categories: product.categories.map(pc => ({
+                    id: pc.category.id,
+                    name: pc.category.name,
+                    slug: pc.category.slug
+                })),
+                brand: product.brand ? {
+                    id: product.brand.id,
+                    name: product.brand.name,
+                    slug: product.brand.slug
+                } : null,
             })),
             totalPages: Math.ceil(totalProducts / pageSize),
             currentPage: page,
@@ -36,4 +48,3 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Error fetching products' }, { status: 500 });
     }
 }
-

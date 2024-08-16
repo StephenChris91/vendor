@@ -1,115 +1,65 @@
-'use server'
+import { NextRequest, NextResponse } from 'next/server';
+import { ProductStatus, ProductType } from '@prisma/client';
+import { db } from '../../../../prisma/prisma';
 
-import { productSchema } from "schemas";
-import { revalidatePath } from "next/cache";
-import { auth } from "auth";
-import { getUserById } from "lib/data/user";
-import { Prisma } from "@prisma/client";
-import { db } from "../../../../prisma/prisma";
-
-export async function POST(request: Request) {
-  const session = await auth();
-
-  if (!session?.user) {
-    return new Response(JSON.stringify({ status: 'error', message: 'User not authenticated' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  const user = await getUserById(session.user.id as string);
-
-  if (!user || (user.role !== 'Vendor' && user.role !== 'Admin')) {
-    return new Response(JSON.stringify({ status: 'error', message: 'User not authorized to create a product' }), {
-      status: 403,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  const shop = await db.shop.findUnique({
-    where: {
-      userId: user.id,
-    },
-  });
-
-  if (!shop) {
-    return new Response(JSON.stringify({ status: 'error', message: 'No shop found for the user' }), {
-      status: 404,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  const body = await request.json();
-  const validInput = productSchema.safeParse(body);
-
-  if (!validInput.success) {
-    console.error("Invalid product data:", validInput.error.errors);
-    return new Response(JSON.stringify({ status: 'error', message: 'Invalid product data' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  const categoryIds = validInput.data.categories ?? [];
-  const categories = await db.category.findMany({
-    where: { id: { in: categoryIds } }
-  });
-
-  if (categories.length !== categoryIds.length) {
-    console.error("Some categories not found:", { expected: categoryIds.length, found: categories.length });
-    return new Response(JSON.stringify({ status: 'error', message: 'Some categories not found' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    const productData: Prisma.productCreateInput = {
-      name: validInput.data.name,
-      slug: validInput.data.slug,
-      description: validInput.data.description,
-      price: validInput.data.price,
-      sale_price: validInput.data.sale_price,
-      sku: validInput.data.sku,
-      quantity: validInput.data.quantity,
-      in_stock: validInput.data.in_stock,
-      is_taxable: validInput.data.is_taxable,
-      status: validInput.data.status,
-      product_type: validInput.data.product_type,
-      image: validInput.data.image,
-      video: validInput.data.video,
-      gallery: validInput.data.gallery,
-      ratings: validInput.data.ratings,
-      total_reviews: validInput.data.total_reviews,
-      my_review: validInput.data.my_review,
-      in_wishlist: validInput.data.in_wishlist,
-      shop_name: validInput.data.shop_name,
-      shop: {
-        connect: { id: shop.id },
+    const body = await request.json();
+    const newProduct = await db.product.create({
+      data: {
+        name: body.name,
+        slug: body.slug,
+        description: body.description,
+        price: body.price,
+        sale_price: body.sale_price,
+        sku: body.sku,
+        quantity: body.quantity,
+        in_stock: body.in_stock,
+        is_taxable: body.is_taxable,
+        status: body.status as ProductStatus,
+        product_type: body.product_type as ProductType,
+        image: body.image,
+        gallery: body.gallery,
+        isFlashDeal: body.isFlashDeal,
+        discountPercentage: body.discountPercentage,
+        shop: body.shop_id ? { connect: { id: body.shop_id } } : undefined,
+        user: body.user_id ? { connect: { id: body.user_id } } : undefined,
+        brand: body.brandId ? { connect: { id: body.brandId } } : undefined,
+        categories: {
+          create: body.categories.map((categoryId: string) => ({
+            category: { connect: { id: categoryId } }
+          }))
+        },
       },
-      categories: {
-        connect: categoryIds.map(id => ({ id })),
+      include: {
+        shop: true,
+        user: true,
+        categories: {
+          include: {
+            category: true
+          }
+        },
+        brand: true,
       },
-      user: {
-        connect: { id: session.user.id },
-      },
-    };
-
-    const product = await db.product.create({
-      data: productData,
     });
 
-    revalidatePath('/');
-
-    return new Response(JSON.stringify({ status: 'success', product }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
+    return NextResponse.json({
+      ...newProduct,
+      shop_name: newProduct.shop?.shopName || null,
+      author_name: newProduct.user?.name || null,
+      categories: newProduct.categories.map(pc => ({
+        id: pc.category.id,
+        name: pc.category.name,
+        slug: pc.category.slug
+      })),
+      brand: newProduct.brand ? {
+        id: newProduct.brand.id,
+        name: newProduct.brand.name,
+        slug: newProduct.brand.slug
+      } : null,
     });
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ status: 'error', message: 'Failed to create product' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error('Error creating product:', error);
+    return NextResponse.json({ error: 'Error creating product' }, { status: 500 });
   }
 }
