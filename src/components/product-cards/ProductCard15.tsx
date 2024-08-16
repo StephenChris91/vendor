@@ -129,18 +129,34 @@ export default function ProductCard15(props: Props) {
     dispatch({ type: "CHANGE_CART_AMOUNT", payload });
   };
 
+  // Provide all required properties here
   const product: Product = {
     id,
     name: title,
-    price,
-    description: "", // Provide an actual description
-    sale_price: 0, // Provide an actual sale_price if needed
-    sku: 0, // Provide an actual sku if needed
-    quantity: 0, // Provide an actual quantity if needed
-    gallery: images,
     slug,
-    status: ProductStatus.Published, // Use the enum value
-    product_type: ProductType.Simple, // Use the enum value
+    description: "", // Provide an actual description if available
+    price,
+    sale_price: price, // Use the same price if no sale price is available
+    sku: 0, // Provide an actual SKU if available
+    quantity: 0, // Provide an actual quantity if available
+    in_stock: true, // Assume it's in stock, or provide actual value if available
+    is_taxable: false, // Provide actual value if available
+    status: ProductStatus.Published,
+    product_type: ProductType.Simple,
+    image: imgUrl,
+    ratings: rating,
+    total_reviews: 0, // Provide actual value if available
+    my_review: null,
+    in_wishlist: false, // Provide actual value if available
+    gallery: images,
+    shop_name: null, // Provide actual shop name if available
+    stock: 0, // Provide actual stock if available
+    categories: [], // Provide actual categories if available
+    shop: null, // Provide actual shop data if available
+    user: null, // Provide actual user data if available
+    brandId: null, // Provide actual brand ID if available
+    isFlashDeal: false, // Provide actual value if available
+    discountPercentage: off || null,
   };
 
   return (
