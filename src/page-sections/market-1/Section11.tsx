@@ -26,6 +26,9 @@ export default function Section11({ moreItems }: Props) {
               rating={4}
               imgUrl={item.image}
               images={item.gallery as string[]}
+              shop={item.shop}
+              shopId={item.shop.id}
+              sale_price={item.sale_price}
             />
           </Grid>
         ))}
