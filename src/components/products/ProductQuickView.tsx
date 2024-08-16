@@ -23,15 +23,7 @@ export default function ProductQuickView({ open, onClose, product }: Props) {
         borderRadius={8}
         position="relative"
       >
-        <ProductIntro
-          id={product.id}
-          title={product.name}
-          price={product.price}
-          // images={product.gallery} // Use gallery instead of image for multiple images
-          gallery={product.gallery}
-          image={product.image}
-          shop={product.shop}
-        />
+        <ProductIntro product={product} />
 
         <Box position="absolute" top="0.75rem" right="0.75rem" cursor="pointer">
           <Icon
