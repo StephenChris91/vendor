@@ -17,6 +17,14 @@ const fetchCategories = async (): Promise<SelectOption[]> => {
     slug: cat.slug,
   }));
 };
+const fetchBrands = async (): Promise<SelectOption[]> => {
+  const response = await axios.get("/api/products/categories");
+  return response.data.map((cat: any) => ({
+    id: cat.id,
+    name: cat.name,
+    slug: cat.slug,
+  }));
+};
 
 export default function AddProduct() {
   const {
@@ -27,6 +35,15 @@ export default function AddProduct() {
     queryKey: ["categories"],
     queryFn: fetchCategories,
   });
+
+  // const {
+  //   data: brands,
+  //   isLoading,
+  //   isError,
+  // } = useQuery<SelectOption[]>({
+  //   queryKey: ["brands"],
+  //   queryFn: fetchBrands,
+  // });
 
   const HEADER_LINK = (
     <Link href="/vendor/products">
@@ -48,7 +65,7 @@ export default function AddProduct() {
       ) : isError ? (
         <div>Error loading categories</div>
       ) : (
-        <ProductForm categoryOptions={categories || []} />
+        <ProductForm categoryOptions={categories || []} brandOptions={[]} />
       )}
     </Fragment>
   );
