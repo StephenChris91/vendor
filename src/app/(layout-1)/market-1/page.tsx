@@ -52,7 +52,7 @@ export default async function HomeLanding() {
       />
 
       {/* NEW ARRIVALS AREA */}
-      <Section5 newArrivalsList={newArrivalsList} />
+      <Section5 />
 
       {/* BIG DISCOUNT AREA */}
       <Section13 />

@@ -10,39 +10,39 @@ import axios from "axios";
 import Spinner from "@component/Spinner";
 
 // Function to fetch new arrivals
-// const fetchNewArrivals = async (): Promise<Product[]> => {
-//   try {
-//     const response = await axios.get("/api/data/new-arrivals");
-//     console.log("New arrivals response:", response);
-//     return Array.isArray(response.data) ? response.data : [];
-//   } catch (error) {
-//     console.error("Error fetching new arrivals:", error);
-//     if (axios.isAxiosError(error)) {
-//       console.error("Response data:", error.response?.data);
-//       console.error("Response status:", error.response?.status);
-//     }
-//     return [];
-//   }
-// };
+const fetchNewArrivals = async (): Promise<Product[]> => {
+  try {
+    const response = await axios.get("/api/data/new-arrivals");
+    console.log("New arrivals response:", response);
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error("Error fetching new arrivals:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Response data:", error.response?.data);
+      console.error("Response status:", error.response?.status);
+    }
+    return [];
+  }
+};
 
 type Props = { newArrivalsList: Product[] };
 
-export default function Section5({ newArrivalsList }: Props) {
+export default function Section5() {
   // Using useQuery to fetch and manage the data
-  // const {
-  //   data: newArrivalsList,
-  //   isLoading,
-  //   error,
-  // } = useQuery<Product[], Error>({
-  //   queryKey: ["newArrivals"],
-  //   queryFn: fetchNewArrivals,
-  // });
+  const {
+    data: newArrivalsList,
+    isLoading,
+    error,
+  } = useQuery<Product[], Error>({
+    queryKey: ["newArrivals"],
+    queryFn: fetchNewArrivals,
+  });
 
-  // if (isLoading) return <Spinner />;
-  // if (error) return <div>An error occurred: {error.message}</div>;
+  if (isLoading) return <Spinner />;
+  if (error) return <div>An error occurred: {error.message}</div>;
 
-  // // Ensure newArrivalsList is an array
-  // const productList = Array.isArray(newArrivalsList) ? newArrivalsList : [];
+  // Ensure newArrivalsList is an array
+  const productList = Array.isArray(newArrivalsList) ? newArrivalsList : [];
 
   return (
     <CategorySectionCreator

@@ -51,7 +51,7 @@ export default function Section13() {
     isLoading,
     error,
   } = useQuery<Product[], Error>({
-    queryKey: ["newArrivals"],
+    queryKey: ["bigDiscounts"],
     queryFn: fetchBigDiscounts,
   });
 

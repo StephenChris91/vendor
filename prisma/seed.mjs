@@ -4,7 +4,9 @@ import {
   userRole,
   ProductStatus,
   ProductType,
-  // orderStatus,
+  orderStatus,
+  VerificationStatus,
+  ShopStatus,
 } from "@prisma/client";
 import { hash } from "bcrypt-ts";
 
@@ -20,6 +22,8 @@ async function main() {
       lastname: "User",
       role: userRole.Admin,
       emailVerified: new Date(),
+      verificationStatus: VerificationStatus.Complete,
+      hasPaid: true,
     },
   });
 
@@ -31,7 +35,9 @@ async function main() {
       lastname: "User",
       role: userRole.Vendor,
       emailVerified: new Date(),
+      verificationStatus: VerificationStatus.Complete,
       isOnboardedVendor: true,
+      hasPaid: true,
     },
   });
 
@@ -43,6 +49,16 @@ async function main() {
       lastname: "User",
       role: userRole.Customer,
       emailVerified: new Date(),
+      verificationStatus: VerificationStatus.Complete,
+      hasPaid: false,
+    },
+  });
+
+  // Create a shop category
+  const shopCategory = await prisma.category.create({
+    data: {
+      name: "General",
+      slug: "general",
     },
   });
 
@@ -53,10 +69,12 @@ async function main() {
       description: "A great shop with amazing products",
       userId: vendorUser.id,
       slug: "vendors-shop",
+      status: ShopStatus.Approved,
+      categoryId: shopCategory.id,
     },
   });
 
-  // Create categories
+  // Create product categories
   const categories = await Promise.all([
     prisma.category.create({
       data: { name: "Electronics", slug: "electronics" },
@@ -81,7 +99,11 @@ async function main() {
         product_type: ProductType.Simple,
         user_id: vendorUser.id,
         shop_id: shop.id,
-        categories: { connect: { id: categories[0].id } },
+        categories: {
+          create: [
+            { categoryId: categories[0].id }, // Electronics
+          ],
+        },
       },
     }),
     prisma.product.create({
@@ -98,7 +120,11 @@ async function main() {
         product_type: ProductType.Variable,
         user_id: vendorUser.id,
         shop_id: shop.id,
-        categories: { connect: { id: categories[1].id } },
+        categories: {
+          create: [
+            { categoryId: categories[1].id }, // Clothing
+          ],
+        },
       },
     }),
   ]);
@@ -107,20 +133,41 @@ async function main() {
   const order = await prisma.order.create({
     data: {
       status: orderStatus.Pending,
+      subtotal: 100798, // $1007.98
+      tax: 1101, // $11.01
+      shippingCost: 1000, // $10.00
       totalPrice: 101899, // $1018.99
       userId: customerUser.id,
       shopId: shop.id,
+      paymentMethod: "Credit Card",
       orderItems: {
         create: [
           {
             productId: products[0].id,
             quantity: 1,
+            price: 99900, // $999.00
+            name: "Smartphone",
+            sku: "SKU-0001",
           },
           {
             productId: products[1].id,
             quantity: 2,
+            price: 1499, // $14.99 each
+            name: "T-Shirt",
+            sku: "SKU-0002",
           },
         ],
+      },
+      shippingAddress: {
+        create: {
+          name: "Customer User",
+          street: "123 Main St",
+          city: "Anytown",
+          state: "Anystate",
+          zipCode: "12345",
+          country: "USA",
+          phone: "555-555-5555",
+        },
       },
     },
   });
