@@ -39,6 +39,9 @@ export default function SaleProducts({ products, meta }: Props) {
               images={item.gallery}
               imgUrl={item.image}
               rating={4}
+              shopId={item.shop.id}
+              shop={item.shop}
+              sale_price={item.sale_price}
             />
           </Grid>
         ))}
