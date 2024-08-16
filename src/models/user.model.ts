@@ -3,7 +3,7 @@ import Product from "./product.model";
 import Shop from "./shop.model";
 
 
-interface User {
+export interface User {
   id: string;
   email: string;
   password?: string;
