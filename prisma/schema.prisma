@@ -224,7 +224,7 @@ model product {
   stock              Int?
   wishlistedBy       Wishlist[]
   orderItems         orderItem[]
-  isFlashDeal        Boolean           @default(false)
+  isFlashDeal        Boolean?          @default(false)
   discountPercentage Float?
   brand              Brand?            @relation(fields: [brandId], references: [id])
   brandId            String?

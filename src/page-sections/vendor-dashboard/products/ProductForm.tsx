@@ -1,8 +1,9 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import * as yup from "yup";
 import { Formik, Form, FormikHelpers } from "formik";
-
+import { useRouter } from "next/navigation";
 import Card from "@component/Card";
 import Image from "@component/Image";
 import Grid from "@component/grid/Grid";
@@ -17,19 +18,8 @@ import toast from "react-hot-toast";
 import CheckBox from "@component/CheckBox";
 import Select, { SelectOption } from "@component/Select";
 import Typography from "@component/Typography";
-
-// const UploadImageBox = styled("div")(({ theme }) => ({
-//   width: 70,
-//   height: 70,
-//   display: "flex",
-//   overflow: "hidden",
-//   borderRadius: "8px",
-//   marginRight: ".5rem",
-//   position: "relative",
-//   alignItems: "center",
-//   justifyContent: "center",
-//   backgroundColor: theme.colors.primary[100],
-// }));
+import { validationSchema } from "schemas";
+import { uploadToS3 } from "@utils/s3Client";
 
 const StyledDropZone = styled(DropZone)`
   width: 100%;
@@ -63,8 +53,8 @@ interface FormValues {
   gallery: string[];
   categories: SelectOption[];
   brandId: string | null;
-  isFlashDeal: boolean;
-  discountPercentage: number | null;
+  isFlashDeal?: boolean;
+  discountPercentage?: number | null;
 }
 
 const statusOptions: SelectOption[] = [
@@ -88,6 +78,42 @@ export default function ProductUpdateForm({
   const [categoryOption, setCategoryOption] = useState(initialCategoryOptions);
   const [selectBrandOptions, setSelectBrandOptions] =
     useState(initialBrandOptions);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchCategoriesAndBrands = async () => {
+      try {
+        const [categoriesResponse, brandsResponse] = await Promise.all([
+          fetch("/api/categories/get-categories"),
+          fetch("/api/brands/get-brands"),
+        ]);
+
+        const categories = await categoriesResponse.json();
+        const brands = await brandsResponse.json();
+
+        console.log("Fetched categories:", categories);
+        console.log("Fetched brands:", brands);
+
+        setCategoryOption(
+          categories.map((cat: any) => ({
+            value: cat.id,
+            label: cat.name,
+          }))
+        );
+        setSelectBrandOptions(
+          brands.map((brand: any) => ({
+            value: brand.id,
+            label: brand.name,
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching categories and brands:", error);
+        toast.error("Failed to load categories and brands");
+      }
+    };
+
+    fetchCategoriesAndBrands();
+  }, []);
 
   const generateSKU = () => {
     return Math.floor(Math.random() * 1000000000);
@@ -108,11 +134,7 @@ export default function ProductUpdateForm({
 
   const handleCreateBrand = (inputValue: string) => {
     const newBrand = { value: inputValue.toLowerCase(), label: inputValue };
-
-    setSelectBrandOptions((prev) =>
-      Array.isArray(prev) ? [...prev, newBrand] : [newBrand]
-    );
-
+    setSelectBrandOptions((prev) => [...prev, newBrand]);
     return newBrand;
   };
 
@@ -148,7 +170,7 @@ export default function ProductUpdateForm({
       product?.categories?.map((pc) => ({
         value: pc.categoryId,
         label:
-          categoryOption.find((cat) => cat.value === pc.categoryId)?.label ||
+          categoryOption.find((cat) => cat.label === pc.categoryId)?.label ||
           "",
       })) || [],
     brandId: product?.brandId || null,
@@ -156,41 +178,9 @@ export default function ProductUpdateForm({
     discountPercentage: product?.discountPercentage || null,
   };
 
-  const validationSchema = yup.object().shape({
-    name: yup.string().required("Name is required"),
-    slug: yup.string().required("Slug is required"),
-    description: yup.string().required("Description is required"),
-    price: yup
-      .number()
-      .required("Price is required")
-      .positive("Price must be positive"),
-    sale_price: yup.number().positive("Sale price must be positive"),
-    sku: yup.number().required("SKU is required"),
-    quantity: yup
-      .number()
-      .required("Quantity is required")
-      .positive("Quantity must be positive"),
-    in_stock: yup.boolean().required("In Stock status is required"),
-    is_taxable: yup.boolean().required("Taxable status is required"),
-    status: yup
-      .string()
-      .oneOf(["Draft", "Published", "Suspended", "OutOfStock"])
-      .required("Status is required"),
-    product_type: yup
-      .string()
-      .oneOf(["Simple", "Variable"])
-      .required("Product type is required"),
-    image: yup.string().required("Product image is required"),
-    gallery: yup.array().of(yup.string()),
-    categories: yup.array().min(1, "At least one category is required"),
-    brandId: yup.string().nullable(),
-    isFlashDeal: yup.boolean(),
-    discountPercentage: yup.number().nullable().min(0).max(100),
-  });
-
   const handleFormSubmit = async (
     values: FormValues,
-    { setSubmitting }: FormikHelpers<FormValues>
+    { setSubmitting, resetForm }: FormikHelpers<FormValues>
   ) => {
     if (!isSlugUnique) {
       toast.error("Slug is not unique. Please modify the product name.");
@@ -198,21 +188,17 @@ export default function ProductUpdateForm({
       return;
     }
 
-    console.log("Form submission started", values);
-
-    console.log(values, "form submitting started");
-
     const transformedValues = {
       ...values,
       categories: values.categories.map((cat) => cat.value),
     };
 
-    console.log("Calling createProduct...");
     const createdProduct = await createProduct(transformedValues);
-    console.log("createProduct response:", createdProduct);
 
     if (createdProduct.status === "success") {
       toast.success("Product created successfully");
+      resetForm();
+      router.push(`/vendor/products/`);
     } else if (createdProduct.status === "error") {
       toast.error("Failed to create product");
     }
@@ -239,14 +225,27 @@ export default function ProductUpdateForm({
             setFieldValue("image", url);
           };
 
-          const handleGalleryUpload = async (files: File[]) => {
-            // This function should handle file uploads and return URLs
+          const handleGalleryUpload = async (filesOrFile: File[] | File) => {
             const uploadFile = async (file: File): Promise<string> => {
-              return URL.createObjectURL(file);
+              try {
+                const buffer = await file.arrayBuffer();
+                const key = `products/${Date.now()}_${file.name}`;
+                const result = await uploadToS3(Buffer.from(buffer), key);
+                return result;
+              } catch (error) {
+                console.error("Error uploading file:", error);
+                toast.error(`Failed to upload file: ${file.name}`);
+                throw error;
+              }
             };
 
             try {
-              const uploadPromises = files.map((file) => uploadFile(file));
+              const filesToUpload = Array.isArray(filesOrFile)
+                ? filesOrFile
+                : [filesOrFile];
+              const uploadPromises = filesToUpload.map((file) =>
+                uploadFile(file)
+              );
               const urls = await Promise.all(uploadPromises);
               setFieldValue("gallery", [...values.gallery, ...urls]);
             } catch (error) {
@@ -401,7 +400,7 @@ export default function ProductUpdateForm({
                   />
                 </Grid>
 
-                <Grid item sm={6} xs={12}>
+                {/* <Grid item sm={6} xs={12}>
                   <Select
                     options={statusOptions}
                     value={
@@ -419,7 +418,7 @@ export default function ProductUpdateForm({
                     placeholder="Select Status"
                     errorText={touched.status && errors.status}
                   />
-                </Grid>
+                </Grid> */}
 
                 <Grid item sm={6} xs={12}>
                   <Select
@@ -453,6 +452,7 @@ export default function ProductUpdateForm({
                         "image/webp": [".webp"],
                       }}
                       multiple={false}
+                      useS3={false}
                     />
                     {values.image && (
                       <FlexBox flexDirection="row" mt={2} flexWrap="wrap">

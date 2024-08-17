@@ -129,9 +129,10 @@ export async function createProduct(values: z.infer<typeof productSchema>) {
 
 
 
-    revalidatePath('/shop');
+    revalidatePath('/shop')
+    revalidatePath('/vendor/products')
+    revalidatePath('/admin/products')
 
-    console.log("Product created successfully", product);
 
     return { status: 'success', product };
   } catch (error) {

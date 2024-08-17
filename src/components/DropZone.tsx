@@ -8,7 +8,7 @@ import Typography, { H5, Small } from "@component/Typography";
 import { uploadFile } from "actions/upload-logo";
 
 export interface DropZoneProps {
-  onChange: (result: string | File[]) => void;
+  onChange: (result: string | File[] | File) => void;
   uploadType: string;
   maxSize?: number;
   acceptedFileTypes?: Record<string, string[]>;
@@ -34,10 +34,10 @@ export default function DropZone({
       console.log("Files dropped:", acceptedFiles);
       setFiles(acceptedFiles);
       if (!useS3) {
-        onChange(acceptedFiles);
+        onChange(multiple ? acceptedFiles : acceptedFiles[0]);
       }
     },
-    [onChange, useS3]
+    [onChange, useS3, multiple]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

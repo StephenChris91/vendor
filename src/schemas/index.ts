@@ -1,4 +1,6 @@
 import { z } from "zod";
+import * as yup from "yup";
+
 export const signupSchema = z
   .object({
     firstname: z.string().min(1, 'Username is required').max(100),
@@ -161,7 +163,7 @@ export const productSchema = z.object({
   // shop_id: z.string(),
   shop_name: z.string().optional(),
   isFlashDeal: z.boolean().optional(),
-  discountPercentage: z.number().min(0).max(100).optional(),
+  discountPercentage: z.number().min(0).max(100).nullable().optional(),
   brandId: z.string().optional(),
 });
 
@@ -187,5 +189,49 @@ export const adminLoginSchema = z.object({
       message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
     }),
 });
+
+export const validationSchema = yup.object().shape({
+  name: yup.string().required("Name is required"),
+  slug: yup.string().required("Slug is required"),
+  description: yup.string().required("Description is required"),
+  price: yup
+    .number()
+    .required("Price is required")
+    .positive("Price must be positive"),
+  sale_price: yup.number().positive("Sale price must be positive"),
+  sku: yup.number().required("SKU is required"),
+  quantity: yup
+    .number()
+    .required("Quantity is required")
+    .positive("Quantity must be positive"),
+  in_stock: yup.boolean().required("In Stock status is required"),
+  is_taxable: yup.boolean().required("Taxable status is required"),
+  status: yup
+    .string()
+    .oneOf(["Draft", "Published", "Suspended", "OutOfStock"])
+    .required("Status is required"),
+  product_type: yup
+    .string()
+    .oneOf(["Simple", "Variable"])
+    .required("Product type is required"),
+  image: yup.string().required("Product image is required"),
+  gallery: yup.array().of(yup.string()),
+  categories: yup.array().min(1, "At least one category is required"),
+  brandId: yup.string().nullable(),
+  isFlashDeal: yup.boolean().notRequired(),
+  discountPercentage: yup
+    .number()
+    .nullable()
+    .min(0)
+    .max(100)
+    .when("isFlashDeal", {
+      is: true,
+      then: (schema) =>
+        schema.required("Discount percentage is required for flash deals"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+});
+
+
 
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;
