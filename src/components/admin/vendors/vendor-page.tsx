@@ -39,6 +39,7 @@ export default function VendorsPage() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({});
+  const [vendor, setVendor] = useState<Vendor[]>([]);
 
   const {
     data: vendors,
@@ -97,6 +98,10 @@ export default function VendorsPage() {
     toggleStatusMutation.mutate({ id, status: newStatus });
   };
 
+  const handleDeleteVendor = (vendorId: string) => {
+    setVendor(vendors.filter((vendor) => vendor.id !== vendorId));
+  };
+
   const handleAddVendor = () => {
     // Implement add vendor logic
   };
@@ -118,7 +123,11 @@ export default function VendorsPage() {
       <VendorSearchFilter onSearch={handleSearch} onFilter={handleFilter} />
 
       {vendors && (
-        <VendorList vendors={vendors} onToggleStatus={handleToggleStatus} />
+        <VendorList
+          vendors={vendors}
+          onToggleStatus={handleToggleStatus}
+          onDeleteVendor={handleDeleteVendor}
+        />
       )}
     </Box>
   );

@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
@@ -7,7 +9,8 @@ import { Button } from "@component/buttons";
 import Pagination from "@component/pagination";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-
+import { Eye, ShieldMinus, ShieldPlus, Trash2 } from "lucide-react";
+import Modal from "@component/Modal";
 import {
   TableWrapper,
   TableHead,
@@ -17,6 +20,7 @@ import {
   TableCell,
 } from "./styles";
 import { updateVendorStatus } from "actions/updateVendorStatus";
+import { deleteVendor } from "actions/deleteVendor"; // You'll need to create this action
 
 interface Vendor {
   id: string;
@@ -32,13 +36,17 @@ interface Vendor {
 interface VendorListProps {
   vendors: Vendor[];
   onToggleStatus: (id: string, newStatus: "active" | "inactive") => void;
+  onDeleteVendor: (id: string) => void; // New prop for handling vendor deletion
 }
 
 const VendorList: React.FC<VendorListProps> = ({
   vendors = [],
   onToggleStatus,
+  onDeleteVendor,
 }) => {
   const router = useRouter();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [vendorToDelete, setVendorToDelete] = useState<string | null>(null);
 
   const handleStatusChange = async (
     vendorId: string,
@@ -72,40 +80,64 @@ const VendorList: React.FC<VendorListProps> = ({
     router.push(`/admin/vendors/${vendorId}`);
   };
 
+  const handleDeleteVendor = (vendorId: string) => {
+    setVendorToDelete(vendorId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteVendor = async () => {
+    if (vendorToDelete) {
+      const toastId = toast.loading("Deleting vendor...");
+      try {
+        await deleteVendor(vendorToDelete);
+        onDeleteVendor(vendorToDelete);
+        toast.success("Vendor deleted successfully", { id: toastId });
+      } catch (error) {
+        console.error("Failed to delete vendor:", error);
+        toast.error("Failed to delete vendor. Please try again.", {
+          id: toastId,
+        });
+      }
+      setIsDeleteModalOpen(false);
+      setVendorToDelete(null);
+    }
+  };
+
   return (
-    <TableWrapper>
-      <StyledTable>
-        <TableHead>
-          <TableRow>
-            <TableHeaderCell>Name</TableHeaderCell>
-            <TableHeaderCell>Email</TableHeaderCell>
-            <TableHeaderCell>Registration Date</TableHeaderCell>
-            <TableHeaderCell>Status</TableHeaderCell>
-            <TableHeaderCell>Total Sales</TableHeaderCell>
-            <TableHeaderCell>Products</TableHeaderCell>
-            <TableHeaderCell>Rating</TableHeaderCell>
-            <TableHeaderCell>Actions</TableHeaderCell>
-          </TableRow>
-        </TableHead>
-        <tbody>
-          {vendors.map((vendor) => (
-            <TableRow key={vendor.id}>
-              <TableCell>{vendor.name}</TableCell>
-              <TableCell>{vendor.email}</TableCell>
-              <TableCell>{vendor.registrationDate}</TableCell>
-              <TableCell>
-                <H6
-                  color={
-                    vendor.status === "active" ? "success.main" : "error.main"
-                  }
-                >
-                  {vendor.status}
-                </H6>
-              </TableCell>
-              <TableCell>${vendor.totalSales.toLocaleString()}</TableCell>
-              <TableCell>{vendor.productCount}</TableCell>
-              <TableCell>{vendor.rating.toFixed(1)}</TableCell>
-              <TableCell>
+    <>
+      <TableWrapper>
+        <StyledTable>
+          <TableHead>
+            <TableRow>
+              <TableHeaderCell>Name</TableHeaderCell>
+              <TableHeaderCell>Email</TableHeaderCell>
+              <TableHeaderCell>Registration Date</TableHeaderCell>
+              <TableHeaderCell>Status</TableHeaderCell>
+              <TableHeaderCell>Total Sales</TableHeaderCell>
+              <TableHeaderCell>Products</TableHeaderCell>
+              <TableHeaderCell>Rating</TableHeaderCell>
+              <TableHeaderCell>Actions</TableHeaderCell>
+            </TableRow>
+          </TableHead>
+          <tbody>
+            {vendors.map((vendor) => (
+              <TableRow key={vendor.id}>
+                <TableCell>{vendor.name}</TableCell>
+                <TableCell>{vendor.email}</TableCell>
+                <TableCell>{vendor.registrationDate}</TableCell>
+                <TableCell>
+                  <H6
+                    color={
+                      vendor.status === "active" ? "success.main" : "error.main"
+                    }
+                  >
+                    {vendor.status}
+                  </H6>
+                </TableCell>
+                <TableCell>${vendor.totalSales.toLocaleString()}</TableCell>
+                <TableCell>{vendor.productCount}</TableCell>
+                <TableCell>{vendor.rating.toFixed(1)}</TableCell>
+                {/* <TableCell>
                 <FlexBox>
                   <Button
                     variant="outlined"
@@ -124,12 +156,77 @@ const VendorList: React.FC<VendorListProps> = ({
                     {vendor.status === "active" ? "Deactivate" : "Activate"}
                   </Button>
                 </FlexBox>
-              </TableCell>
-            </TableRow>
-          ))}
-        </tbody>
-      </StyledTable>
-    </TableWrapper>
+              </TableCell> */}
+                <TableCell>
+                  <FlexBox>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => handleViewVendor(vendor.id)}
+                      mr={1}
+                    >
+                      <Eye />
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color={vendor.status === "active" ? "primary" : "warn"}
+                      onClick={() =>
+                        handleStatusChange(vendor.id, vendor.status)
+                      }
+                      mr={1}
+                    >
+                      {vendor.status === "active" ? (
+                        <ShieldMinus />
+                      ) : (
+                        <ShieldPlus />
+                      )}
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => handleDeleteVendor(vendor.id)}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </FlexBox>
+                </TableCell>
+              </TableRow>
+            ))}
+          </tbody>
+        </StyledTable>
+      </TableWrapper>
+      <Modal
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      >
+        <div
+          style={{ background: "white", padding: "20px", borderRadius: "8px" }}
+        >
+          <h2>Confirm Deletion</h2>
+          <p>
+            Are you sure you want to delete this vendor? This action cannot be
+            undone.
+          </p>
+          <FlexBox justifyContent="flex-end" mt="1rem">
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => setIsDeleteModalOpen(false)}
+              mr={1}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={confirmDeleteVendor}
+            >
+              Delete
+            </Button>
+          </FlexBox>
+        </div>
+      </Modal>
+    </>
   );
 };
 
