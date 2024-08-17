@@ -250,7 +250,7 @@ export default function ProductCard1({
                   {title}
                 </H3>
                 <Typography as="p" text-muted fontSize="12px">
-                  Sold by: {shop.shopName}
+                  Sold by: {shop ? shop?.shopName : null}
                 </Typography>{" "}
                 {/* Ensure shopName is correctly accessed */}
               </Link>
