@@ -127,7 +127,12 @@ export async function createProduct(values: z.infer<typeof productSchema>) {
       },
     });
 
-    revalidatePath('/');
+
+
+    revalidatePath('/shop');
+
+    console.log("Product created successfully", product);
+
     return { status: 'success', product };
   } catch (error) {
     console.error(error);

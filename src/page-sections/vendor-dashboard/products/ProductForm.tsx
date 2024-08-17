@@ -198,6 +198,8 @@ export default function ProductUpdateForm({
       return;
     }
 
+    console.log("Form submission started", values);
+
     console.log(values, "form submitting started");
 
     const transformedValues = {
@@ -205,7 +207,10 @@ export default function ProductUpdateForm({
       categories: values.categories.map((cat) => cat.value),
     };
 
+    console.log("Calling createProduct...");
     const createdProduct = await createProduct(transformedValues);
+    console.log("createProduct response:", createdProduct);
+
     if (createdProduct.status === "success") {
       toast.success("Product created successfully");
     } else if (createdProduct.status === "error") {
@@ -434,19 +439,6 @@ export default function ProductUpdateForm({
                     placeholder="Select Product Type"
                     errorText={touched.product_type && errors.product_type}
                   />
-
-                  {/* <Grid item xs={12}>
-                    <TextField
-                      fullwidth
-                      name="video"
-                      label="Video URL"
-                      placeholder="Product Video URL"
-                      value={values.video}
-                      onBlur={handleBlur}
-                      onChange={handleChange}
-                      errorText={touched.video && errors.video}
-                    />
-                  </Grid> */}
 
                   <Grid item xs={12}>
                     <StyledLabel>Product Image</StyledLabel>
