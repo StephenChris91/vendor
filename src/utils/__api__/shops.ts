@@ -25,6 +25,8 @@ export const useShopList = (options?: UseQueryOptions<Shop[], Error>) => {
   return useQuery<Shop[], Error>({
     queryKey: ['shops'],
     queryFn: fetchShopList,
+    refetchInterval: 60000, // Refetch every minute
+    refetchOnWindowFocus: true, // Refetch when the window gains focus
     ...options,
   });
 };

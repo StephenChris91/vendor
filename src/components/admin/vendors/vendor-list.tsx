@@ -137,26 +137,6 @@ const VendorList: React.FC<VendorListProps> = ({
                 <TableCell>${vendor.totalSales.toLocaleString()}</TableCell>
                 <TableCell>{vendor.productCount}</TableCell>
                 <TableCell>{vendor.rating.toFixed(1)}</TableCell>
-                {/* <TableCell>
-                <FlexBox>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => handleViewVendor(vendor.id)}
-                    mr={1}
-                  >
-                    View
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    // color={vendor.status === "active" ? "error.main" : "success.main"}
-                    color={vendor.status === "active" ? "primary" : "warn"}
-                    onClick={() => handleStatusChange(vendor.id, vendor.status)}
-                  >
-                    {vendor.status === "active" ? "Deactivate" : "Activate"}
-                  </Button>
-                </FlexBox>
-              </TableCell> */}
                 <TableCell>
                   <FlexBox>
                     <Button

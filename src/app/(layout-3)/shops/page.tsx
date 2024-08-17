@@ -9,15 +9,17 @@ import { H2, SemiSpan } from "@component/Typography";
 import { useShopList } from "@utils/__api__/shops";
 
 export default function ShopList() {
-  const { data: shopListData, isLoading, error } = useShopList();
+  const { data: shopListData, isLoading, error, refetch } = useShopList();
 
   useEffect(() => {
-    if (shopListData) {
-      console.log("Shop list data:", shopListData);
-    }
-  }, [shopListData]);
+    const interval = setInterval(() => {
+      refetch();
+    }, 60000); // Refetch every minute
 
-  if (isLoading) return <div>Loading...</div>;
+    return () => clearInterval(interval);
+  }, [refetch]);
+
+  if (isLoading) return <div>Loading shops...</div>;
   if (error) {
     console.error("Error in ShopList:", error);
     return <div>Error loading shops. Please try again later.</div>;
@@ -27,8 +29,7 @@ export default function ShopList() {
     !Array.isArray(shopListData) ||
     shopListData.length === 0
   ) {
-    console.log("Shop list is empty or not in expected format:", shopListData);
-    return <div>No shops found.</div>;
+    return <div>No approved shops found. Check back later!</div>;
   }
 
   return (

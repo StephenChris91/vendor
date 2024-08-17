@@ -3,13 +3,21 @@ import { db } from '../../../../prisma/prisma';
 
 export async function GET() {
     try {
-        const shops = await db.shop.findMany(
-            { include: { shopSettings: true, address: true, paymentInfo: true } }
-        )
+        const shops = await db.shop.findMany({
+            where: { status: 'Approved' },
+            include: {
+                shopSettings: true,
+                address: true,
+            },
+        });
 
-        return NextResponse.json(shops);
+        return NextResponse.json(shops, {
+            headers: {
+                'Cache-Control': 'no-store, max-age=0',
+            },
+        });
     } catch (error) {
         console.error('Error fetching shops:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to fetch shops' }, { status: 500 });
     }
 }
