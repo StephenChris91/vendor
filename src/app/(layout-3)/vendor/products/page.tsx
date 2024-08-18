@@ -3,21 +3,16 @@
 import { Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@lib/axios";
-// GLOBAL CUSTOM COMPONENTS
 import Hidden from "@component/hidden";
 import FlexBox from "@component/FlexBox";
 import TableRow from "@component/TableRow";
 import { H5 } from "@component/Typography";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
-// PAGE SECTION COMPONENTS
 import { ProductList } from "@sections/vendor-dashboard/products";
-import { useCurrentUser } from "@lib/use-session-client";
 
-// API function to fetch products
-const fetchVendorProducts = async ({ queryKey }) => {
-  const [_key, { id: vendorId, page, pageSize }] = queryKey;
-  const { data } = await axios.get("/api/products/vendor", {
-    params: { vendorId, page, pageSize },
+const fetchVendorProducts = async (page: number, pageSize: number) => {
+  const { data } = await axios.get("/api/products/vendor/get-products", {
+    params: { page, pageSize },
   });
   return data;
 };
@@ -27,20 +22,17 @@ export default function VendorProducts({
 }: {
   params: { page: string };
 }) {
-  // Implement this function based on your auth system
   const page = params.page ? parseInt(params.page) : 1;
-  const pageSize = 10;
-
-  const user = useCurrentUser();
-  const vendorId = user?.id;
+  const pageSize = 28;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["vendorProducts", { vendorId, page, pageSize }],
-    queryFn: fetchVendorProducts,
+    queryKey: ["vendorProducts", page, pageSize],
+    queryFn: () => fetchVendorProducts(page, pageSize),
+    refetchInterval: 60000, // Refetch every minute
   });
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>An error occurred: {error.message}</div>;
+  if (error) return <div>An error occurred: {(error as Error).message}</div>;
 
   return (
     <Fragment>
@@ -71,7 +63,7 @@ export default function VendorProducts({
         </TableRow>
       </Hidden>
 
-      <ProductList products={data.result} meta={data.meta} />
+      <ProductList products={data?.products} meta={data?.meta} />
     </Fragment>
   );
 }

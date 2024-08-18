@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
 import Avatar from "@component/avatar";
 import Hidden from "@component/hidden";
 import Icon from "@component/icon/Icon";
@@ -12,28 +10,21 @@ import TableRow from "@component/TableRow";
 import Pagination from "@component/pagination";
 import { IconButton } from "@component/buttons";
 import Typography, { H5 } from "@component/Typography";
-
 import { calculateDiscount, currency } from "@utils/utils";
 import { Meta } from "interfaces";
 import { ProductType } from "types";
 
-// ==============================================================
 interface Props {
   meta: Meta;
   products: ProductType[];
 }
-// ==============================================================
 
 export default function ProductsList({ meta, products }: Props) {
-  const { push } = useRouter();
-  const [page, setPage] = useState<number | null>(null);
+  const router = useRouter();
 
-  useEffect(() => {
-    if (page !== null) {
-      push(`/vendor/products?page=${page}`);
-      setPage(null);
-    }
-  }, [page]);
+  const handlePageChange = (newPage: number) => {
+    router.push(`/vendor/products?page=${newPage}`);
+  };
 
   return (
     <>
@@ -51,19 +42,12 @@ export default function ProductsList({ meta, products }: Props) {
               </FlexBox>
 
               <H5 m="6px" textAlign="left" fontWeight="400">
-                {currency(discountedPrice)}
+                {currency(item.price)}
               </H5>
 
-              {discountedPrice !== item.price && (
-                <H5
-                  m="6px"
-                  textAlign="left"
-                  fontWeight="400"
-                  color="text.muted"
-                >
-                  <del>{currency(item.price)}</del>
-                </H5>
-              )}
+              <H5 m="6px" textAlign="left" fontWeight="400">
+                {currency(discountedPrice)}
+              </H5>
 
               <Hidden flex="0 0 0 !important" down={769}>
                 <Typography textAlign="center" color="text.muted">
@@ -82,7 +66,7 @@ export default function ProductsList({ meta, products }: Props) {
       <FlexBox justifyContent="center" mt="2.5rem">
         <Pagination
           pageCount={meta?.totalPage || 1}
-          onChange={({ selected }) => setPage(selected + 1)}
+          onChange={({ selected }) => handlePageChange(selected + 1)}
         />
       </FlexBox>
     </>

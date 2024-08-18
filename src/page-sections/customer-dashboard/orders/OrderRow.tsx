@@ -30,7 +30,7 @@ export default function OrderRow({ order }: OrderRowProps) {
   };
 
   return (
-    <Link href={`/orders/${order.id}`}>
+    <Link href={`/vendor/orders/${order.id}`}>
       <TableRow my="1rem" padding="6px 18px">
         <H5 m="6px" textAlign="left">
           #{order.id.substring(0, 8)}

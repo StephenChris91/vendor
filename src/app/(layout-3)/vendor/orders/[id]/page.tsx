@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Fragment } from "react";
 import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@lib/axios";
 // GLOBAL CUSTOM COMPONENTS
 import Box from "@component/Box";
 import Card from "@component/Card";
@@ -20,8 +22,28 @@ import Typography, { H5, H6 } from "@component/Typography";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
 // CUSTOM DATA MODEL
 import { IDParams } from "interfaces";
+import Spinner from "@component/Spinner";
+
+const fetchOrderDetails = async (id: string) => {
+  const { data } = await axios.get(`/api/products/vendor/orders/${id}`);
+  return data;
+};
 
 export default function OrderDetails({ params }: IDParams) {
+  const {
+    data: order,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["orderDetails", params.id],
+    queryFn: () => fetchOrderDetails(params.id),
+    // refetchInterval: 60000
+  });
+
+  if (isLoading) return <Spinner />;
+  if (error)
+    return <div>Error loading order details: {(error as Error).message}</div>;
+
   return (
     <Fragment>
       <DashboardPageHeader
@@ -38,45 +60,73 @@ export default function OrderDetails({ params }: IDParams) {
 
       <Card p="0px" mb="30px" overflow="hidden">
         <TableRow bg="gray.200" p="12px" boxShadow="none" borderRadius={0}>
-          <FlexBox className="pre" flex="0 0 0 !important" m="6px" alignItems="center">
+          <FlexBox
+            className="pre"
+            flex="0 0 0 !important"
+            m="6px"
+            alignItems="center"
+          >
             <Typography fontSize="14px" color="text.muted" mr="4px">
               Order ID:
             </Typography>
 
-            <Typography fontSize="14px">{params.id}</Typography>
+            <Typography fontSize="14px">{order.id}</Typography>
           </FlexBox>
 
           <FlexBox className="pre" m="6px" alignItems="center">
             <Typography fontSize="14px" color="text.muted" mr="4px">
               Placed on:
             </Typography>
-            <Typography fontSize="14px">{format(new Date(), "dd MMM, yyyy")}</Typography>
+            <Typography fontSize="14px">
+              {format(new Date(order.createdAt), "dd MMM, yyyy")}
+            </Typography>
           </FlexBox>
 
           <Box maxWidth="160px">
-            <Select placeholder="Order Status" options={orderStatusList} />
+            <Select
+              placeholder="Order Status"
+              options={orderStatusList}
+              value={orderStatusList.find(
+                (status) => status.value === order.status
+              )}
+              onChange={(selectedOption) => {
+                // Handle status change here
+              }}
+            />
           </Box>
         </TableRow>
 
-        <Box p="1rem 1.5rem 10px">
-          <TextField label="Add Product" fullwidth />
-        </Box>
-
         <Box py="0.5rem">
-          {[1, 2, 3, 4].map((item) => (
-            <FlexBox px="1rem" py="0.5rem" flexWrap="wrap" alignItems="center" key={item}>
+          {order.orderItems.map((item) => (
+            <FlexBox
+              px="1rem"
+              py="0.5rem"
+              flexWrap="wrap"
+              alignItems="center"
+              key={item.id}
+            >
               <FlexBox flex="2 2 260px" m="6px" alignItems="center">
-                <Avatar src="/assets/images/products/imagetree.png" size={64} />
+                <Avatar
+                  src={
+                    item.product.image ||
+                    "/assets/images/products/imagetree.png"
+                  }
+                  size={64}
+                />
 
                 <Box ml="20px">
-                  <H6 my="0px">Nike React Phantom Run Flyknit 2</H6>
+                  <H6 my="0px">{item.product.name}</H6>
                   <FlexBox alignItems="center">
                     <Typography fontSize="14px" color="text.muted">
-                      $145 x
+                      ${item.price} x
                     </Typography>
 
                     <Box maxWidth="60px" ml="8px" mt="0.25rem">
-                      <TextField defaultValue={3} type="number" fullwidth />
+                      <TextField
+                        defaultValue={item.quantity}
+                        type="number"
+                        fullwidth
+                      />
                     </Box>
                   </FlexBox>
                 </Box>
@@ -84,7 +134,7 @@ export default function OrderDetails({ params }: IDParams) {
 
               <FlexBox flex="1 1 260px" m="6px" alignItems="center">
                 <Typography fontSize="14px" color="text.muted">
-                  Product properties: Black, L
+                  Product properties: {item.product.description}
                 </Typography>
               </FlexBox>
 
@@ -109,7 +159,7 @@ export default function OrderDetails({ params }: IDParams) {
               rows={5}
               fullwidth
               borderRadius={10}
-              defaultValue="Kelly Williams 777 Brockton Avenue, Abington MA 2351"
+              defaultValue={`${order.order.shippingAddress.name}, ${order.order.shippingAddress.street}, ${order.order.shippingAddress.city}, ${order.order.shippingAddress.state} ${order.order.shippingAddress.zipCode}, ${order.order.shippingAddress.country}`}
             />
           </Card>
 
@@ -117,7 +167,12 @@ export default function OrderDetails({ params }: IDParams) {
             <H5 mt="0px" mb="14px">
               Customer's Note
             </H5>
-            <TextArea defaultValue="Please deliver ASAP." rows={5} borderRadius={10} fullwidth />
+            <TextArea
+              defaultValue="Please deliver ASAP."
+              rows={5}
+              borderRadius={10}
+              fullwidth
+            />
           </Card>
         </Grid>
 
@@ -127,43 +182,75 @@ export default function OrderDetails({ params }: IDParams) {
               Total Summary
             </H5>
 
-            <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
+            <FlexBox
+              justifyContent="space-between"
+              alignItems="center"
+              mb="0.5rem"
+            >
               <Typography fontSize="14px" color="text.hint">
                 Subtotal:
               </Typography>
-              <H6 my="0px">$335</H6>
+              <H6 my="0px">${order.subtotal}</H6>
             </FlexBox>
 
-            <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
+            <FlexBox
+              justifyContent="space-between"
+              alignItems="center"
+              mb="0.5rem"
+            >
               <Typography fontSize="14px" color="text.hint">
                 Shipping fee:
               </Typography>
 
-              <FlexBox alignItems="center" maxWidth="100px" ml="8px" mt="0.25rem">
+              <FlexBox
+                alignItems="center"
+                maxWidth="100px"
+                ml="8px"
+                mt="0.25rem"
+              >
                 <Typography mr="0.5rem">$</Typography>
-                <TextField defaultValue={10} type="number" fullwidth />
+                <TextField
+                  defaultValue={order.shippingCost}
+                  type="number"
+                  fullwidth
+                />
               </FlexBox>
             </FlexBox>
 
-            <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
+            <FlexBox
+              justifyContent="space-between"
+              alignItems="center"
+              mb="0.5rem"
+            >
               <Typography fontSize="14px" color="text.hint">
-                Discount:
+                Tax:
               </Typography>
 
-              <FlexBox alignItems="center" maxWidth="100px" ml="8px" mt="0.25rem">
-                <Typography mr="0.5rem">-$</Typography>
-                <TextField defaultValue={30} type="number" fullwidth />
+              <FlexBox
+                alignItems="center"
+                maxWidth="100px"
+                ml="8px"
+                mt="0.25rem"
+              >
+                <Typography mr="0.5rem">$</Typography>
+                <TextField defaultValue={order.tax} type="number" fullwidth />
               </FlexBox>
             </FlexBox>
 
             <Divider mb="0.5rem" />
 
-            <FlexBox justifyContent="space-between" alignItems="center" mb="1rem">
+            <FlexBox
+              justifyContent="space-between"
+              alignItems="center"
+              mb="1rem"
+            >
               <H6 my="0px">Total</H6>
-              <H6 my="0px">$315</H6>
+              <H6 my="0px">${order.totalPrice}</H6>
             </FlexBox>
 
-            <Typography fontSize="14px">Paid by Credit/Debit Card</Typography>
+            <Typography fontSize="14px">
+              Paid by {order.paymentMethod}
+            </Typography>
           </Card>
 
           <Button variant="contained" color="primary" ml="auto">
@@ -179,5 +266,5 @@ const orderStatusList = [
   { label: "Processing", value: "Processing" },
   { label: "Pending", value: "Pending" },
   { label: "Delivered", value: "Delivered" },
-  { label: "Cancelled", value: "Cancelled" }
+  { label: "Cancelled", value: "Cancelled" },
 ];

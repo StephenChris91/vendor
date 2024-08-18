@@ -9,14 +9,14 @@ import { H5 } from "@component/Typography";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
 import OrderList from "@sections/vendor-dashboard/orders/OrderList";
 import Spinner from "@component/Spinner";
-import { Order, OrderStatus } from "@models/order.model";
+import { Order } from "@models/order.model";
 
 interface OrdersResponse {
   orders: Order[];
   meta: {
     page: number;
     pageSize: number;
-    total: number;
+    totalCount: number;
     totalPages: number;
   };
 }
@@ -25,9 +25,12 @@ const fetchVendorOrders = async (
   page = 1,
   pageSize = 10
 ): Promise<OrdersResponse> => {
-  const { data } = await axios.get<OrdersResponse>(`/api/products/vendor`, {
-    params: { page, pageSize },
-  });
+  const { data } = await axios.get<OrdersResponse>(
+    `/api/products/vendor/get-orders`,
+    {
+      params: { page, pageSize },
+    }
+  );
   return data;
 };
 
@@ -36,6 +39,7 @@ export default function Orders() {
   const { data, isLoading, error } = useQuery<OrdersResponse, Error>({
     queryKey: ["vendorOrders", page],
     queryFn: () => fetchVendorOrders(page),
+    refetchInterval: 60000, // Refetch every minute
   });
 
   if (isLoading) return <Spinner />;

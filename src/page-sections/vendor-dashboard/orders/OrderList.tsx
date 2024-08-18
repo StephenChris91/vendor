@@ -6,22 +6,20 @@ import Pagination from "@component/pagination";
 import OrderRow from "@sections/customer-dashboard/orders/OrderRow";
 import { Order } from "@models/order.model";
 
-// ==============================================================
 type Props = {
   orders: Order[];
   meta: {
     page: number;
     pageSize: number;
-    total: number;
+    totalCount: number;
     totalPages: number;
   };
   onPageChange: (page: number) => void;
 };
-// ==============================================================
 
 export default function OrderList({ orders, meta, onPageChange }: Props) {
   const handlePageChange = (data: { selected: number }) => {
-    onPageChange(data.selected + 1); // Add 1 because pagination component uses 0-indexed pages
+    onPageChange(data.selected + 1);
   };
 
   return (
@@ -33,7 +31,7 @@ export default function OrderList({ orders, meta, onPageChange }: Props) {
       <FlexBox justifyContent="center" mt="2.5rem">
         <Pagination
           pageCount={meta.totalPages}
-          initialPage={meta.page - 1} // Subtract 1 because pagination component uses 0-indexed pages
+          initialPage={meta.page - 1}
           onChange={handlePageChange}
         />
       </FlexBox>
