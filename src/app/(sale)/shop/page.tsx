@@ -15,6 +15,8 @@ export default function SalePage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["products", page, PAGE_SIZE],
     queryFn: () => getAllProducts(page, PAGE_SIZE),
+    refetchInterval: 60000, // Refetch every 60 seconds (1 minute)
+    refetchIntervalInBackground: true, // Optional: refetch even when the tab is not active
   });
 
   if (isLoading) return <Container mt="2rem">Loading...</Container>;

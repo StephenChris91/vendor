@@ -20,6 +20,7 @@ import Select, { SelectOption } from "@component/Select";
 import Typography from "@component/Typography";
 import { validationSchema } from "schemas";
 import { uploadToS3 } from "@utils/s3Client";
+import { LuHash } from "react-icons/lu";
 
 const StyledDropZone = styled(DropZone)`
   width: 100%;
@@ -354,13 +355,21 @@ export default function ProductUpdateForm({
                     onChange={handleChange}
                     errorText={touched.sku && errors.sku}
                   />
+                  <Typography
+                    as="h4"
+                    fontSize="10px"
+                    fontWeight="bold"
+                    text-muted
+                  >
+                    Generate a unique SKU for the product
+                  </Typography>
                   <Button
                     mt="0.5rem"
                     color="primary"
                     variant="outlined"
                     onClick={() => setFieldValue("sku", generateSKU())}
                   >
-                    Generate SKU
+                    <LuHash />
                   </Button>
                 </Grid>
 
@@ -380,6 +389,8 @@ export default function ProductUpdateForm({
 
                 <Grid item sm={6} xs={12}>
                   <CheckBox
+                    size={15}
+                    color="primary"
                     name="in_stock"
                     label="In Stock"
                     checked={values.in_stock}
@@ -391,6 +402,8 @@ export default function ProductUpdateForm({
 
                 <Grid item sm={6} xs={12}>
                   <CheckBox
+                    size={15}
+                    color="primary"
                     name="is_taxable"
                     label="Taxable"
                     checked={values.is_taxable}
@@ -399,26 +412,6 @@ export default function ProductUpdateForm({
                     }
                   />
                 </Grid>
-
-                {/* <Grid item sm={6} xs={12}>
-                  <Select
-                    options={statusOptions}
-                    value={
-                      statusOptions.find(
-                        (option) => option.value === values.status
-                      ) || null
-                    }
-                    onChange={(newValue) =>
-                      setFieldValue(
-                        "status",
-                        (newValue as SelectOption)?.value || ""
-                      )
-                    }
-                    label="Status"
-                    placeholder="Select Status"
-                    errorText={touched.status && errors.status}
-                  />
-                </Grid> */}
 
                 <Grid item sm={6} xs={12}>
                   <Select
@@ -438,147 +431,150 @@ export default function ProductUpdateForm({
                     placeholder="Select Product Type"
                     errorText={touched.product_type && errors.product_type}
                   />
-
-                  <Grid item xs={12}>
-                    <StyledLabel>Product Image</StyledLabel>
-                    <StyledDropZone
-                      onChange={handleUpload}
-                      uploadType="product-image"
-                      maxSize={4 * 1024 * 1024} // 4MB limit
-                      acceptedFileTypes={{
-                        "image/png": [".png"],
-                        "image/jpeg": [".jpg", ".jpeg"],
-                        "image/gif": [".gif"],
-                        "image/webp": [".webp"],
-                      }}
-                      multiple={false}
-                      useS3={false}
-                    />
-                    {values.image && (
-                      <FlexBox flexDirection="row" mt={2} flexWrap="wrap">
-                        <Image src={values.image} width={100} height={100} />
-                      </FlexBox>
-                    )}
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <StyledLabel>Product Gallery</StyledLabel>
-                    <StyledDropZone
-                      onChange={handleGalleryUpload}
-                      uploadType="product-gallery"
-                      maxSize={4 * 1024 * 1024} // 4MB limit
-                      acceptedFileTypes={{
-                        "image/png": [".png"],
-                        "image/jpeg": [".jpg", ".jpeg"],
-                        "image/gif": [".gif"],
-                        "image/webp": [".webp"],
-                      }}
-                      multiple={true}
-                    />
-                    {values.gallery.length > 0 && (
-                      <FlexBox flexDirection="row" mt={2} flexWrap="wrap">
-                        {values.gallery.map((img, index) => (
-                          <Image
-                            key={index}
-                            src={img}
-                            width={100}
-                            height={100}
-                            // objectFit="cover"
-                            m={1}
-                          />
-                        ))}
-                      </FlexBox>
-                    )}
-                  </Grid>
-
-                  <Grid item sm={6} xs={12}>
-                    <Select
-                      isMulti
-                      isCreatable
-                      options={categoryOption}
-                      value={values.categories}
-                      onChange={(newValue) =>
-                        setFieldValue("categories", newValue)
-                      }
-                      onCreateOption={(inputValue) => {
-                        const newCategory = handleCreateCategory(inputValue);
-                        setFieldValue("categories", [
-                          ...values.categories,
-                          newCategory,
-                        ]);
-                      }}
-                      label="Categories"
-                      placeholder="Select or Create Categories"
-                      errorText={
-                        touched.categories && (errors.categories as string)
-                      }
-                    />
-                  </Grid>
-
-                  <Grid item sm={6} xs={12}>
-                    <Select
-                      isCreatable
-                      options={selectBrandOptions}
-                      value={
-                        selectBrandOptions?.find(
-                          (option) => option.value === values.brandId
-                        ) || null
-                      }
-                      onChange={(newValue) =>
-                        setFieldValue(
-                          "brandId",
-                          (newValue as SelectOption)?.value || null
-                        )
-                      }
-                      onCreateOption={(inputValue) => {
-                        const newBrand = handleCreateBrand(inputValue);
-                        setFieldValue("brandId", newBrand?.label);
-                      }}
-                      label="Brand"
-                      placeholder="Select or Create Brand"
-                      errorText={touched.brandId && errors.brandId}
-                    />
-                  </Grid>
-
-                  <Grid item sm={6} xs={12}>
-                    <CheckBox
-                      name="isFlashDeal"
-                      label="Flash Deal"
-                      checked={values.isFlashDeal}
-                      onChange={(e) =>
-                        setFieldValue("isFlashDeal", e.target.checked)
-                      }
-                    />
-                  </Grid>
-
-                  <Grid item sm={6} xs={12}>
-                    <TextField
-                      fullwidth
-                      name="discountPercentage"
-                      label="Discount Percentage"
-                      placeholder="Discount Percentage"
-                      type="number"
-                      value={values.discountPercentage || ""}
-                      onBlur={handleBlur}
-                      onChange={handleChange}
-                      errorText={
-                        touched.discountPercentage && errors.discountPercentage
-                      }
-                      disabled={!values.isFlashDeal}
-                    />
-                  </Grid>
                 </Grid>
 
-                <Button
-                  mt="25px"
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  disabled={isSubmitting || !isSlugUnique}
-                >
-                  {product ? "Update Product" : "Create Product"}
-                </Button>
+                <Grid item xs={12}>
+                  <StyledLabel>Product Image</StyledLabel>
+                  <StyledDropZone
+                    uploadType="product-image"
+                    maxSize={4 * 1024 * 1024}
+                    acceptedFileTypes={{
+                      "image/png": [".png"],
+                      "image/jpeg": [".jpg", ".jpeg"],
+                      "image/gif": [".gif"],
+                      "image/webp": [".webp"],
+                    }}
+                    multiple={false}
+                    onUpload={(url) => setFieldValue("image", url)}
+                  />
+                  {values.image && (
+                    <FlexBox flexDirection="row" mt={2} flexWrap="wrap">
+                      <Image src={values.image} width={100} height={100} />
+                    </FlexBox>
+                  )}
+                </Grid>
+
+                <Grid item xs={12}>
+                  <StyledLabel>Product Gallery</StyledLabel>
+                  <StyledDropZone
+                    uploadType="product-gallery"
+                    maxSize={4 * 1024 * 1024}
+                    acceptedFileTypes={{
+                      "image/png": [".png"],
+                      "image/jpeg": [".jpg", ".jpeg"],
+                      "image/gif": [".gif"],
+                      "image/webp": [".webp"],
+                    }}
+                    multiple={true}
+                    onUpload={(url) =>
+                      setFieldValue("gallery", [...values.gallery, url])
+                    }
+                  />
+                  {values.gallery.length > 0 && (
+                    <FlexBox flexDirection="row" mt={2} flexWrap="wrap">
+                      {values.gallery.map((img, index) => (
+                        <Image
+                          key={index}
+                          src={img}
+                          width={100}
+                          height={100}
+                          m={1}
+                        />
+                      ))}
+                    </FlexBox>
+                  )}
+                </Grid>
+
+                <Grid item sm={6} xs={12}>
+                  <Select
+                    isMulti
+                    isCreatable
+                    options={categoryOption}
+                    value={values.categories}
+                    onChange={(newValue) =>
+                      setFieldValue("categories", newValue)
+                    }
+                    onCreateOption={(inputValue) => {
+                      const newCategory = handleCreateCategory(inputValue);
+                      setFieldValue("categories", [
+                        ...values.categories,
+                        newCategory,
+                      ]);
+                    }}
+                    label="Categories"
+                    placeholder="Select or Create Categories"
+                    errorText={
+                      touched.categories && (errors.categories as string)
+                    }
+                  />
+                </Grid>
+
+                <Grid item sm={6} xs={12}>
+                  <Select
+                    isCreatable
+                    options={selectBrandOptions}
+                    value={
+                      selectBrandOptions?.find(
+                        (option) => option.value === values.brandId
+                      ) || null
+                    }
+                    onChange={(newValue) =>
+                      setFieldValue(
+                        "brandId",
+                        (newValue as SelectOption)?.value || null
+                      )
+                    }
+                    onCreateOption={(inputValue) => {
+                      const newBrand = handleCreateBrand(inputValue);
+                      setFieldValue("brandId", newBrand?.label);
+                    }}
+                    label="Brand"
+                    placeholder="Select or Create Brand"
+                    errorText={touched.brandId && errors.brandId}
+                  />
+                </Grid>
+
+                <Grid item sm={6} xs={12}>
+                  <CheckBox
+                    size={15}
+                    color="primary"
+                    name="isFlashDeal"
+                    label="Flash Deal"
+                    checked={values.isFlashDeal}
+                    onChange={(e) =>
+                      setFieldValue("isFlashDeal", e.target.checked)
+                    }
+                  />
+                </Grid>
+
+                <Grid item sm={6} xs={12}>
+                  <TextField
+                    fullwidth
+                    name="discountPercentage"
+                    label="Discount Percentage"
+                    placeholder="Discount Percentage"
+                    type="number"
+                    value={values.discountPercentage || ""}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    errorText={
+                      touched.discountPercentage && errors.discountPercentage
+                    }
+                    disabled={!values.isFlashDeal}
+                  />
+                </Grid>
               </Grid>
+
+              <Button
+                mt="25px"
+                variant="contained"
+                color="primary"
+                type="submit"
+                disabled={isSubmitting || !isSlugUnique}
+              >
+                {product ? "Update Product" : "Create Product"}
+              </Button>
+              {/* </Grid> */}
             </Form>
           );
         }}

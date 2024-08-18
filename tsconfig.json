@@ -26,8 +26,10 @@
       "@component/*": ["components/*"],
       "@sections/*": ["page-sections/*"],
       "@models/*": ["models/*"]
-    }
+    },
+    "types": ["jest", "node"]
+
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "prisma/seed.mjs"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "prisma/seed.mjs", "src/tsconfig.jest.json", "src/page-sections/vendor-dashboard/products/__test__/ProductForm.test.jsx"],
   "exclude": ["node_modules", "./src/components/icon/Icon.tsx"]
 }

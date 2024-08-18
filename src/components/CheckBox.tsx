@@ -20,17 +20,10 @@ type CheckBoxProps = {
 type WrapperProps = { labelPlacement?: "start" | "end" };
 
 const StyledCheckBox = styled.input.withConfig({
-  shouldForwardProp: (prop: string) => isValidProp(prop)
+  shouldForwardProp: (prop: string) => isValidProp(prop),
 })<CheckBoxProps & InputHTMLAttributes<HTMLInputElement>>(
   ({ color, size }) =>
     systemCss({
-      /* remove standard background appearance */
-      // "-webkit-appearance": "none",
-      // "-moz-appearance": "none",
-      // "-webkit-user-select": "none",
-      // "-moz-user-select": "none",
-      // "-ms-user-select": "none",
-      // "user-select": "none",
       appearance: "none",
       outline: "none",
       cursor: "pointer",
@@ -43,53 +36,59 @@ const StyledCheckBox = styled.input.withConfig({
       borderRadius: 2,
       position: "relative",
 
-      "&:checked": { borderColor: `${color}.main` },
-
-      /* create custom radiobutton appearance */
-      "&:after": {
-        width: "calc(100% - 5px)",
-        height: "calc(100% - 5px)",
-        top: "50%",
-        left: "50%",
-        transform: "translateX(-50%) translateY(-50%)",
-        position: "absolute",
-        bg: "transparent",
-        content: '" "',
-        visibility: "visible",
-        borderRadius: 1,
-        transition: "all 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms"
+      "&:checked": {
+        borderColor: color,
+        backgroundColor: color,
       },
 
-      /* appearance for checked radiobutton */
+      /* create custom checkbox appearance */
+      "&:after": {
+        content: '""',
+        position: "absolute",
+        display: "none",
+        left: "50%",
+        top: "50%",
+        width: "30%",
+        height: "60%",
+        border: "solid white",
+        borderWidth: "0 2px 2px 0",
+        transform: "translate(-50%, -60%) rotate(45deg)",
+      },
+
+      /* appearance for checked checkbox */
       "&:checked:after": {
-        bg: `${color}.main`
+        display: "block",
       },
 
       "&:disabled": {
-        borderColor: `text.disabled`
+        borderColor: `text.disabled`,
+        backgroundColor: `text.disabled`,
       },
 
       "&:checked:disabled:after": {
-        bg: `text.disabled`
-      }
+        borderColor: "white",
+      },
     }),
   compose(color)
 );
 
 const Wrapper = styled.div.withConfig({
-  shouldForwardProp: (prop: string) => isValidProp(prop)
+  shouldForwardProp: (prop: string) => isValidProp(prop),
 })<WrapperProps & SpaceProps>`
   display: flex;
   align-items: center;
-  flex-direction: ${(props) => (props.labelPlacement !== "end" ? "row" : "row-reverse")};
+  flex-direction: ${(props) =>
+    props.labelPlacement !== "end" ? "row" : "row-reverse"};
   input {
-    ${(props) => (props.labelPlacement !== "end" ? "margin-right: 0.5rem" : "margin-left: 0.5rem")};
+    ${(props) =>
+      props.labelPlacement !== "end"
+        ? "margin-right: 0.5rem"
+        : "margin-left: 0.5rem"};
   }
   label {
     cursor: pointer;
   }
   input[disabled] + label {
-    /* color: text.disabled; */
     color: disabled;
     cursor: unset;
   }
@@ -103,6 +102,7 @@ const CheckBox = ({
   label,
   labelPlacement,
   labelColor = "secondary",
+  color = "primary",
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & CheckBoxProps & SpaceProps) => {
   const [checkboxId, setCheckboxId] = useState(id);
@@ -111,7 +111,8 @@ const CheckBox = ({
   let spacingProps: any = {};
   for (const key in props) {
     const propKey = key as "color" | "size";
-    if (key.startsWith("m") || key.startsWith("p")) spacingProps[propKey] = props[propKey];
+    if (key.startsWith("m") || key.startsWith("p"))
+      spacingProps[propKey] = props[propKey];
   }
 
   useEffect(() => setCheckboxId(Math.random()), []);
@@ -121,8 +122,14 @@ const CheckBox = ({
       size={18}
       color={`${labelColor}.main`}
       labelPlacement={labelPlacement}
-      {...spacingProps}>
-      <StyledCheckBox id={checkboxId} type="checkbox" {...props} />
+      {...spacingProps}
+    >
+      <StyledCheckBox
+        id={checkboxId}
+        type="checkbox"
+        color={`${color}`}
+        {...props}
+      />
       <label htmlFor={checkboxId}>{label}</label>
     </Wrapper>
   );

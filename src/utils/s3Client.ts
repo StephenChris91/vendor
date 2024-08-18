@@ -14,7 +14,7 @@ const s3Client = new S3Client({
 function getContentType(filename: string): string {
     const ext = path.extname(filename).toLowerCase();
     const mimeTypes: { [key: string]: string } = {
-        '.jpg': 'image/jpeg',
+        '.jpg': 'image/jpg',
         '.jpeg': 'image/jpeg',
         '.png': 'image/png',
         '.gif': 'image/gif',

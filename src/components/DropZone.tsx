@@ -8,23 +8,23 @@ import Typography, { H5, Small } from "@component/Typography";
 import { uploadFile } from "actions/upload-logo";
 
 export interface DropZoneProps {
-  onChange: (result: string | File[] | File) => void;
   uploadType: string;
   maxSize?: number;
   acceptedFileTypes?: Record<string, string[]>;
   multiple?: boolean;
   onAuthError?: () => void;
   useS3?: boolean;
+  onUpload?: (url: string) => void; // Add this line
 }
 
 export default function DropZone({
-  onChange,
   uploadType,
   maxSize = 5 * 1024 * 1024,
   acceptedFileTypes = { "image/*": [".png", ".jpg", ".jpeg", ".gif"] },
   multiple = false,
   onAuthError,
   useS3 = true,
+  onUpload, // Add this line
 }: DropZoneProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -33,11 +33,12 @@ export default function DropZone({
     (acceptedFiles: File[]) => {
       console.log("Files dropped:", acceptedFiles);
       setFiles(acceptedFiles);
-      if (!useS3) {
-        onChange(multiple ? acceptedFiles : acceptedFiles[0]);
+      if (!useS3 && onUpload) {
+        // If not using S3, immediately call onUpload with the file
+        onUpload(URL.createObjectURL(acceptedFiles[0]));
       }
     },
-    [onChange, useS3, multiple]
+    [useS3, onUpload]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -59,9 +60,11 @@ export default function DropZone({
 
         if (result.url) {
           console.log("Upload successful, URL:", result.url);
-          onChange(result.url);
           toast.success("File uploaded successfully!");
           setFiles([]);
+          if (onUpload) {
+            onUpload(result.url); // Call onUpload with the returned URL
+          }
         } else {
           throw new Error("No URL returned from server");
         }

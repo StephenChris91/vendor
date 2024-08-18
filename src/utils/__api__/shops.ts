@@ -6,7 +6,6 @@ import { SlugParams } from "interfaces";
 // Fetch functions
 const fetchShopList = async (): Promise<Shop[]> => {
   const response = await axios.get("/api/shop");
-  console.log(response.data);
   return response.data;
 };
 
@@ -26,7 +25,6 @@ export const useShopList = (options?: UseQueryOptions<Shop[], Error>) => {
     queryKey: ['shops'],
     queryFn: fetchShopList,
     refetchInterval: 60000, // Refetch every minute
-    refetchOnWindowFocus: true, // Refetch when the window gains focus
     ...options,
   });
 };
