@@ -5,6 +5,8 @@ import Product from "@models/product.model";
 
 export async function getAllProducts(page: number, pageSize: number): Promise<{ products: Product[], meta: any }> {
     const products = await db.product.findMany({
+        where: { status: 'Published' },
+
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: {
