@@ -77,7 +77,6 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
       </H5>
 
       <DropZone
-        onChange={handleImageUpload}
         uploadType="shop-banner"
         useS3={true}
         multiple={false}

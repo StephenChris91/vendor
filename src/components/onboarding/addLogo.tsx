@@ -77,7 +77,6 @@ const AddLogo: React.FC<AddLogoProps> = ({
       </H5>
 
       <DropZone
-        onChange={handleImageUpload}
         uploadType="shop-logo"
         useS3={true}
         multiple={false}

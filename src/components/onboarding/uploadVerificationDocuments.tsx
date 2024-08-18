@@ -158,7 +158,6 @@ const UploadVerificationDocuments: React.FC<
       </H5>
 
       <DropZone
-        onChange={handleFileChange}
         uploadType="verification-documents"
         useS3={false}
         multiple={true}
