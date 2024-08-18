@@ -8,12 +8,28 @@ import { ProductCard1 } from "@component/product-cards";
 import CategorySectionCreator from "@component/CategorySectionCreator";
 import useWindowSize from "@hook/useWindowSize";
 import Product from "@models/product.model";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+import Spinner from "@component/Spinner";
 
 // =============================================================
-type Props = { products: Product[] };
+// Function to fetch new arrivals
+const fetchFlashDeals = async (): Promise<Product[]> => {
+  try {
+    const response = await axios.get("/api/data/flash-deals");
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error("Error fetching new arrivals:", error);
+    if (axios.isAxiosError(error)) {
+      // console.error("Response data:", error.response?.data);
+      // console.error("Response status:", error.response?.status);
+    }
+    return [];
+  }
+};
 // =============================================================
 
-export default function Section2({ products }: Props) {
+export default function Section2() {
   const width = useWindowSize();
   const [visibleSlides, setVisibleSlides] = useState(4);
 
@@ -24,6 +40,24 @@ export default function Section2({ products }: Props) {
     else setVisibleSlides(4);
   }, [width]);
 
+  // Using useQuery to fetch and manage the data
+  const {
+    data: flashDealsData,
+    isLoading,
+    error,
+  } = useQuery<Product[], Error>({
+    queryKey: ["newArrivals"],
+    queryFn: fetchFlashDeals,
+    refetchInterval: 60000, // Refetch every 10 minutes
+    refetchIntervalInBackground: true, // Refresh every 10 minutes after
+  });
+
+  if (isLoading) return <Spinner />;
+  if (error) return <div>An error occurred: {error.message}</div>;
+
+  // Ensure newArrivalsList is an array
+  const productList = Array.isArray(flashDealsData) ? flashDealsData : [];
+
   return (
     <CategorySectionCreator
       iconName="light"
@@ -31,8 +65,11 @@ export default function Section2({ products }: Props) {
       seeMoreLink="#"
     >
       <Box mt="-0.25rem" mb="-0.25rem">
-        <Carousel totalSlides={products.length} visibleSlides={visibleSlides}>
-          {products.map((item, ind) => (
+        <Carousel
+          totalSlides={productList.length}
+          visibleSlides={visibleSlides}
+        >
+          {productList.map((item, ind) => (
             <Box py="0.25rem" key={ind}>
               <ProductCard1
                 key={ind}
@@ -45,7 +82,7 @@ export default function Section2({ products }: Props) {
                 imgUrl={item.image}
                 rating={4}
                 shop={item.shop}
-                shopId={item.shop.id}
+                shopId={item.shop?.id}
                 sale_price={item.sale_price}
               />
             </Box>

@@ -8,6 +8,8 @@ export async function GET(req: NextRequest) {
       { include: { categories: true, shop: true, orderItems: true } }
     );
 
+    console.log(products)
+
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);

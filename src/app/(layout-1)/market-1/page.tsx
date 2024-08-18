@@ -40,7 +40,7 @@ export default async function HomeLanding() {
       <Section1 carouselData={mainCarouselData} />
 
       {/* FLASH DEAL PRODUCTS AREA */}
-      <Section2 products={flashDealsData} />
+      <Section2 />
 
       {/* TOP CATEGORIES AREA */}
       <Section3 categoryList={topCategories} />
