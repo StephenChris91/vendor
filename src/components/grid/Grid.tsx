@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, cloneElement } from "react";
+import { Children, cloneElement, isValidElement, ReactElement } from "react";
 import { FlexboxProps } from "styled-system";
 // STYLED COMPONENT
 import StyledGrid from "./styles";
@@ -19,11 +19,17 @@ export default function Grid({
 
   if (props.container) {
     childList = Children.map(children, (child) => {
-      return cloneElement(child, {
-        spacing: spacing,
-        vertical_spacing: vertical_spacing,
-        horizontal_spacing: horizontal_spacing
-      });
+      // Ensure the child is a valid React element before cloning it
+      if (isValidElement(child)) {
+        // Add type assertion to the child as ReactElement<any>
+        return cloneElement(child as ReactElement<any>, {
+          spacing,
+          vertical_spacing,
+          horizontal_spacing,
+        });
+      }
+      // If the child is not a valid React element, return it as is
+      return child;
     });
   }
 
@@ -33,7 +39,8 @@ export default function Grid({
       containerHeight={containerHeight}
       vertical_spacing={vertical_spacing}
       horizontal_spacing={horizontal_spacing}
-      {...props}>
+      {...props}
+    >
       {childList}
     </StyledGrid>
   );

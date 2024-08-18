@@ -1,18 +1,18 @@
-import axios from "@lib/axios";
+import axios from "axios";
 
 const getSummeryCards = async () => {
-  const response = await axios.get("/api/admin/summery");
+  const response = await axios.get("/api/vendors/dashboard/summary");
   return response.data;
 };
 
-const getCountryBasedSales = async () => {
-  const response = await axios.get("/api/admin/top-countries");
+const getSalesByStates = async () => {
+  const response = await axios.get("/api/vendors/dashboard/top-states");
   return response.data;
 };
 
 const getSales = async () => {
-  const response = await axios.get("/api/admin/sales");
+  const response = await axios.get("/api/vendors/dashboard/sales");
   return response.data;
 };
 
-export default { getSummeryCards, getCountryBasedSales, getSales };
+export default { getSummeryCards, getSalesByStates, getSales };

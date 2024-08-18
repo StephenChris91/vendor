@@ -1,12 +1,12 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Formik } from "formik";
 import * as yup from "yup";
-// GLOBAL CUSTOM COMPONENTS
+import axios from "@lib/axios";
 import Box from "@component/Box";
 import Hidden from "@component/hidden";
-import Select from "@component/Select";
+import Select, { SelectOption } from "@component/Select";
 import Avatar from "@component/avatar";
 import Grid from "@component/grid/Grid";
 import Icon from "@component/icon/Icon";
@@ -14,35 +14,142 @@ import { Card1 } from "@component/Card1";
 import { Button } from "@component/buttons";
 import TextField from "@component/text-field";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
-// CUSTOM DATA
 import countryList from "@data/countryList";
+import {
+  useMutation,
+  useQueryClient,
+  UseMutationResult,
+  useQuery,
+} from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+
+interface ShopDetails {
+  shopName: string;
+  description: string;
+  logo: string;
+  banner: string;
+  country: string;
+  city: string;
+  email: string;
+  phone: string;
+}
+
+const fetchShopDetails = async (): Promise<ShopDetails> => {
+  const response = await axios.get("/api/vendors/dashboard/shop");
+  return response.data;
+};
+
+const updateShopDetails = async (data: ShopDetails): Promise<any> => {
+  const response = await axios.put("/api/vendors/dashboard/shop", data);
+  return response.data;
+};
 
 export default function AccountSettings() {
-  const initialValues = {
-    first_name: "",
-    last_name: "",
-    country: "",
-    city: "",
-    email: "",
-    contact: "",
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [logoImage, setLogoImage] = useState<string | null>(null);
+
+  const { data: shopDetails, isLoading } = useQuery<ShopDetails>({
+    queryKey: ["shopDetails"],
+    queryFn: fetchShopDetails,
+  });
+
+  const mutation: UseMutationResult<any, Error, ShopDetails> = useMutation({
+    mutationFn: (data: ShopDetails) => updateShopDetails(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shopDetails"] });
+      toast.success("Shop details updated successfully");
+      // Redirect to dashboard
+      router.push("/vendor/dashboard");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update shop details: ${error.message}`);
+    },
+  });
+
+  const initialValues: ShopDetails = {
+    shopName: shopDetails?.shopName || "",
+    description: shopDetails?.description || "",
+    logo: shopDetails?.logo || "",
+    banner: shopDetails?.banner || "",
+    country: shopDetails?.country || "",
+    city: shopDetails?.city || "",
+    email: shopDetails?.email || "",
+    phone: shopDetails?.phone || "",
   };
 
   const accountSchema = yup.object().shape({
-    first_name: yup.string().required("required"),
-    last_name: yup.string().required("required"),
+    shopName: yup.string().required("required"),
+    description: yup.string().required("required"),
     country: yup.mixed().required("required"),
     city: yup.string().required("required"),
     email: yup.string().email("invalid email").required("required"),
-    contact: yup.string().required("required"),
+    phone: yup.string().required("required"),
   });
 
-  const handleFormSubmit = async (values: any) => {
-    console.log(values);
+  const handleFormSubmit = async (
+    values: ShopDetails,
+    { resetForm }: { resetForm: () => void }
+  ) => {
+    mutation.mutate(
+      {
+        ...values,
+        logo: logoImage || values.logo,
+        banner: coverImage || values.banner,
+      },
+      {
+        onSuccess: () => {
+          resetForm();
+          setCoverImage(null);
+          setLogoImage(null);
+        },
+      }
+    );
   };
+
+  const handleLogoUpload = async (file: File, type: "logo" | "banner") => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+
+    try {
+      const response = await axios.post("/api/upload/shop-logo", formData);
+      if (type === "logo") {
+        setLogoImage(response.data.url);
+      } else {
+        setCoverImage(response.data.url);
+      }
+      toast.success(`${type} uploaded successfully`);
+    } catch (error) {
+      toast.error(`Failed to upload ${type}`);
+    }
+  };
+
+  const handleBannerUpload = async (file: File, type: "logo" | "banner") => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+
+    try {
+      const response = await axios.post("/api/upload/shop-banner", formData);
+      if (type === "logo") {
+        setLogoImage(response.data.url);
+      } else {
+        setCoverImage(response.data.url);
+      }
+      toast.success(`${type} uploaded successfully`);
+    } catch (error) {
+      toast.error(`Failed to upload ${type}`);
+    }
+  };
+
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <Fragment>
-      <DashboardPageHeader title="Account" iconName="settings_filled" />
+      <DashboardPageHeader title="Shop Settings" iconName="settings_filled" />
 
       <Card1 p="24px 30px" borderRadius={8}>
         <Box
@@ -52,8 +159,11 @@ export default function AccountSettings() {
           borderRadius="10px"
           position="relative"
           style={{
-            background:
-              "url(/assets/images/banners/banner-10.png) center/cover",
+            background: `url(${
+              coverImage ||
+              shopDetails?.banner ||
+              "/assets/images/banners/banner-10.png"
+            }) center/cover`,
           }}
         >
           <Box
@@ -67,7 +177,11 @@ export default function AccountSettings() {
               size={80}
               border="4px solid"
               borderColor="gray.100"
-              src="/assets/images/faces/propic(9).png"
+              src={
+                logoImage ||
+                shopDetails?.logo ||
+                "/assets/images/faces/propic(9).png"
+              }
             />
 
             <Box ml="-20px" zIndex={1}>
@@ -89,7 +203,9 @@ export default function AccountSettings() {
             <Hidden>
               <input
                 className="hidden"
-                onChange={(e) => console.log(e.target.files)}
+                onChange={(e) =>
+                  e.target.files && handleLogoUpload(e.target.files[0], "logo")
+                }
                 id="profile-image"
                 accept="image/*"
                 type="file"
@@ -121,7 +237,10 @@ export default function AccountSettings() {
             <Hidden>
               <input
                 className="hidden"
-                onChange={(e) => console.log(e.target.files)}
+                onChange={(e) =>
+                  e.target.files &&
+                  handleBannerUpload(e.target.files[0], "banner")
+                }
                 id="cover-image"
                 accept="image/*"
                 type="file"
@@ -134,6 +253,7 @@ export default function AccountSettings() {
           initialValues={initialValues}
           validationSchema={accountSchema}
           onSubmit={handleFormSubmit}
+          enableReinitialize
         >
           {({
             values,
@@ -143,31 +263,37 @@ export default function AccountSettings() {
             handleBlur,
             handleSubmit,
             setFieldValue,
+            resetForm,
           }) => (
-            <form onSubmit={handleSubmit}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit(e);
+              }}
+            >
               <Box mb="30px">
                 <Grid container horizontal_spacing={6} vertical_spacing={4}>
                   <Grid item md={6} xs={12}>
                     <TextField
                       fullwidth
-                      name="first_name"
-                      label="First Name"
+                      name="shopName"
+                      label="Shop Name"
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      value={values.first_name}
-                      errorText={touched.first_name && errors.first_name}
+                      value={values.shopName}
+                      errorText={touched.shopName && errors.shopName}
                     />
                   </Grid>
 
                   <Grid item md={6} xs={12}>
                     <TextField
                       fullwidth
-                      name="last_name"
-                      label="Last Name"
+                      name="description"
+                      label="Description"
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      value={values.last_name}
-                      errorText={touched.last_name && errors.last_name}
+                      value={values.description}
+                      errorText={touched.description && errors.description}
                     />
                   </Grid>
 
@@ -189,11 +315,11 @@ export default function AccountSettings() {
                       fullwidth
                       type="tel"
                       label="Phone"
-                      name="contact"
+                      name="phone"
                       onBlur={handleBlur}
-                      value={values.contact}
+                      value={values.phone}
                       onChange={handleChange}
-                      errorText={touched.contact && errors.contact}
+                      errorText={touched.phone && errors.phone}
                     />
                   </Grid>
 
@@ -201,9 +327,18 @@ export default function AccountSettings() {
                     <Select
                       label="Country"
                       options={countryList}
-                      value={values.country || "US"}
+                      value={
+                        countryList.find(
+                          (country) => country.value === values.country
+                        ) || null
+                      }
                       errorText={touched.country && (errors.country as string)}
-                      onChange={(country) => setFieldValue("country", country)}
+                      onChange={(selectedOption) =>
+                        setFieldValue(
+                          "country",
+                          (selectedOption as SelectOption)?.value || ""
+                        )
+                      }
                     />
                   </Grid>
 

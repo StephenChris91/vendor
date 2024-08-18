@@ -7,7 +7,7 @@ import {
   ChartOptions,
   CategoryScale,
   LineController,
-  Chart as ChartJS
+  Chart as ChartJS,
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 import { colors } from "@utils/themeColors";
@@ -28,7 +28,7 @@ const datasetOptions = {
   pointRadius: 2,
   pointBorderWidth: 4,
   borderColor: colors.primary.main,
-  backgroundColor: colors.primary.light
+  backgroundColor: colors.primary.light,
 };
 
 const options: ChartOptions = {
@@ -46,16 +46,17 @@ const options: ChartOptions = {
           }
 
           if (context.parsed.y !== null) {
-            label += new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-              context.parsed.y
-            );
+            label += new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(context.parsed.y);
           }
 
           return label;
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 };
 
 // ===================================================================
@@ -68,8 +69,8 @@ export default function AnalyticsChart({ sales }: Props) {
       type="line"
       options={options}
       data={{
-        labels: sales.labels,
-        datasets: [{ data: sales.data, ...datasetOptions }]
+        labels: sales?.labels,
+        datasets: [{ data: sales?.data, ...datasetOptions }],
       }}
     />
   );

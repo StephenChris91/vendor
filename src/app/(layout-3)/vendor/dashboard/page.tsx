@@ -1,31 +1,51 @@
+"use client";
+
 import { Fragment } from "react";
-// API FUNCTIONS
-import api from "@utils/__api__/dashboard";
-// GLOBAL CUSTOM COMPONENTS
+import { useQuery } from "@tanstack/react-query";
+import axios from "@lib/axios";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
-// PAGE SECTION COMPONENTS
 import DashboardContent from "@sections/vendor-dashboard/dashboard";
-import { useCurrentSession } from "@lib/use-session-server";
+import Spinner from "@component/Spinner";
 
-export default async function VendorDashboard() {
-  const session = await useCurrentSession();
-  const sales = await api.getSales();
-  const summeryCards = await api.getSummeryCards();
-  const countrySales = await api.getCountryBasedSales();
+const getSummeryCards = async () => {
+  const response = await axios.get("/api/vendors/dashboard/summary");
+  return response.data;
+};
 
-  // if (session?.user?.shopStatus == "Pending") {
-  //   return (
-  //     <div>Your shop is still pending approval. Please wait for approval.</div>
-  //   );
-  // }
+const getCountryBasedSales = async () => {
+  const response = await axios.get("/api/vendors/dashboard/top-states");
+  return response.data;
+};
+
+const getSales = async () => {
+  const response = await axios.get("/api/vendors/dashboard/sales");
+  return response.data;
+};
+
+export default function VendorDashboard() {
+  const { data: sales, isLoading: salesLoading } = useQuery({
+    queryKey: ["sales"],
+    queryFn: getSales,
+  });
+
+  const { data: summeryCards, isLoading: summeryLoading } = useQuery({
+    queryKey: ["summery"],
+    queryFn: getSummeryCards,
+  });
+
+  const { data: countrySales, isLoading: countrySalesLoading } = useQuery({
+    queryKey: ["countrySales"],
+    queryFn: getCountryBasedSales,
+  });
+
+  if (salesLoading || summeryLoading || countrySalesLoading) {
+    return <Spinner />;
+  }
 
   return (
     <Fragment>
       <DashboardPageHeader title="Dashboard" iconName="bag_filled" />
-      {/* {session.user?.shopStatus == "Pending" ? (
-        "Pending"
-      ) : (
-      )} */}
+
       <DashboardContent
         sales={sales}
         summeryCards={summeryCards}
