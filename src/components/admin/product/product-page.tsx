@@ -31,7 +31,11 @@ interface ProductStats {
 }
 
 const fetchProducts = async (): Promise<Product[]> => {
-  const response = await fetch("/api/products");
+  const response = await fetch("/api/products", {
+    next: {
+      revalidate: 0,
+    },
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch products");
   }
