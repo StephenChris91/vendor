@@ -43,7 +43,8 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
         await signIn('credentials', {
             email,
             password,
-            redirect: false,
+            redirect: true,
+            redirectTo: vendorOnboard ? '/vendor/dashboard' : vendorNotOnboarded ? '/auth/onboarding' : '/auth/profile'
         });
 
         let redirectTo = '/profile'; // Default redirect

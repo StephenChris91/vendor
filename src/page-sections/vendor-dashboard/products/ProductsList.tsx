@@ -32,7 +32,7 @@ export default function ProductsList({ meta, products }: Props) {
         const discountedPrice = calculateDiscount(item.price, item.sale_price);
 
         return (
-          <Link href={`/vendor/products/${item.slug}`} key={item.id}>
+          <Link href={`/vendor/products/${item.id}`} key={item.id}>
             <TableRow my="1rem" padding="6px 18px">
               <FlexBox alignItems="center" m="6px" flex="2 2 220px !important">
                 <Avatar src={item.image} size={36} />

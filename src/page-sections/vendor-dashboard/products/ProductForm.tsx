@@ -21,6 +21,7 @@ import Typography from "@component/Typography";
 import { validationSchema } from "schemas";
 import { uploadToS3 } from "@utils/s3Client";
 import { LuHash } from "react-icons/lu";
+import { updateProduct } from "actions/update-product";
 
 const StyledDropZone = styled(DropZone)`
   width: 100%;
@@ -33,7 +34,7 @@ const StyledLabel = styled(Typography)`
   font-weight: 600;
 `;
 interface Props {
-  product?: Product;
+  product: Product;
   categoryOptions: SelectOption[];
   brandOptions: SelectOption[];
 }
@@ -108,6 +109,8 @@ export default function ProductUpdateForm({
       }
     };
 
+    console.log("This product is from the update form :", product);
+
     fetchCategoriesAndBrands();
   }, []);
 
@@ -135,6 +138,12 @@ export default function ProductUpdateForm({
   };
 
   const checkSlugUniqueness = async (slug: string) => {
+    if (product) {
+      // If editing an existing product, consider the slug unique
+      setIsSlugUnique(true);
+      return true;
+    }
+
     try {
       const response = await fetch(`/api/products/check-slug?slug=${slug}`);
       if (!response.ok) throw new Error("Failed to check slug uniqueness");
@@ -148,37 +157,39 @@ export default function ProductUpdateForm({
     }
   };
 
-  const initialValues: FormValues = {
-    name: product?.name || "",
-    slug: product?.slug || "",
-    description: product?.description || "",
-    price: product?.price || 0,
-    sale_price: product?.sale_price || 0,
-    sku: product?.sku || 0,
-    quantity: product?.quantity || 0,
-    in_stock: product?.in_stock || false,
-    is_taxable: product?.is_taxable || false,
-    status: product?.status || "Draft",
-    product_type: product?.product_type || "Simple",
-    image: product?.image || "",
-    gallery: product?.gallery || [],
-    categories:
-      product?.categories?.map((pc) => ({
-        value: pc.categoryId,
-        label:
-          categoryOption.find((cat) => cat.label === pc.categoryId)?.label ||
-          "",
-      })) || [],
-    brandId: product?.brandId || null,
-    isFlashDeal: product?.isFlashDeal || false,
-    discountPercentage: product?.discountPercentage || null,
-  };
-
+  const initialValues: FormValues = React.useMemo(
+    () => ({
+      name: product?.name || "",
+      slug: product?.slug || "",
+      description: product?.description || "",
+      price: product?.price || 0,
+      sale_price: product?.sale_price || 0,
+      sku: product?.sku || 0,
+      quantity: product?.quantity || 0,
+      in_stock: product?.in_stock ?? false,
+      is_taxable: product?.is_taxable ?? false,
+      status: product?.status || "Draft",
+      product_type: product?.product_type || "Simple",
+      image: product?.image || "",
+      gallery: product?.gallery || [],
+      categories:
+        product?.categories?.map((pc) => ({
+          value: pc.categoryId,
+          label:
+            categoryOption.find((cat) => cat.value === pc.categoryId)?.label ||
+            "",
+        })) || [],
+      brandId: product?.brandId || null,
+      isFlashDeal: product?.isFlashDeal ?? false,
+      discountPercentage: product?.discountPercentage || null,
+    }),
+    [product, categoryOption, selectBrandOptions]
+  );
   const handleFormSubmit = async (
     values: FormValues,
     { setSubmitting, resetForm }: FormikHelpers<FormValues>
   ) => {
-    if (!isSlugUnique) {
+    if (!isSlugUnique && !product) {
       toast.error("Slug is not unique. Please modify the product name.");
       setSubmitting(false);
       return;
@@ -189,14 +200,33 @@ export default function ProductUpdateForm({
       categories: values.categories.map((cat) => cat.value),
     };
 
-    const createdProduct = await createProduct(transformedValues);
+    try {
+      let result;
+      if (product) {
+        // Update existing product
+        result = await updateProduct(product.id, transformedValues);
+      } else {
+        // Create new product
+        result = await createProduct(transformedValues);
+      }
 
-    if (createdProduct.status === "success") {
-      toast.success("Product created successfully");
-      resetForm();
-      router.push(`/vendor/products/`);
-    } else if (createdProduct.status === "error") {
-      toast.error("Failed to create product");
+      if (result.status === "success") {
+        toast.success(
+          product
+            ? "Product updated successfully"
+            : "Product created successfully"
+        );
+        resetForm();
+        router.push(`/vendor/products/`);
+      } else {
+        toast.error(
+          result.message ||
+            (product ? "Failed to update product" : "Failed to create product")
+        );
+      }
+    } catch (error) {
+      console.error("Error submitting product:", error);
+      toast.error("An error occurred while submitting the product");
     }
     setSubmitting(false);
   };
@@ -207,6 +237,7 @@ export default function ProductUpdateForm({
         onSubmit={handleFormSubmit}
         initialValues={initialValues}
         validationSchema={validationSchema}
+        enableReinitialize={true} // This is important for updating initialValues when product changes
       >
         {({
           values,
@@ -270,7 +301,7 @@ export default function ProductUpdateForm({
                     name="name"
                     label="Name"
                     placeholder="Product Name"
-                    value={values.name}
+                    value={product ? product.name : values.name}
                     onBlur={handleBlur}
                     onChange={handleNameChange}
                     errorText={touched.name && errors.name}
@@ -283,11 +314,11 @@ export default function ProductUpdateForm({
                     name="slug"
                     label="Slug"
                     placeholder="product-slug"
-                    value={values.slug}
+                    value={product ? product.slug : values.slug}
                     onBlur={handleBlur}
                     onChange={handleChange}
                     errorText={touched.slug && errors.slug}
-                    disabled
+                    disabled={!!product}
                   />
                   {!isSlugUnique && (
                     <p style={{ color: "red" }}>
@@ -565,11 +596,10 @@ export default function ProductUpdateForm({
                 variant="contained"
                 color="primary"
                 type="submit"
-                disabled={isSubmitting || !isSlugUnique}
+                disabled={isSubmitting || (!product && !isSlugUnique)}
               >
                 {product ? "Update Product" : "Create Product"}
               </Button>
-              {/* </Grid> */}
             </Form>
           );
         }}
