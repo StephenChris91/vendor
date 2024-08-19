@@ -37,7 +37,7 @@ export default function CheckoutForm() {
     reference: new Date().getTime().toString(),
     email: shippingAddress?.email || user?.email,
     amount: Math.round(totalAmount * 100), // Convert to kobo
-    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_LIVE_KEY!,
   };
 
   const onSuccess = async (reference: any) => {

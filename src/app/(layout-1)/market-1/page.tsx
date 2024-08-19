@@ -17,21 +17,18 @@ import Section13 from "@sections/market-1/Section13";
 export default async function HomeLanding() {
   const carList = await api.getCarList();
   const carBrands = await api.getCarBrands();
-  const moreItems = await api.getMoreItems();
   const mobileList = await api.getMobileList();
   const opticsList = await api.getOpticsList();
   const mobileShops = await api.getMobileShops();
   const opticsShops = await api.getOpticsShops();
   const serviceList = await api.getServiceList();
   const mobileBrands = await api.getMobileBrands();
-  const flashDealsData = await api.getFlashDeals();
   const opticsBrands = await api.getOpticsBrands();
   const bottomCategories = await api.getCategories();
   const topCategories = await api.getTopCategories();
   const topRatedBrands = await api.getTopRatedBrand();
   const mainCarouselData = await api.getMainCarousel();
-  const newArrivalsList = await api.getNewArrivalList();
-  const bigDiscountList = await api.getBigDiscountList();
+
   const topRatedProducts = await api.getTopRatedProduct();
 
   return (

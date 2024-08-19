@@ -9,6 +9,7 @@ interface AuthContextType {
   setUser: React.Dispatch<React.SetStateAction<Session["user"] | null>>;
   signIn: () => void;
   signOut: () => void;
+  refreshAuth: () => void; // Add this line
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,8 +28,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [session, status]);
 
+  const refreshAuth = () => {
+    if (status === "authenticated" && session?.user) {
+      setUser(session.user);
+    } else {
+      setUser(null);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ user, setUser, signIn, signOut, refreshAuth }}
+    >
       {children}
     </AuthContext.Provider>
   );

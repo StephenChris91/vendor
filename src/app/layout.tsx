@@ -3,7 +3,6 @@ import SessionProviderServer from "@utils/session-provider-server";
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
 // THEME PROVIDER
-import "@uploadthing/react/styles.css";
 const openSans = Open_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

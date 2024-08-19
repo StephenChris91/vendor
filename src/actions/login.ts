@@ -6,8 +6,7 @@ import { loginSchema } from 'schemas';
 import { sendVerificationEmail } from '@lib/emails/mail';
 import { getUserByEmail } from 'lib/data/user';
 import { generateVerificationToken } from 'lib/data/tokens';
-import { signIn } from 'auth';
-import { AuthError } from 'next-auth';
+import { compare } from 'bcrypt-ts';
 
 export const login = async (values: z.infer<typeof loginSchema>) => {
     const validInput = loginSchema.safeParse(values)
@@ -35,33 +34,30 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
         return { success: 'Confirmation email sent' };
     }
 
+    const passwordMatch = await compare(password, existingUser.password);
+
+    if (!passwordMatch) {
+        return { error: 'Invalid email or password' };
+    }
+
     const vendorOnboard = existingUser.role === 'Vendor' && existingUser.isOnboardedVendor;
     const vendorNotOnboarded = existingUser.role === 'Vendor' && !existingUser.isOnboardedVendor;
     const isAdmin = existingUser.role === "Admin";
 
-    try {
-        await signIn('credentials', {
-            email,
-            password,
-            redirect: true,
-            redirectTo: vendorOnboard ? '/vendor/dashboard' : vendorNotOnboarded ? '/auth/onboarding' : '/auth/profile'
-        });
+    let redirectTo = ''; // Default redirect
+    if (isAdmin) redirectTo = '/admin';
+    else if (vendorOnboard) redirectTo = '/vendor/dashboard';
+    else if (vendorNotOnboarded) redirectTo = '/onboarding';
 
-        let redirectTo = '/profile'; // Default redirect
-        if (isAdmin) redirectTo = '/admin';
-        else if (vendorOnboard) redirectTo = '/vendor/dashboard';
-        else if (vendorNotOnboarded) redirectTo = '/onboarding';
-
-        return { success: 'Logged in successfully', redirectTo };
-    } catch (error) {
-        if (error instanceof AuthError) {
-            switch (error.type) {
-                case "CredentialsSignin":
-                    return { error: 'Invalid email or password' };
-                default:
-                    return { error: 'An unexpected error occurred' };
-            }
+    return {
+        success: 'Logged in successfully',
+        redirectTo,
+        user: {
+            id: existingUser.id,
+            name: existingUser.name,
+            email: existingUser.email,
+            role: existingUser.role,
+            // Add any other user properties you need
         }
-        throw error;
-    }
+    };
 };

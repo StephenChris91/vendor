@@ -41,23 +41,23 @@ export default function PaymentForm() {
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
   };
 
-  const flutterwaveConfig = {
-    public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY!,
-    tx_ref: new Date().getTime().toString(),
-    amount: totalAmount,
-    currency: "NGN",
-    payment_options: "card,mobilemoney,ussd",
-    customer: {
-      email: user.email,
-      phone_number: "",
-      name: user.name,
-    },
-    customizations: {
-      title: "Your Store Name",
-      description: "Payment for items in cart",
-      logo: "/path/to/your/logo.png",
-    },
-  };
+  // const flutterwaveConfig = {
+  //   public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY!,
+  //   tx_ref: new Date().getTime().toString(),
+  //   amount: totalAmount,
+  //   currency: "NGN",
+  //   payment_options: "card,mobilemoney,ussd",
+  //   customer: {
+  //     email: user.email,
+  //     phone_number: "",
+  //     name: user.name,
+  //   },
+  //   customizations: {
+  //     title: "Your Store Name",
+  //     description: "Payment for items in cart",
+  //     logo: "/path/to/your/logo.png",
+  //   },
+  // };
 
   const initializePaystackPayment = usePaystackPayment(paystackConfig);
 

@@ -16,7 +16,8 @@ import { H3, H5, H6, SemiSpan, Small, Span } from "@component/Typography";
 import { StyledRoot } from "./styles";
 import { login } from "actions/login";
 import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
+import { useAuth } from "@context/authContext";
 
 type LoginProps = {
   onLoginSuccess?: () => void;
@@ -26,7 +27,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const router = useRouter();
   const { passwordVisibility, togglePasswordVisibility } = useVisibility();
   const [isLoading, setIsLoading] = useState(false);
-  const { update } = useSession();
+  const { refreshAuth } = useAuth();
 
   const initialValues = { email: "", password: "" };
 
@@ -42,14 +43,25 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       if (result.error) {
         toast.error(result.error);
       } else if (result.success) {
-        toast.success(result.success);
-        await update(); // Update the session
-        if (onLoginSuccess) {
-          onLoginSuccess();
-        }
-        // Handle client-side navigation based on user role
-        if (result.redirectTo) {
-          router.push(result.redirectTo);
+        // Use the signIn function from next-auth/react on the client side
+        const signInResult = await signIn("credentials", {
+          email: values.email,
+          password: values.password,
+          redirect: false,
+        });
+
+        if (signInResult?.error) {
+          toast.error(signInResult.error);
+        } else {
+          toast.success(result.success);
+          refreshAuth(); // Refresh the auth context
+          if (onLoginSuccess) {
+            onLoginSuccess();
+          }
+          // Handle client-side navigation based on user role
+          if (result.redirectTo) {
+            router.push(result.redirectTo);
+          }
         }
       }
     } catch (error) {
