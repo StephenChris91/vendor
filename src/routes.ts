@@ -3,7 +3,7 @@
  * An array of routes accessible to all users who visit the site.
  * @type {string[]}
  */
-export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/admin/adminLogin', '/address', '/address/:id', '/orders', '/orders/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shop', '/shops', '/product', '/product/:id', '/product/search', '/product/search/:id', '/shops/:slug', '/track', '/compare', '/support', '/verification', '/checkout',];
+export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/admin/adminLogin', '/address', '/address/:id', '/orders', '/orders/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shop', '/shops', '/shops/:id', '/shops/*', '/product', '/product/:id', '/product/search', '/product/search/:id', '/shops/:slug', '/track', '/compare', '/support', '/verification', '/checkout',];
 
 /**
  * @description: Authenticated routes

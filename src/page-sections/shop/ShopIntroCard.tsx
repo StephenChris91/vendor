@@ -14,7 +14,14 @@ type Props = { shop: Shop };
 export default function ShopIntroCard({ shop }: Props) {
   return (
     <ShopIntroWrapper mb="32px" pb="20px" overflow="hidden">
-      <Box className="cover-image" height="202px" />
+      <Box
+        style={{
+          backgroundImage: `url(${shop.banner})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        height="202px"
+      />
 
       <FlexBox mt="-64px" px="30px" flexWrap="wrap">
         <Avatar

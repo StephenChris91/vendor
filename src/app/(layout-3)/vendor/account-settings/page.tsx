@@ -54,6 +54,8 @@ export default function AccountSettings() {
   const { data: shopDetails, isLoading } = useQuery<ShopDetails>({
     queryKey: ["shopDetails"],
     queryFn: fetchShopDetails,
+    refetchInterval: 60000, // Fetch shop details every 60 seconds
+    refetchIntervalInBackground: true,
   });
 
   const mutation: UseMutationResult<any, Error, ShopDetails> = useMutation({

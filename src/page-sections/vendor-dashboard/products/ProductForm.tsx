@@ -91,10 +91,6 @@ export default function ProductUpdateForm({
 
         const categories = await categoriesResponse.json();
         const brands = await brandsResponse.json();
-
-        console.log("Fetched categories:", categories);
-        console.log("Fetched brands:", brands);
-
         setCategoryOption(
           categories.map((cat: any) => ({
             value: cat.id,
@@ -108,7 +104,6 @@ export default function ProductUpdateForm({
           }))
         );
       } catch (error) {
-        console.error("Error fetching categories and brands:", error);
         toast.error("Failed to load categories and brands");
       }
     };
