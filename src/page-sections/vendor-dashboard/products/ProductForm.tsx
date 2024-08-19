@@ -34,7 +34,7 @@ const StyledLabel = styled(Typography)`
   font-weight: 600;
 `;
 interface Props {
-  product: Product;
+  product?: Product;
   categoryOptions: SelectOption[];
   brandOptions: SelectOption[];
 }
