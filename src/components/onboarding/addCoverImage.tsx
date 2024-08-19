@@ -45,16 +45,12 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
     }
   }, [initialCoverImage]);
 
-  const handleImageUpload = useCallback(
-    (result: string | File[]) => {
-      if (typeof result === "string") {
-        formik.setFieldValue("coverImage", result);
-        updateFormData({ banner: result });
-        toast.success("Shop cover image uploaded successfully!");
-      } else {
-        console.error("Unexpected result type from DropZone");
-        toast.error("Failed to upload cover image. Please try again.");
-      }
+  const handleUpload = useCallback(
+    (url: string) => {
+      setIsUploading(false);
+      formik.setFieldValue("coverImage", url);
+      updateFormData({ banner: url });
+      toast.success("Shop cover image uploaded successfully!");
     },
     [formik, updateFormData]
   );
@@ -78,14 +74,15 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
 
       <DropZone
         uploadType="shop-banner"
-        useS3={true}
-        multiple={false}
+        maxSize={4 * 1024 * 1024}
         acceptedFileTypes={{
           "image/png": [".png"],
           "image/jpeg": [".jpg", ".jpeg"],
           "image/gif": [".gif"],
           "image/webp": [".webp"],
         }}
+        multiple={false}
+        onUpload={handleUpload}
       />
 
       {formik.touched.coverImage && formik.errors.coverImage && (

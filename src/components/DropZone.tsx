@@ -14,7 +14,7 @@ export interface DropZoneProps {
   multiple?: boolean;
   onAuthError?: () => void;
   useS3?: boolean;
-  onUpload?: (url: string) => void; // Add this line
+  onUpload?: (url: string, file: File) => void; // Updated this line
 }
 
 export default function DropZone({
@@ -24,7 +24,7 @@ export default function DropZone({
   multiple = false,
   onAuthError,
   useS3 = true,
-  onUpload, // Add this line
+  onUpload,
 }: DropZoneProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -33,9 +33,9 @@ export default function DropZone({
     (acceptedFiles: File[]) => {
       console.log("Files dropped:", acceptedFiles);
       setFiles(acceptedFiles);
-      if (!useS3 && onUpload) {
-        // If not using S3, immediately call onUpload with the file
-        onUpload(URL.createObjectURL(acceptedFiles[0]));
+      if (!useS3 && onUpload && acceptedFiles.length > 0) {
+        // If not using S3, immediately call onUpload with the file and its object URL
+        onUpload(URL.createObjectURL(acceptedFiles[0]), acceptedFiles[0]);
       }
     },
     [useS3, onUpload]
@@ -61,10 +61,10 @@ export default function DropZone({
         if (result.url) {
           console.log("Upload successful, URL:", result.url);
           toast.success("File uploaded successfully!");
-          setFiles([]);
           if (onUpload) {
-            onUpload(result.url); // Call onUpload with the returned URL
+            onUpload(result.url, files[0]); // Call onUpload with the returned URL and the file
           }
+          setFiles([]);
         } else {
           throw new Error("No URL returned from server");
         }

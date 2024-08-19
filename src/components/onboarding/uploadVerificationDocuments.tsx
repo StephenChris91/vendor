@@ -16,32 +16,25 @@ interface UploadVerificationDocumentsProps {
   userEmail: string;
 }
 
+interface DocumentData {
+  name: string;
+  content: string;
+  type: string;
+}
+
 interface FormValues {
-  documents: File[];
+  documents: DocumentData[];
 }
 
 const formSchema = yup.object().shape({
   documents: yup
     .array()
     .of(
-      yup
-        .mixed()
-        .test(
-          "fileFormat",
-          "Unsupported file format. Please upload PDF or document files.",
-          (value) => {
-            if (value instanceof File) {
-              const acceptedFormats = [
-                "application/pdf",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "application/vnd.oasis.opendocument.text",
-              ];
-              return acceptedFormats.includes(value.type);
-            }
-            return false;
-          }
-        )
+      yup.object().shape({
+        name: yup.string().required(),
+        content: yup.string().required(),
+        type: yup.string().required(),
+      })
     )
     .min(1, "At least one document is required")
     .required("At least one document is required"),
@@ -61,18 +54,7 @@ const UploadVerificationDocuments: React.FC<
       if (values.documents.length === 0) return;
 
       try {
-        const documentData = await Promise.all(
-          values.documents.map(async (file) => {
-            const base64 = await fileToBase64(file);
-            return {
-              name: file.name,
-              content: base64,
-              type: file.type,
-            };
-          })
-        );
-
-        await submitVerificationDocuments(userId, userEmail, documentData);
+        await submitVerificationDocuments(userId, userEmail, values.documents);
 
         toast.success("Documents submitted successfully for verification!");
         formik.resetForm();
@@ -84,53 +66,19 @@ const UploadVerificationDocuments: React.FC<
     },
   });
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          resolve(reader.result.split(",")[1]);
-        } else {
-          reject(new Error("Failed to convert file to base64"));
-        }
+  const handleUpload = useCallback(
+    (url: string, file: File) => {
+      const newDocument: DocumentData = {
+        name: file.name,
+        content: url,
+        type: file.type,
       };
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
-  const handleFileChange = useCallback(
-    (result: string | File[]) => {
-      if (Array.isArray(result)) {
-        const acceptedFormats = [
-          "application/pdf",
-          "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          "application/vnd.oasis.opendocument.text",
-        ];
-
-        const validFiles = result.filter((file) =>
-          acceptedFormats.includes(file.type)
-        );
-
-        if (validFiles.length !== result.length) {
-          toast.error(
-            "Some files were not added. Please upload only PDF or document files."
-          );
-        }
-
-        formik.setFieldValue("documents", [
-          ...formik.values.documents,
-          ...validFiles,
-        ]);
-        setFileNames((prevNames) => [
-          ...prevNames,
-          ...validFiles.map((file) => file.name),
-        ]);
-      } else {
-        console.error("Unexpected result type from DropZone");
-        toast.error("Failed to add files. Please try again.");
-      }
+      formik.setFieldValue("documents", [
+        ...formik.values.documents,
+        newDocument,
+      ]);
+      setFileNames((prevNames) => [...prevNames, file.name]);
+      toast.success("Document uploaded successfully!");
     },
     [formik]
   );
@@ -159,8 +107,7 @@ const UploadVerificationDocuments: React.FC<
 
       <DropZone
         uploadType="verification-documents"
-        useS3={false}
-        multiple={true}
+        maxSize={10 * 1024 * 1024} // 10MB limit
         acceptedFileTypes={{
           "application/pdf": [".pdf"],
           "application/msword": [".doc"],
@@ -168,11 +115,13 @@ const UploadVerificationDocuments: React.FC<
             [".docx"],
           "application/vnd.oasis.opendocument.text": [".odt"],
         }}
+        multiple={true}
+        onUpload={handleUpload}
       />
 
       {formik.touched.documents && formik.errors.documents && (
         <Small color="error.main" mt="0.5rem">
-          {formik.errors.documents}
+          {formik.errors.documents as string}
         </Small>
       )}
 

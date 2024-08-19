@@ -45,16 +45,12 @@ const AddLogo: React.FC<AddLogoProps> = ({
     }
   }, [initialLogo]);
 
-  const handleImageUpload = useCallback(
-    (result: string | File[]) => {
-      if (typeof result === "string") {
-        formik.setFieldValue("logo", result);
-        updateFormData({ logo: result });
-        toast.success("Shop logo uploaded successfully!");
-      } else {
-        console.error("Unexpected result type from DropZone");
-        toast.error("Failed to upload logo. Please try again.");
-      }
+  const handleUpload = useCallback(
+    (url: string) => {
+      setIsUploading(false);
+      formik.setFieldValue("logo", url);
+      updateFormData({ logo: url });
+      toast.success("Shop logo uploaded successfully!");
     },
     [formik, updateFormData]
   );
@@ -78,14 +74,15 @@ const AddLogo: React.FC<AddLogoProps> = ({
 
       <DropZone
         uploadType="shop-logo"
-        useS3={true}
-        multiple={false}
+        maxSize={4 * 1024 * 1024}
         acceptedFileTypes={{
           "image/png": [".png"],
           "image/jpeg": [".jpg", ".jpeg"],
           "image/gif": [".gif"],
           "image/webp": [".webp"],
         }}
+        multiple={false}
+        onUpload={handleUpload}
       />
 
       {formik.touched.logo && formik.errors.logo && (

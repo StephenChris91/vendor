@@ -21,6 +21,7 @@ import { H3, Paragraph } from "@component/Typography";
 import { LogoutButton } from "@component/logout-button";
 import { createShop } from "actions/createshop";
 import { ShopStatus } from "@prisma/client";
+import { signOut } from "next-auth/react";
 
 const steps = [
   { component: AddLogo, label: "Shop Logo" },
@@ -97,18 +98,16 @@ const MultiStepForm = () => {
         categoryName: formData.shopSettings.category, // Use the category name instead of ID
       };
 
-      console.log(
-        "Shop data being submitted:",
-        JSON.stringify(shopData, null, 2)
-      );
-
       const result = await createShop(shopData);
-      console.log(result.status, result.message);
 
       if (result.status === "success") {
         toast.success("Shop created successfully!");
-        console.log("Redirecting to confirmation page...");
-        router.push("/onboarding/confirmation");
+
+        // Log the user out
+        await signOut({ redirect: false });
+
+        // Redirect to the homepage
+        router.push("/");
       } else {
         console.log(result.status, result.message);
         toast.error(result.message || "Failed to create shop");

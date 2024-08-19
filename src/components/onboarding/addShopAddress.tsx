@@ -75,6 +75,8 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
     formik.submitForm();
   };
 
+  //TODO: Retreive list of cities from terminal africa and populate the select option with it
+
   const detectLocation = () => {
     setIsDetectingLocation(true);
     if ("geolocation" in navigator) {
