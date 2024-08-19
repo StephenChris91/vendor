@@ -19,6 +19,8 @@ export default function ShopIntroCard({ shop }: Props) {
           backgroundImage: `url(${shop.banner})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          objectFit: "cover",
         }}
         height="202px"
       />
@@ -47,7 +49,7 @@ export default function ShopIntroCard({ shop }: Props) {
               bg="secondary.main"
               display="inline-block"
             >
-              <H3 fontWeight="600" color="gray.100">
+              <H3 fontWeight="600" color="primary">
                 {shop?.shopName}
               </H3>
             </Box>
