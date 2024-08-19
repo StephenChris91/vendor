@@ -1,3 +1,4 @@
+import TawkToChat from "@component/chat";
 import Providers from "@utils/providers";
 import SessionProviderServer from "@utils/session-provider-server";
 import type { Metadata } from "next";
@@ -22,7 +23,10 @@ export default async function RootLayout({
     <html lang="en">
       <body className={openSans.className}>
         <SessionProviderServer>
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+            <TawkToChat />
+          </Providers>
         </SessionProviderServer>
       </body>
     </html>
