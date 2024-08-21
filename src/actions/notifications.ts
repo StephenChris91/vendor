@@ -3,9 +3,10 @@
 // lib/notifications.ts
 import { order, shopOrder, shop, user, orderItem, shippingAddress } from '@prisma/client';
 import { Resend } from 'resend';
+
+import { db } from '../../prisma/prisma';
 import VendorNotificationEmail from '@lib/emails/vendorNotifications';
 import OrderConfirmation from '@lib/emails/orderConfirmation';
-import { db } from '../../prisma/prisma';
 
 
 const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_KEY);

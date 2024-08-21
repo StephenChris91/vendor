@@ -3,7 +3,7 @@
 import { verifyPaystackTransaction } from '@lib/order/createPayment';
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../prisma/prisma';
-import { notifyVendors, sendOrderConfirmationEmail } from '@lib/order/notifications';
+import { notifyVendors, sendOrderConfirmationEmail } from 'actions/notifications';
 
 export async function POST(req: Request) {
     try {
