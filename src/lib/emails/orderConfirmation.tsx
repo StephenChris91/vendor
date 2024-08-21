@@ -82,7 +82,7 @@ export const OrderConfirmation: React.FC<OrderConfirmationProps> = ({
         <Hr />
         <Section>
           <Text>Thank you for shopping with us!</Text>
-          <Button href="https://yourstore.com/orders" style={button}>
+          <Button href="https://vendorspot.ng/orders" style={button}>
             View Your Order
           </Button>
         </Section>

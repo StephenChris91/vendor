@@ -9,6 +9,7 @@ import FlexBox from "@component/FlexBox";
 import Card from "@component/Card";
 import Divider from "@component/Divider";
 import { currency } from "@utils/utils";
+import Spinner from "@component/Spinner";
 
 interface OrderSummaryItem {
   name: string;
@@ -62,7 +63,18 @@ const Success = () => {
   }, [searchParams]);
 
   if (isLoading) {
-    return <div>Loading order details...</div>;
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {

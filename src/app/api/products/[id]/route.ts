@@ -87,7 +87,6 @@ export async function PUT(
     }
 }
 
-// GET handler to fetch a single product
 
 
 // DELETE handler to remove a product

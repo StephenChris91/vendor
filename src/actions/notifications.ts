@@ -1,9 +1,11 @@
+'use server'
+
 // lib/notifications.ts
 import { order, shopOrder, shop, user, orderItem, shippingAddress } from '@prisma/client';
 import { Resend } from 'resend';
-import { db } from '../../../prisma/prisma';
 import VendorNotificationEmail from '@lib/emails/vendorNotifications';
 import OrderConfirmation from '@lib/emails/orderConfirmation';
+import { db } from '../../prisma/prisma';
 
 
 const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_KEY);
@@ -54,7 +56,7 @@ export async function notifyVendors(order: order & { shopOrders: shopOrder[] }):
 
 async function sendVendorNotification({ vendor, shop, shopOrder }: VendorNotification): Promise<void> {
     try {
-        await resend.emails.send({
+        const sent = await resend.emails.send({
             from: 'Vendorspot Team <admin@vendorspot.ng>',
             to: vendor.email,
             subject: `New Order Received - Order #${shopOrder.id}`,
@@ -74,6 +76,10 @@ async function sendVendorNotification({ vendor, shop, shopOrder }: VendorNotific
                 total: shopOrder.totalPrice
             })
         });
+
+        if (sent.data && sent.data.id) {
+            console.log(`Vendor notification email sent to ${vendor.email}`);
+        }
     } catch (error) {
         console.error(`Error sending vendor notification email to ${vendor.email}:`, error);
         throw new Error(`Failed to send vendor notification email to ${vendor.email}`);
@@ -82,12 +88,18 @@ async function sendVendorNotification({ vendor, shop, shopOrder }: VendorNotific
 
 export async function sendOrderConfirmationEmail(userEmail: string, order: OrderWithDetails): Promise<void> {
     try {
-        await resend.emails.send({
-            from: 'Your E-commerce Platform <noreply@yourdomain.com>',
+
+
+        const sent = await resend.emails.send({
+            from: 'Vendorspot Notification <admin@vendorspot.ng>',
             to: userEmail,
             subject: `Order Confirmation - Order #${order.id}`,
             react: OrderConfirmation({ order })
         });
+
+        if (sent.data.id) {
+            console.log(`Order confirmation email sent to ${userEmail}`);
+        }
     } catch (error) {
         console.error(`Failed to send order confirmation email to ${userEmail}:`, error);
         // You might want to implement a retry mechanism or alert system here

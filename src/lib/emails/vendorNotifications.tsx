@@ -10,6 +10,7 @@ import {
   Button,
   Hr,
 } from "@react-email/components";
+import Typography from "@component/Typography";
 
 interface VendorNotificationEmailProps {
   vendorName: string;
@@ -43,7 +44,12 @@ export const VendorNotificationEmail: React.FC<
         <Section>
           <Text style={heading}>New Order Received</Text>
           <Text>Dear {vendorName},</Text>
-          <Text>You have received a new order for your shop {shopName}.</Text>
+          <Text>
+            You have received a new order for your shop{" "}
+            <Typography as="h2" fontWeight="600">
+              {shopName}.
+            </Typography>
+          </Text>
           <Text>Order #: {orderId}</Text>
           <Text>Order Date: {orderDate}</Text>
         </Section>
@@ -79,7 +85,7 @@ export const VendorNotificationEmail: React.FC<
           <Text>
             Please log in to your vendor dashboard to process this order.
           </Text>
-          <Button href="https://yourdashboard.com" style={button}>
+          <Button href="https://vendorspot.com/vendor/dashboard" style={button}>
             Go to Dashboard
           </Button>
         </Section>

@@ -10,6 +10,8 @@ import {
     adminRoutes,
     vendorRoutes
 } from "routes";
+import { getToken } from "next-auth/jwt";
+
 
 const { auth } = NextAuth(authConfig);
 
@@ -25,6 +27,22 @@ export default auth((req) => {
 
     const isApiDataRoute = nextUrl.pathname.startsWith('/api/');
     const isShopRoute = nextUrl.pathname.startsWith('/shops/');
+
+    // if (isLoggedIn) {
+    //     const token = await getToken({ req });
+    //     const lastActivity = token?.lastActivity as number | undefined;
+    //     const currentTime = Date.now();
+    //     const idleTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+    //     if (lastActivity && currentTime - lastActivity > idleTime) {
+    //       // User has been idle for more than 5 minutes
+    //       return Response.redirect(new URL("/api/auth/signout", nextUrl));
+    //     }
+
+    //     // Update last activity time
+    //     token.lastActivity = currentTime;
+    //     req.auth = { ...req.auth, token };
+    //   }
 
     // Then in your middleware logic:
     if (isApiAuthRoute || isApiDataRoute || isShopRoute) {
