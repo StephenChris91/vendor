@@ -1,5 +1,5 @@
 // hooks/useShippingRates.ts
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { getOrCreatePickupAddresses, createDeliveryAddress, createParcel, fetchShippingRates } from 'hooks/terminal';
 import { useCart } from 'hooks/useCart';
 import User from '@models/user.model';
@@ -15,31 +15,34 @@ interface AggregatedShippingRate {
 
 export const useShippingRates = () => {
     const [individualRates, setIndividualRates] = useState<ShippingRate[]>([]);
-    const [aggregatedRates, setAggregatedRates] = useState<AggregatedShippingRate[]>([]);
+    const [aggregatedRates, setAggregatedRates] = useState<AggregatedShippingRate[]>([]); // Initialize with empty array
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const { cartItems, setShippingRate } = useCart();
-    const [selectedShippingRates, setSelectedShippingRates] = useAtom(selectedShippingRatesAtom);
+    const [selectedShippingRates] = useAtom(selectedShippingRatesAtom);
 
-    const aggregateRates = (rates: ShippingRate[]): AggregatedShippingRate[] => {
-        const aggregated = rates.reduce((acc, rate) => {
+    const memoizedCartItems = useMemo(() => cartItems, [cartItems]);
+
+    const aggregateRates = useCallback((rates: ShippingRate[]): AggregatedShippingRate[] => {
+        const aggregated: Record<string, AggregatedShippingRate> = {};
+
+        rates.forEach((rate) => {
             const key = `${rate.carrier_name}-${rate.currency}`;
-            if (acc[key]) {
-                acc[key].amount += rate.amount;
-                acc[key].vendor_rates[rate.vendorId] = rate.amount;
+            if (key in aggregated) {
+                aggregated[key].amount += rate.amount;
+                aggregated[key].vendor_rates[rate.vendorId] = rate.amount;
             } else {
-                acc[key] = {
+                aggregated[key] = {
                     carrier_name: rate.carrier_name,
                     currency: rate.currency,
                     amount: rate.amount,
                     vendor_rates: { [rate.vendorId]: rate.amount }
                 };
             }
-            return acc;
-        }, {} as Record<string, AggregatedShippingRate>);
+        });
 
         return Object.values(aggregated);
-    };
+    }, []);
 
     const getShippingRates = useCallback(async (user: User, vendors: { id: string }[], address: any) => {
         setIsLoading(true);
@@ -48,7 +51,7 @@ export const useShippingRates = () => {
         try {
             const pickupAddresses = await getOrCreatePickupAddresses(vendors);
             const deliveryAddressId = await createDeliveryAddress(user, address);
-            const parcelId = await createParcel(cartItems);
+            const parcelId = await createParcel(memoizedCartItems);
 
             const ratesPromises = pickupAddresses.map(({ addressId, vendorId }) =>
                 fetchShippingRates(addressId, deliveryAddressId, parcelId).then(rates =>
@@ -77,7 +80,7 @@ export const useShippingRates = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [cartItems, setShippingRate, selectedShippingRates]);
+    }, [memoizedCartItems, setShippingRate, selectedShippingRates, aggregateRates]);
 
     return { individualRates, aggregatedRates, isLoading, error, getShippingRates };
 };

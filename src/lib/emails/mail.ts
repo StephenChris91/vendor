@@ -33,23 +33,54 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   });
 };
 
-export const sendOrderConfirmationEmail = async (order: any, customerEmail: string) => {
+export const sendOrderConfirmationEmail = async (email: string,
+  orderDetails: {
+    orderId: string;
+    items: any[];
+    subtotal: number;
+    tax: number;
+    shippingCost: number;
+    totalAmount: number;
+    shippingAddress: any;
+  }) => {
   await resend.emails.send({
     from: 'Vendorspot Orders <orders@vendorspot.ng>',
-    to: customerEmail,
+    to: email,
     subject: 'Order Confirmation',
-    react: OrderConfirmation({ order }),
+    react: OrderConfirmation({
+      order: {
+        id: orderDetails.orderId,
+        createdAt: new Date(),
+        orderItems: orderDetails.items.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        subtotal: orderDetails.subtotal,
+        tax: orderDetails.tax,
+        shippingCost: orderDetails.shippingCost,
+        totalPrice: orderDetails.totalAmount,
+        shippingAddress: orderDetails.shippingAddress
+      }
+    }),
   });
 };
 
 export const sendVendorNotificationEmail = async (vendor: any, order: any, vendorOrderItems: any[]) => {
+  // Add a null check for the vendor object
+  if (!vendor || !vendor.shopName) {
+    console.error('Vendor or shopName is undefined:', vendor);
+    return; // or throw an error if you prefer
+  }
+
+  const { shopName } = vendor;
   await resend.emails.send({
     from: 'Vendorspot Orders <orders@vendorspot.ng>',
     to: vendor.email,
     subject: 'New Order Received',
     react: VendorNotificationEmail({
       vendorName: vendor.firstname,
-      shopName: vendor.shop.shopName,
+      shopName: shopName,
       orderId: order.id,
       orderDate: order.createdAt,
       orderItems: vendorOrderItems,

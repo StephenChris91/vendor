@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Card1 } from "@component/Card1";
 import Divider from "@component/Divider";
 import FlexBox from "@component/FlexBox";
@@ -6,85 +6,12 @@ import { Button } from "@component/buttons";
 import TextField from "@component/text-field";
 import Typography from "@component/Typography";
 import { useCart } from "hooks/useCart";
-import { useShippingRates } from "hooks/useShippingRates";
-import Select, { SelectOption } from "@component/Select";
-import { useCurrentUser } from "@lib/use-session-client";
-import { ShippingRate } from "../../store/cartStore";
 import { currency } from "@utils/utils";
 
 export default function CheckoutSummary() {
-  const {
-    cartItems,
-    cartTotal,
-    selectedShippingRates,
-    setShippingRate,
-    shippingAddress,
-    getVendorIds,
-  } = useCart();
-  const {
-    individualRates,
-    aggregatedRates,
-    isLoading,
-    error,
-    getShippingRates,
-  } = useShippingRates();
+  const { cartItems, cartTotal, selectedShippingRates, shippingAddress } =
+    useCart();
   const [voucher, setVoucher] = useState("");
-  const user = useCurrentUser();
-
-  useEffect(() => {
-    if (user && shippingAddress && cartItems.length > 0) {
-      const vendors = getVendorIds().map((id) => ({ id }));
-      getShippingRates(user, vendors, shippingAddress);
-    }
-  }, [user, shippingAddress, cartItems, getVendorIds, getShippingRates]);
-
-  const handleShippingRateChange = (option: SelectOption | null) => {
-    if (option) {
-      const selectedAggregatedRate = aggregatedRates.find(
-        (r) => r.carrier_name === option.value
-      );
-      if (selectedAggregatedRate) {
-        Object.entries(selectedAggregatedRate.vendor_rates).forEach(
-          ([vendorId, amount]) => {
-            const vendorRate = individualRates.find(
-              (r) =>
-                r.vendorId === vendorId &&
-                r.carrier_name === selectedAggregatedRate.carrier_name
-            );
-            if (vendorRate) {
-              setShippingRate({
-                vendorId,
-                rate: vendorRate,
-              });
-            }
-          }
-        );
-      }
-    }
-  };
-
-  const getShippingOptions = (): SelectOption[] => {
-    return aggregatedRates.map((rate) => ({
-      label: `${rate.carrier_name} - ${currency(rate.amount)}`,
-      value: rate.carrier_name,
-    }));
-  };
-
-  const getSelectedOption = (): SelectOption | null => {
-    const selectedRates = Object.values(selectedShippingRates);
-    if (selectedRates.length > 0) {
-      const carrierName = selectedRates[0].carrier_name;
-      const totalAmount = selectedRates.reduce(
-        (sum, rate) => sum + (rate.amount || 0),
-        0
-      );
-      return {
-        label: `${carrierName} - ${currency(totalAmount)}`,
-        value: carrierName,
-      };
-    }
-    return null;
-  };
 
   const calculateTotalShipping = () => {
     return Object.values(selectedShippingRates).reduce(
@@ -113,28 +40,6 @@ export default function CheckoutSummary() {
           </Typography>
         </FlexBox>
       </FlexBox>
-
-      <Typography color="text.hint" mb="0.5rem">
-        Shipping:
-      </Typography>
-      {isLoading ? (
-        <Typography>Loading rates...</Typography>
-      ) : error ? (
-        <Typography color="error">{error}</Typography>
-      ) : (
-        <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
-          <Typography>Select shipping method:</Typography>
-          <Select
-            options={getShippingOptions()}
-            value={getSelectedOption()}
-            onChange={(option) =>
-              handleShippingRateChange(option as SelectOption)
-            }
-            placeholder="Select shipping method"
-            isSearchable={false}
-          />
-        </FlexBox>
-      )}
 
       <FlexBox justifyContent="space-between" alignItems="center" mb="0.5rem">
         <Typography color="text.hint">Shipping:</Typography>

@@ -11,11 +11,6 @@ import { currency } from "@utils/utils";
 import FlexBox from "@component/FlexBox";
 import Divider from "@component/Divider";
 import { useCurrentUser } from "@lib/use-session-client";
-import { sendVendorNotificationEmail } from "@lib/emails/mail";
-import {
-  notifyVendors,
-  sendOrderConfirmationEmail,
-} from "actions/notifications";
 
 export default function CheckoutForm() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -46,8 +41,6 @@ export default function CheckoutForm() {
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
   };
 
-  // ...
-
   const onSuccess = async (reference: any) => {
     try {
       // Create order in your database
@@ -69,13 +62,6 @@ export default function CheckoutForm() {
       }
 
       const { order } = await response.json();
-      console.log(order.id);
-
-      // Send order confirmation email to customer
-      await sendOrderConfirmationEmail(shippingAddress.email, order);
-
-      // Notify vendors
-      await notifyVendors(order);
 
       // Clear cart and redirect to success page
       clearCart();

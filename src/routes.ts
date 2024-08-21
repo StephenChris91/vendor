@@ -25,7 +25,7 @@ export const adminRoutes: (string | undefined)[] = ['/admin', '/admin/dashboard'
  * An array of routes accessible to only users with vendor roles. This routes will redirect to the vendor dashboard
  * @type {string[]}
  */
-export const vendorRoutes = ['/vendor', '/vendor/account-settings', '/vendor/dashboard', '/vendor/products', '/vendor/products/:slug', '/vendor/products/create',];
+export const vendorRoutes = ['/vendor', '/vendor/account-settings', '/vendor/dashboard', '/vendor/products', '/vendor/products/:slug', '/vendor/products/create', '/vendor/*',];
 
 /**
  * @description: A prefix for api auth routes
