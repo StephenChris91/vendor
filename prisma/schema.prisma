@@ -217,7 +217,7 @@ model product {
   my_review          String?
   in_wishlist        Boolean?
   shop_id            String?
-  shop               shop?             @relation("ShopProducts", fields: [shop_id], references: [id], onDelete: SetNull)
+  shop               shop?             @relation("ShopProducts", fields: [shop_id], references: [id], onDelete: Cascade)
   user               user?             @relation("UserProducts", fields: [user_id], references: [id], onDelete: SetNull)
   gallery            String[]
   shop_name          String?
@@ -249,7 +249,7 @@ model category {
 }
 
 model ProductCategory {
-  product    product  @relation(fields: [productId], references: [id])
+  product    product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId  String
   category   category @relation(fields: [categoryId], references: [id])
   categoryId String
@@ -340,10 +340,10 @@ model TaxRate {
 }
 
 model orderItem {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   orderId     String
   shopOrderId String
-  productId   String
+  productId   String?
   quantity    Int
   price       Float
   name        String
@@ -353,7 +353,7 @@ model orderItem {
   updatedAt DateTime  @updatedAt
   order     order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   shopOrder shopOrder @relation(fields: [shopOrderId], references: [id], onDelete: Cascade)
-  product   product   @relation(fields: [productId], references: [id])
+  product   product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
 
 model cartItem {

@@ -31,11 +31,7 @@ interface ProductStats {
 }
 
 const fetchProducts = async (): Promise<Product[]> => {
-  const response = await fetch("/api/products", {
-    next: {
-      revalidate: 0,
-    },
-  });
+  const response = await fetch("/api/products", {});
   if (!response.ok) {
     throw new Error("Failed to fetch products");
   }
@@ -57,11 +53,15 @@ export default function ProductsPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: products = [], isLoading: isLoadingProducts } = useQuery<
-    Product[]
-  >({
+  const {
+    data: products = [],
+    isLoading: isLoadingProducts,
+    refetch,
+  } = useQuery<Product[]>({
     queryKey: ["products", searchQuery, filters],
     queryFn: () => fetchProducts(),
+    refetchInterval: 60000,
+    refetchIntervalInBackground: true,
   });
 
   const {
