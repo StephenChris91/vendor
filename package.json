@@ -11,8 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "test": "test jest",
-    "test:watch": "jest --watch"
+    "test": "test jest"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.4.1",
@@ -81,8 +80,6 @@
     "@babel/preset-env": "^7.25.3",
     "@babel/preset-react": "^7.24.7",
     "@babel/preset-typescript": "^7.24.7",
-    "@testing-library/jest-dom": "^6.4.8",
-    "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/formidable": "^3.4.5",
     "@types/jest": "^28.1.6",
@@ -97,12 +94,9 @@
     "@types/styled-system": "^5.1.22",
     "@types/styled-system__css": "^5.0.21",
     "@types/styled-system__theme-get": "^5.0.4",
-    "jest": "^25.0.0",
-    "jest-environment-jsdom": "^24.0.0",
     "jest-runner-groups": "^2.2.0",
     "msw": "^2.3.5",
     "prisma": "^5.17.0",
-    "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   },
