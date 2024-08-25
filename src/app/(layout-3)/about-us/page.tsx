@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 import { H1, H2, Paragraph } from "@component/Typography";
 import Container from "@component/Container";
