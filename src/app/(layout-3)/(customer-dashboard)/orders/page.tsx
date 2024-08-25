@@ -83,7 +83,7 @@ export default function OrderList() {
       </Hidden>
 
       {orderList.map((item) => (
-        <VendorOrderRow order={item} key={item.id} />
+        <OrderRow order={item} key={item.id} />
       ))}
 
       <OrdersPagination orderList={orderList} />
