@@ -106,7 +106,7 @@ export default auth((req) => {
         }
 
         //check if vendor has created a shop
-        if (req.auth?.user?.role === "Vendor" && !req.auth?.user?.shopId && nextUrl.pathname !== '/vendor/dashboard' && nextUrl.pathname !== '/vendor/account-settings') {
+        if (req.auth?.user?.role === "Vendor" && !req.auth?.user?.shopId) {
             return Response.redirect(new URL('/onboarding', nextUrl));
         }
     }
