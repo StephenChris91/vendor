@@ -9,7 +9,7 @@ interface AuthContextType {
   setUser: React.Dispatch<React.SetStateAction<Session["user"] | null>>;
   signIn: () => void;
   signOut: () => void;
-  refreshAuth: () => void; // Add this line
+  refreshAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

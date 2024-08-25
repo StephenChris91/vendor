@@ -21,6 +21,7 @@ import StyledHeader from "./styles";
 import UserLoginDialog from "./LoginDialog";
 import { LogoutButton } from "@component/logout-button";
 import { useAuth } from "@context/authContext";
+import { useCurrentUser } from "@lib/use-session-client";
 
 // ====================================================================
 type HeaderProps = { isFixed?: boolean; className?: string };
@@ -30,7 +31,9 @@ export default function Header({ isFixed, className }: HeaderProps) {
   const { cartItems } = useCart(); // Use the new useCart hook
   const [open, setOpen] = useState(false);
   const toggleSidenav = () => setOpen(!open);
-  const { user, signIn } = useAuth();
+  // const { user, signIn } = useAuth();
+
+  const user = useCurrentUser();
 
   const CART_HANDLE = (
     <Box ml="20px" position="relative">
@@ -59,7 +62,7 @@ export default function Header({ isFixed, className }: HeaderProps) {
   );
 
   const LOGIN_HANDLE = (
-    <IconButton ml="1rem" bg="gray.200" p="8px" onClick={() => signIn()}>
+    <IconButton ml="1rem" bg="gray.200" p="8px">
       <Icon size="28px">user</Icon>
     </IconButton>
   );

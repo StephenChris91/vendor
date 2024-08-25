@@ -10,13 +10,19 @@ import {
     adminRoutes,
     vendorRoutes
 } from "routes";
-import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
 
+const { auth: nextAuthMiddleware } = NextAuth(authConfig);
 
-const { auth } = NextAuth(authConfig);
-
-export default auth((req) => {
+export default async function middleware(req) {
     const { nextUrl } = req;
+
+    // Run the next-auth middleware
+    const authResult = await nextAuthMiddleware(req);
+
+    // If next-auth middleware returns a response, return it
+    if (authResult) return authResult;
+
     const isLoggedIn = !!req.auth;
 
     const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
@@ -28,21 +34,17 @@ export default auth((req) => {
     const isApiDataRoute = nextUrl.pathname.startsWith('/api/');
     const isShopRoute = nextUrl.pathname.startsWith('/shops/');
 
-    // if (isLoggedIn) {
-    //     const token = await getToken({ req });
-    //     const lastActivity = token?.lastActivity as number | undefined;
-    //     const currentTime = Date.now();
-    //     const idleTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+    if (isLoggedIn) {
+        const session = req.auth;
+        const lastActivity = session.lastActivity as number | undefined;
+        const currentTime = Date.now();
+        const idleTime = 5 * 60 * 1000; // 5 minutes in milliseconds
 
-    //     if (lastActivity && currentTime - lastActivity > idleTime) {
-    //       // User has been idle for more than 5 minutes
-    //       return Response.redirect(new URL("/api/auth/signout", nextUrl));
-    //     }
-
-    //     // Update last activity time
-    //     token.lastActivity = currentTime;
-    //     req.auth = { ...req.auth, token };
-    //   }
+        if (lastActivity && currentTime - lastActivity > idleTime) {
+            // User has been idle for more than 5 minutes
+            return NextResponse.redirect(new URL('/api/auth/signout', nextUrl));
+        }
+    }
 
     // Then in your middleware logic:
     if (isApiAuthRoute || isApiDataRoute || isShopRoute) {
@@ -63,14 +65,14 @@ export default auth((req) => {
 
             // Redirect based on user role
             if (req.auth?.user?.role === "Admin") {
-                return Response.redirect(new URL(DEFAULT_ADMIN_REDIRECT, nextUrl));
+                return NextResponse.redirect(new URL(DEFAULT_ADMIN_REDIRECT, nextUrl));
             } else if (req.auth?.user?.role === "Vendor") {
                 if (!req.auth?.user?.isOnboardedVendor && nextUrl.pathname !== '/onboarding/confirmation') {
-                    return Response.redirect(new URL('/onboarding', nextUrl));
+                    return NextResponse.redirect(new URL('/onboarding', nextUrl));
                 }
-                return Response.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
+                return NextResponse.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
             } else {
-                return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+                return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
             }
         }
         return null;
@@ -84,7 +86,7 @@ export default auth((req) => {
 
         const encodedCallbackUrl = encodeURIComponent(callbackUrl);
 
-        return Response.redirect(new URL(
+        return NextResponse.redirect(new URL(
             `/login?callbackUrl=${encodedCallbackUrl}`,
             nextUrl
         ));
@@ -92,22 +94,22 @@ export default auth((req) => {
 
     if (isLoggedIn) {
         if (isAdminRoute && req.auth?.user?.role !== "Admin") {
-            return Response.redirect(new URL("/", nextUrl));
+            return NextResponse.redirect(new URL("/", nextUrl));
         }
 
         if (isVendorRoute && req.auth?.user?.role !== "Vendor") {
-            return Response.redirect(new URL("/", nextUrl));
+            return NextResponse.redirect(new URL("/", nextUrl));
         }
 
         // Vendor onboarding check
         if (req.auth?.user?.role === "Vendor" && !req.auth?.user?.isOnboardedVendor
             && !isPublicRoute && !req.auth?.user?.hasPaid && nextUrl.pathname !== '/onboarding' && nextUrl.pathname !== '/onboarding/confirmation') {
-            return Response.redirect(new URL('/onboarding', nextUrl));
+            return NextResponse.redirect(new URL('/onboarding', nextUrl));
         }
     }
 
     return null;
-})
+}
 
 export const config = {
     matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],

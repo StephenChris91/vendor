@@ -1,8 +1,11 @@
 import TawkToChat from "@component/chat";
+import { useCurrentSession } from "@lib/use-session-server";
+// import SessionManager from "@component/sessionManager";
 import Providers from "@utils/providers";
 import SessionProviderServer from "@utils/session-provider-server";
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
+import { redirect } from "next/navigation";
 // THEME PROVIDER
 const openSans = Open_Sans({ subsets: ["latin"] });
 
@@ -26,6 +29,7 @@ export default async function RootLayout({
           <Providers>
             {children}
             <TawkToChat />
+            {/* <SessionManager /> */}
           </Providers>
         </SessionProviderServer>
       </body>

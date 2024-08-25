@@ -6,6 +6,9 @@ import axios from "@lib/axios";
 import DashboardPageHeader from "@component/layout/DashboardPageHeader";
 import DashboardContent from "@sections/vendor-dashboard/dashboard";
 import Spinner from "@component/Spinner";
+import { useCurrentUser } from "@lib/use-session-client";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 const getSummeryCards = async () => {
   const response = await axios.get("/api/vendors/dashboard/summary");
@@ -23,6 +26,7 @@ const getSales = async () => {
 };
 
 export default function VendorDashboard() {
+  const user = useCurrentUser();
   const { data: sales, isLoading: salesLoading } = useQuery({
     queryKey: ["sales"],
     queryFn: getSales,
@@ -38,8 +42,15 @@ export default function VendorDashboard() {
     queryFn: getCountryBasedSales,
   });
 
+  const router = useRouter();
+
   if (salesLoading || summeryLoading || countrySalesLoading) {
     return <Spinner />;
+  }
+
+  if (user?.role !== "Vendor") {
+    toast.error("You are not authorized to view this page");
+    router.push("/profile");
   }
 
   return (

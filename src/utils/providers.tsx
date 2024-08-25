@@ -10,9 +10,18 @@ import { AuthProvider } from "@context/authContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Provider } from "jotai";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
+  // const router = useRouter();
+  // const { data: sessionData } = useSession();
+
+  // if (!sessionData) {
+  //   router.push("/");
+  //   // return null;
+  // }
 
   return (
     <AppProvider>

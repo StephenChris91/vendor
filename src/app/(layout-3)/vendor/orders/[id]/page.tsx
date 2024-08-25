@@ -70,7 +70,7 @@ export default function OrderDetails({ params }: IDParams) {
               Order ID:
             </Typography>
 
-            <Typography fontSize="14px">{order.id}</Typography>
+            <Typography fontSize="14px">{order?.id}</Typography>
           </FlexBox>
 
           <FlexBox className="pre" m="6px" alignItems="center">
@@ -78,7 +78,7 @@ export default function OrderDetails({ params }: IDParams) {
               Placed on:
             </Typography>
             <Typography fontSize="14px">
-              {format(new Date(order.createdAt), "dd MMM, yyyy")}
+              {format(new Date(order?.createdAt), "dd MMM, yyyy")}
             </Typography>
           </FlexBox>
 
@@ -97,7 +97,7 @@ export default function OrderDetails({ params }: IDParams) {
         </TableRow>
 
         <Box py="0.5rem">
-          {order.orderItems.map((item) => (
+          {order?.orderItems.map((item) => (
             <FlexBox
               px="1rem"
               py="0.5rem"

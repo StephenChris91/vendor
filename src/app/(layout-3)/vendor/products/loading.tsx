@@ -6,8 +6,11 @@ export default function Loading() {
   return (
     <Spinner
       style={{
-        width: "100%",
-        height: "100%",
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        zIndex: 99999,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

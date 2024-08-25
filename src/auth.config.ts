@@ -49,10 +49,7 @@ export default {
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
-            console.log("JWT callback - token before:", token);
-            console.log("JWT callback - user:", user);
-
+        async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.role = user.role;
                 token.firstname = user.firstname;
@@ -60,15 +57,27 @@ export default {
                 token.isOnboardedVendor = user.isOnboardedVendor;
                 token.hasPaid = user.hasPaid;
                 token.shopStatus = user.shop?.status;
+                token.lastActivity = Date.now();
             }
 
-            console.log("JWT callback - token after:", token);
+            if (trigger === "update") {
+                token.lastActivity = Date.now();
+            }
+
+            // Check for inactivity
+            const inactiveTime = Date.now() - (token.lastActivity as number);
+            if (inactiveTime > 5 * 60 * 1000) { // 5 minutes in milliseconds
+                return null; // This will force a new session
+            }
+
+            // Update the last activity time when the session is updated
+            if (trigger === "update" && session?.lastActivity) {
+                token.lastActivity = session.lastActivity;
+            }
+
             return token;
         },
         async session({ session, token }) {
-            console.log("Session callback - session before:", session);
-            console.log("Session callback - token:", token);
-
             if (session.user) {
                 session.user.id = token.sub as string;
                 session.user.role = token.role as string;
@@ -77,18 +86,20 @@ export default {
                 session.user.isOnboardedVendor = token.isOnboardedVendor as boolean;
                 session.user.hasPaid = token.hasPaid as boolean;
                 session.user.shopStatus = token.shopStatus as string | undefined;
-
+                session.user.lastActivity = token.lastActivity as number;
             }
 
-            console.log("Session callback - session after:", session);
             return session;
         },
     },
+
     pages: {
         signIn: '/login',
     },
     session: {
         strategy: "jwt",
+        maxAge: 600000, // 30 minutes
+        updateAge: 60, // Update the session every 1 minute
     },
     secret: process.env.NEXTAUTH_SECRET,
 } satisfies NextAuthConfig;

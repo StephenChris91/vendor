@@ -18,7 +18,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
 }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const { setUser } = useAuth();
+  // const { setUser } = useAuth();
 
   const onClick = async () => {
     try {
@@ -27,7 +27,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
         redirect: true,
         callbackUrl: "/",
       });
-      setUser(null); // Update the AuthContext
+      // setUser(null); // Update the AuthContext
       toast.success("Logged out successfully");
       onLogout?.(); // Call the onLogout prop if it exists
     } catch (error) {
