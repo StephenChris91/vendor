@@ -1,3 +1,5 @@
+'use server'
+
 import { db } from "../../prisma/prisma";
 
 export async function getCustomerProfile(userId: string) {
