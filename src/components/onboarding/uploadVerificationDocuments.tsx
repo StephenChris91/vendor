@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useCallback } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
@@ -14,6 +12,7 @@ import { Button } from "@component/buttons";
 interface UploadVerificationDocumentsProps {
   userId: string;
   userEmail: string;
+  setDocumentsUploaded: (uploaded: boolean) => void;
 }
 
 interface DocumentData {
@@ -42,7 +41,7 @@ const formSchema = yup.object().shape({
 
 const UploadVerificationDocuments: React.FC<
   UploadVerificationDocumentsProps
-> = ({ userId, userEmail }) => {
+> = ({ userId, userEmail, setDocumentsUploaded }) => {
   const [fileNames, setFileNames] = useState<string[]>([]);
 
   const formik = useFormik<FormValues>({
@@ -59,9 +58,11 @@ const UploadVerificationDocuments: React.FC<
         toast.success("Documents submitted successfully for verification!");
         formik.resetForm();
         setFileNames([]);
+        setDocumentsUploaded(true); // Set documents as uploaded
       } catch (error) {
         console.error("Error submitting documents:", error);
         toast.error("Failed to submit documents. Please try again.");
+        setDocumentsUploaded(false); // Ensure documents are marked as not uploaded in case of error
       }
     },
   });
@@ -78,6 +79,7 @@ const UploadVerificationDocuments: React.FC<
         newDocument,
       ]);
       setFileNames((prevNames) => [...prevNames, file.name]);
+
       toast.success("Document uploaded successfully!");
     },
     [formik]
@@ -91,6 +93,11 @@ const UploadVerificationDocuments: React.FC<
     const newFileNames = [...fileNames];
     newFileNames.splice(index, 1);
     setFileNames(newFileNames);
+
+    // If all documents are removed, set documents as not uploaded
+    if (newDocuments.length === 0) {
+      setDocumentsUploaded(false);
+    }
   };
 
   return (

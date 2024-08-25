@@ -104,6 +104,11 @@ export default auth((req) => {
             && !isPublicRoute && !req.auth?.user?.hasPaid && nextUrl.pathname !== '/onboarding' && nextUrl.pathname !== '/onboarding/confirmation') {
             return Response.redirect(new URL('/onboarding', nextUrl));
         }
+
+        //check if vendor has created a shop
+        if (req.auth?.user?.role === "Vendor" && !req.auth?.user?.shopId && nextUrl.pathname !== '/vendor/dashboard' && nextUrl.pathname !== '/vendor/account-settings') {
+            return Response.redirect(new URL('/onboarding', nextUrl));
+        }
     }
 
     return null;

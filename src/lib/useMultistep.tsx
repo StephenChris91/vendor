@@ -1,17 +1,7 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-hot-toast";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@component/buttons";
-import AddBasicInfo from "@component/onboarding/addBasicInfo";
-import AddLogo from "@component/onboarding/addLogo";
-import AddCoverImage from "@component/onboarding/addCoverImage";
-import AddPaymentInfo from "@component/onboarding/addPaymentInfo";
-import AddShopAddress from "@component/onboarding/addShopAddress";
-import AddShopSettings from "@component/onboarding/addShopSettings";
-import ProcessPayment from "@component/onboarding/processPayment";
-import UploadVerificationDocuments from "@component/onboarding/uploadVerificationDocuments";
 import { useFormContext } from "@context/formcontext";
 import { useCurrentUser } from "./use-session-client";
 import { OnboardingStyledRoot } from "@sections/auth/styles";
@@ -22,6 +12,16 @@ import { LogoutButton } from "@component/logout-button";
 import { createShop } from "actions/createshop";
 import { ShopStatus } from "@prisma/client";
 import { signOut } from "next-auth/react";
+
+// Import all step components here
+import AddLogo from "@component/onboarding/addLogo";
+import AddBasicInfo from "@component/onboarding/addBasicInfo";
+import AddCoverImage from "@component/onboarding/addCoverImage";
+import AddPaymentInfo from "@component/onboarding/addPaymentInfo";
+import AddShopAddress from "@component/onboarding/addShopAddress";
+import AddShopSettings from "@component/onboarding/addShopSettings";
+import ProcessPayment from "@component/onboarding/processPayment";
+import UploadVerificationDocuments from "@component/onboarding/uploadVerificationDocuments";
 
 const steps = [
   { component: AddLogo, label: "Shop Logo" },
@@ -43,11 +43,11 @@ const MultiStepForm = () => {
   const user = useCurrentUser();
   const [isPaymentProcessed, setPaymentProcessed] = useState(false);
   const [showPaymentWarning, setShowPaymentWarning] = useState(false);
+  const [documentsUploaded, setDocumentsUploaded] = useState(false);
   const router = useRouter();
 
   const handleNextStep = () => {
     if (currentStep === 5) {
-      // Before moving to payment step
       setShowPaymentWarning(true);
     } else if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -95,18 +95,14 @@ const MultiStepForm = () => {
           deliveryOptions: formData.shopSettings.deliveryOptions,
           isActive: formData.shopSettings.isActive,
         },
-        categoryName: formData.shopSettings.category, // Use the category name instead of ID
+        categoryName: formData.shopSettings.category,
       };
 
       const result = await createShop(shopData);
 
       if (result.status === "success") {
         toast.success("Shop created successfully!");
-
-        // Log the user out
         await signOut({ redirect: false });
-
-        // Redirect to the homepage
         router.push("/");
       } else {
         console.log(result.status, result.message);
@@ -121,12 +117,6 @@ const MultiStepForm = () => {
       }
     }
   };
-
-  // useEffect(() => {
-  //   return () => {
-  //     console.log("MultiStepForm component is unmounting");
-  //   };
-  // }, []);
 
   const StepComponent = steps[currentStep].component;
 
@@ -164,6 +154,7 @@ const MultiStepForm = () => {
       setPaymentProcessed,
       formData,
       onNextStep: handleNextStep,
+      setDocumentsUploaded, // Pass this to the UploadVerificationDocuments component
     };
   };
 
@@ -231,7 +222,12 @@ const MultiStepForm = () => {
             </Button>
           )}
           {currentStep === steps.length - 1 && (
-            <Button variant="contained" color="primary" onClick={handleFinish}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleFinish}
+              disabled={!documentsUploaded} // Disable if documents are not uploaded
+            >
               Finish
             </Button>
           )}
