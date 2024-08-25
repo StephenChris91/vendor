@@ -70,7 +70,7 @@ const VendorList: React.FC<VendorListProps> = ({
       toast.error(
         `Failed to ${
           newStatus === "active" ? "activate" : "deactivate"
-        } vendor. Please try again.`,
+        } vendor. Please try again. ${error.message}`,
         { id: toastId }
       );
     }
