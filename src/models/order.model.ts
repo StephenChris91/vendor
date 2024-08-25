@@ -30,4 +30,8 @@ export interface Order {
   shopId: string;
   paymentReference: string | null;
   orderItems: OrderItem[];
+  items?: any[]; // Adjust type as necessary
+  shippingAddress?: string; // Adjust type as necessary
+  shippingRates?: any[]; // Adjust type as necessary
+  totalAmount?: number; // Adjust type as necessary
 }
