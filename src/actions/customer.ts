@@ -1,13 +1,9 @@
-'use server'
-
-// app/api/customer.ts
-
 import { db } from "../../prisma/prisma";
-
-
 
 export async function getCustomerProfile(userId: string) {
     try {
+        console.log('Fetching customer profile for user:', userId);
+
         const user = await db.user.findUnique({
             where: {
                 id: userId,
@@ -28,6 +24,7 @@ export async function getCustomerProfile(userId: string) {
         });
 
         if (!user) {
+            console.log('Customer not found');
             throw new Error('Customer not found');
         }
 
@@ -37,6 +34,8 @@ export async function getCustomerProfile(userId: string) {
             awaitingShipment: user.orders.filter(order => order.status === 'Processing').length,
             awaitingDelivery: user.orders.filter(order => order.status === 'Complete').length,
         };
+
+        console.log('Fetched customer profile successfully:', userId);
 
         return {
             id: user.id,
@@ -51,7 +50,5 @@ export async function getCustomerProfile(userId: string) {
     } catch (error) {
         console.error('Error fetching customer profile:', error);
         throw error;
-    } finally {
-        await prisma.$disconnect();
     }
 }
