@@ -194,10 +194,12 @@ export default function Register() {
         <Box mb="0.75rem">
           <FlexBox alignItems="flex-start">
             <CheckBox
+              size={12}
               name="isVendor"
               color="primary"
               checked={values.isVendor}
               onChange={(e) => {
+                console.log("Checkbox checked:", values.isVendor); // Add this line for debugging
                 const isVendor = e.target.checked;
                 setFieldValue("isVendor", isVendor);
                 setFieldValue("role", isVendor ? "Vendor" : "Customer");

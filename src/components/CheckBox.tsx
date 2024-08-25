@@ -12,65 +12,37 @@ type CheckBoxProps = {
   labelColor?: colorOptions;
   labelPlacement?: "start" | "end";
   label?: any;
-  id?: any;
+  id?: string;
   size?: number;
 };
 // ==============================================================
 
 type WrapperProps = { labelPlacement?: "start" | "end" };
 
-const StyledCheckBox = styled.input.withConfig({
-  shouldForwardProp: (prop: string) => isValidProp(prop),
-})<CheckBoxProps & InputHTMLAttributes<HTMLInputElement>>(
-  ({ color, size }) =>
-    systemCss({
-      appearance: "none",
-      outline: "none",
-      cursor: "pointer",
+const StyledCheckBox = styled.input<CheckBoxProps>`
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+  width: ${(props) => props.size || 18}px;
+  height: ${(props) => props.size || 18}px;
+  border: 2px solid ${(props) => props.theme.colors.text.hint};
+  border-radius: 2px;
+  position: relative;
+  background-color: ${(props) => (props.checked ? props.color : "transparent")};
+  display: inline-block;
 
-      margin: 0,
-      width: size,
-      height: size,
-      border: "2px solid",
-      borderColor: "text.hint",
-      borderRadius: 2,
-      position: "relative",
-
-      "&:checked": {
-        borderColor: color,
-        backgroundColor: color,
-      },
-
-      /* create custom checkbox appearance */
-      "&:after": {
-        content: '""',
-        position: "absolute",
-        display: "none",
-        left: "50%",
-        top: "50%",
-        width: "30%",
-        height: "60%",
-        border: "solid white",
-        borderWidth: "0 2px 2px 0",
-        transform: "translate(-50%, -60%) rotate(45deg)",
-      },
-
-      /* appearance for checked checkbox */
-      "&:checked:after": {
-        display: "block",
-      },
-
-      "&:disabled": {
-        borderColor: `text.disabled`,
-        backgroundColor: `text.disabled`,
-      },
-
-      "&:checked:disabled:after": {
-        borderColor: "white",
-      },
-    }),
-  compose(color)
-);
+  &:checked::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 30%;
+    height: 60%;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+`;
 
 const Wrapper = styled.div.withConfig({
   shouldForwardProp: (prop: string) => isValidProp(prop),
@@ -105,7 +77,9 @@ const CheckBox = ({
   color = "primary",
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & CheckBoxProps & SpaceProps) => {
-  const [checkboxId, setCheckboxId] = useState(id);
+  const [checkboxId, setCheckboxId] = useState(
+    id || `checkbox-${Math.random().toString(36).substr(2, 9)}`
+  );
 
   // extract spacing props
   let spacingProps: any = {};
@@ -114,8 +88,6 @@ const CheckBox = ({
     if (key.startsWith("m") || key.startsWith("p"))
       spacingProps[propKey] = props[propKey];
   }
-
-  useEffect(() => setCheckboxId(Math.random()), []);
 
   return (
     <Wrapper

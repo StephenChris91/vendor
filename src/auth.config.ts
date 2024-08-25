@@ -89,7 +89,7 @@ export default {
     },
     session: {
         strategy: "jwt",
-        maxAge: 60 //expire in a minute
+        maxAge: 60 * 60 * 24 * 30, // 30 days
     },
     secret: process.env.NEXTAUTH_SECRET,
 } satisfies NextAuthConfig;
