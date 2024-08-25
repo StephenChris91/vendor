@@ -11,6 +11,7 @@ import {
   OrdersPagination,
 } from "@sections/customer-dashboard/orders";
 import { Order } from "@models/order.model";
+import VendorOrderRow from "@sections/customer-dashboard/orders/vendorOrderRow";
 
 type OrdersResponse = { orders: Order[] } | { error: string };
 
@@ -82,7 +83,7 @@ export default function OrderList() {
       </Hidden>
 
       {orderList.map((item) => (
-        <OrderRow order={item} key={item.id} />
+        <VendorOrderRow order={item} key={item.id} />
       ))}
 
       <OrdersPagination orderList={orderList} />
