@@ -43,6 +43,46 @@ const formSchema = yup.object().shape({
   state: yup.string().required("State code is required"),
 });
 
+const nigerianStates: SelectOption[] = [
+  { value: "AB", label: "Abia (AB)" },
+  { value: "AD", label: "Adamawa (AD)" },
+  { value: "AK", label: "Akwa Ibom (AK)" },
+  { value: "AN", label: "Anambra (AN)" },
+  { value: "BA", label: "Bauchi (BA)" },
+  { value: "BY", label: "Bayelsa (BY)" },
+  { value: "BE", label: "Benue (BE)" },
+  { value: "BO", label: "Borno (BO)" },
+  { value: "CR", label: "Cross River (CR)" },
+  { value: "DE", label: "Delta (DE)" },
+  { value: "EB", label: "Ebonyi (EB)" },
+  { value: "ED", label: "Edo (ED)" },
+  { value: "EK", label: "Ekiti (EK)" },
+  { value: "EN", label: "Enugu (EN)" },
+  { value: "FC", label: "Federal Capital Territory (FC)" },
+  { value: "GO", label: "Gombe (GO)" },
+  { value: "IM", label: "Imo (IM)" },
+  { value: "JI", label: "Jigawa (JI)" },
+  { value: "KD", label: "Kaduna (KD)" },
+  { value: "KN", label: "Kano (KN)" },
+  { value: "KT", label: "Katsina (KT)" },
+  { value: "KE", label: "Kebbi (KE)" },
+  { value: "KO", label: "Kogi (KO)" },
+  { value: "KW", label: "Kwara (KW)" },
+  { value: "LA", label: "Lagos (LA)" },
+  { value: "NA", label: "Nasarawa (NA)" },
+  { value: "NI", label: "Niger (NI)" },
+  { value: "OG", label: "Ogun (OG)" },
+  { value: "ON", label: "Ondo (ON)" },
+  { value: "OS", label: "Osun (OS)" },
+  { value: "OY", label: "Oyo (OY)" },
+  { value: "PL", label: "Plateau (PL)" },
+  { value: "RI", label: "Rivers (RI)" },
+  { value: "SO", label: "Sokoto (SO)" },
+  { value: "TA", label: "Taraba (TA)" },
+  { value: "YO", label: "Yobe (YO)" },
+  { value: "ZA", label: "Zamfara (ZA)" },
+];
+
 const AddShopAddress: React.FC<AddShopAddressProps> = ({
   updateFormData,
   initialAddress,
@@ -133,6 +173,13 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
     formik.submitForm();
   };
 
+  const handleStateChange = (option: SelectOption | null) => {
+    if (option) {
+      formik.setFieldValue("state", option.value);
+      formik.submitForm();
+    }
+  };
+
   const detectLocation = () => {
     setIsDetectingLocation(true);
     if ("geolocation" in navigator) {
@@ -205,19 +252,21 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
       <TextField
         fullwidth
         mb="0.75rem"
-        name="countryCode"
+        name="country"
         label="Country Code"
         value={formik.values.country}
         disabled
       />
-      <TextField
-        fullwidth
+
+      <Select
+        options={nigerianStates}
         mb="0.75rem"
         name="state"
         label="State"
-        onBlur={handleBlur}
-        onChange={handleChange}
-        value={formik.values.state}
+        value={nigerianStates.find(
+          (state) => state.value === formik.values.state
+        )}
+        onChange={handleStateChange}
         errorText={formik.touched.state && formik.errors.state}
       />
 
@@ -261,5 +310,4 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
     </Box>
   );
 };
-
 export default AddShopAddress;
