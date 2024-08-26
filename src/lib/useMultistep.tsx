@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Button } from "@component/buttons";
-import { useFormContext } from "@context/formcontext";
+import { useFormContext, FormData } from "@context/formcontext";
 import { useCurrentUser } from "./use-session-client";
 import { OnboardingStyledRoot } from "@sections/auth/styles";
 import Box from "@component/Box";
@@ -96,7 +96,7 @@ const MultiStepForm = () => {
           deliveryOptions: formData.shopSettings.deliveryOptions,
           isActive: formData.shopSettings.isActive,
         },
-        categoryName: formData.shopSettings.category,
+        category: formData.shopSettings.category,
       };
 
       const result = await createShop(shopData);
@@ -107,7 +107,7 @@ const MultiStepForm = () => {
         router.push("/");
       } else {
         console.log(result.status, result.message);
-        toast.error(result.message || "Failed to create shop");
+        toast.error(result.message || `Failed to create shop ${result.error}`);
       }
     } catch (error) {
       console.error("Error creating shop:", error);
@@ -123,7 +123,9 @@ const MultiStepForm = () => {
 
   const getStepProps = () => {
     return {
-      updateFormData,
+      updateFormData: (data: Partial<FormData>) => {
+        updateFormData(data);
+      },
       userName: user?.firstname || "",
       userEmail: user?.email || "",
       userId: user?.id || "",
@@ -132,26 +134,9 @@ const MultiStepForm = () => {
       initialSlug: formData.slug || "",
       initialDescription: formData.description || "",
       initialCoverImage: formData.coverImage || "",
-      initialPaymentInfo: formData.paymentInfo || {
-        accountName: "",
-        accountNumber: "",
-        bankName: "",
-      },
-      initialAddress: formData.address || {
-        street: "",
-        city: "",
-        state: "",
-        postalCode: "",
-        country: "",
-      },
-      initialShopSettings: formData.shopSettings || {
-        phoneNumber: "",
-        website: "",
-        businessHours: "",
-        category: "",
-        deliveryOptions: [],
-        isActive: false,
-      },
+      initialPaymentInfo: formData.paymentInfo,
+      initialAddress: formData.address,
+      initialShopSettings: formData.shopSettings,
       setPaymentProcessed,
       formData,
       onNextStep: handleNextStep,

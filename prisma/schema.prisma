@@ -100,6 +100,8 @@ model user {
   addresses          CustomerAddress[]
   paymentMethods     PaymentMethod[]
   wishlistItems      Wishlist[]
+
+  @@map("users")
 }
 
 model Wishlist {
@@ -139,7 +141,7 @@ model avatar {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    String   @unique
-  user      user     @relation(fields: [userId], references: [id])
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model shop {
@@ -154,24 +156,24 @@ model shop {
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
   userId       String        @unique
-  user         user          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         user?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   products     product[]     @relation("ShopProducts")
   orders       order[]
   address      Address?
   paymentInfo  PaymentInfo?
   shopSettings ShopSettings?
   shopOrders   shopOrder[]
-  categoryId   String
-  category     category      @relation(fields: [categoryId], references: [id])
+  category     String?
+  categoryId   String?
 }
 
 model Address {
   id         String @id @default(cuid())
   street     String
   city       String
-  state      String
+  state      String // This will store the stateCode
   postalCode String
-  country    String
+  country    String // This will store the countryCode
   shop       shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
   shopId     String @unique
 }
@@ -218,7 +220,7 @@ model product {
   in_wishlist        Boolean?
   shop_id            String?
   shop               shop?             @relation("ShopProducts", fields: [shop_id], references: [id], onDelete: Cascade)
-  user               user?             @relation("UserProducts", fields: [user_id], references: [id], onDelete: SetNull)
+  user               user?             @relation("UserProducts", fields: [user_id], references: [id], onDelete: Cascade)
   gallery            String[]
   shop_name          String?
   stock              Int?
@@ -239,7 +241,6 @@ model category {
   name          String            @unique
   slug          String
   isTopCategory Boolean           @default(false)
-  shops         shop[]
   parentId      String?
   parent        category?         @relation("SubCategories", fields: [parentId], references: [id])
   subCategories category[]        @relation("SubCategories")

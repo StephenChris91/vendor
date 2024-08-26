@@ -23,6 +23,18 @@ import Product from "@models/product.model";
 import { ProductStatus, ProductType } from "@prisma/client";
 
 // STYLED COMPONENT
+
+const ImageWrapper = styled.div`
+  width: 230px;
+  height: 230px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  overflow: hidden;
+`;
+
 const Wrapper = styled(Card)`
   margin: auto;
   height: 100%;
@@ -230,7 +242,14 @@ export default function ProductCard1({
           </FlexBox>
 
           <Link href={`/product/${slug}`}>
-            <NextImage alt={title} width={277} src={imgUrl} height={270} />
+            <ImageWrapper>
+              <NextImage
+                alt={title}
+                src={imgUrl}
+                layout="fill"
+                objectFit="cover"
+              />
+            </ImageWrapper>
           </Link>
         </div>
 

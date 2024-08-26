@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import toast from "react-hot-toast";
@@ -8,20 +8,26 @@ import toast from "react-hot-toast";
 import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
 import TextField from "@component/text-field";
+import Select, { SelectOption } from "@component/Select";
 import { Button } from "@component/buttons";
 
 import { reverseGeocode } from "lib/geocode";
+import { fetchCities } from "@lib/fetchTerminalCities";
 
 interface Address {
   street: string;
   city: string;
-  state: string;
   postalCode: string;
   country: string;
+  state: string;
+}
+
+interface FormData {
+  address: Address;
 }
 
 interface AddShopAddressProps {
-  updateFormData: (data: { address: Address }) => void;
+  updateFormData: (data: Partial<FormData>) => void;
   initialAddress: Address;
   userName: string;
   userEmail: string;
@@ -32,9 +38,9 @@ interface AddShopAddressProps {
 const formSchema = yup.object().shape({
   street: yup.string().required("Street address is required"),
   city: yup.string().required("City is required"),
-  state: yup.string().required("State is required"),
   postalCode: yup.string().required("Postal code is required"),
-  country: yup.string().required("Country is required"),
+  country: yup.string().required("Country code is required"),
+  state: yup.string().required("State code is required"),
 });
 
 const AddShopAddress: React.FC<AddShopAddressProps> = ({
@@ -45,24 +51,31 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
   userId,
   setStepValidation,
 }) => {
-  const [isDetectingLocation, setIsDetectingLocation] = React.useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [cities, setCities] = useState<SelectOption[]>([]);
 
   const formik = useFormik({
-    initialValues: initialAddress || {
-      street: "",
-      city: "",
+    initialValues: {
+      ...initialAddress,
+      country: "NG",
       state: "",
-      postalCode: "",
-      country: "",
+      cityOption: null as SelectOption | null,
     },
     validationSchema: formSchema,
     onSubmit: (values) => {
-      updateFormData({ address: values });
+      updateFormData({
+        address: {
+          street: values.street,
+          city: values.cityOption ? values.cityOption.value : "",
+          postalCode: values.postalCode,
+          country: values.country,
+          state: values.state,
+        },
+      });
     },
     validate: (values) => {
       try {
         formSchema.validateSync(values, { abortEarly: false });
-        setStepValidation(true);
         return {};
       } catch (err) {
         if (err instanceof yup.ValidationError) {
@@ -72,7 +85,6 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
               errors[error.path] = error.message;
             }
           });
-          setStepValidation(false);
           return errors;
         }
         return {};
@@ -81,14 +93,25 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
   });
 
   useEffect(() => {
-    if (initialAddress) {
-      formik.setValues(initialAddress);
-    }
-  }, [initialAddress]);
+    const isValid = Object.keys(formik.errors).length === 0 && formik.dirty;
+    setStepValidation(isValid);
+  }, [formik.errors, formik.dirty, setStepValidation]);
 
   useEffect(() => {
-    formik.validateForm();
-  }, []);
+    if (formik.values.country && formik.values.state) {
+      fetchCities(formik.values.country, formik.values.state)
+        .then((fetchedCities) => {
+          const cityOptions = fetchedCities.map((city) => ({
+            value: city.name,
+            label: city.name,
+          }));
+          setCities(cityOptions);
+        })
+        .catch((error) => {
+          toast.error("Failed to fetch cities. Please try again.");
+        });
+    }
+  }, [formik.values.country, formik.values.state]);
 
   const handleBlur = (e: React.FocusEvent<any>) => {
     formik.handleBlur(e);
@@ -97,6 +120,16 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
 
   const handleChange = (e: React.ChangeEvent<any>) => {
     formik.handleChange(e);
+    formik.submitForm();
+  };
+
+  const handleCityChange = (option: SelectOption | SelectOption[] | null) => {
+    if (Array.isArray(option)) {
+      console.warn("Multi-select is not supported for city selection");
+      return;
+    }
+    formik.setFieldValue("cityOption", option);
+    formik.setFieldValue("city", option ? option.value : "");
     formik.submitForm();
   };
 
@@ -110,11 +143,15 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
             const addressDetails = await reverseGeocode(latitude, longitude);
 
             formik.setValues({
+              ...formik.values,
               street: addressDetails.street,
-              city: addressDetails.city,
+              cityOption: {
+                value: addressDetails.city,
+                label: addressDetails.city,
+              },
               state: addressDetails.state,
               postalCode: addressDetails.postalCode,
-              country: addressDetails.country,
+              country: addressDetails.country || "NG",
             });
             formik.submitForm();
             toast.success("Location detected successfully!");
@@ -168,25 +205,11 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
       <TextField
         fullwidth
         mb="0.75rem"
-        name="street"
-        label="Street Address"
-        onBlur={handleBlur}
-        onChange={handleChange}
-        value={formik.values.street}
-        errorText={formik.touched.street && formik.errors.street}
+        name="countryCode"
+        label="Country Code"
+        value={formik.values.country}
+        disabled
       />
-
-      <TextField
-        fullwidth
-        mb="0.75rem"
-        name="city"
-        label="City"
-        onBlur={handleBlur}
-        onChange={handleChange}
-        value={formik.values.city}
-        errorText={formik.touched.city && formik.errors.city}
-      />
-
       <TextField
         fullwidth
         mb="0.75rem"
@@ -198,6 +221,27 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
         errorText={formik.touched.state && formik.errors.state}
       />
 
+      <Select
+        options={cities}
+        mb="0.75rem"
+        name="cityOption"
+        label="City"
+        value={formik.values.cityOption}
+        onChange={handleCityChange}
+        errorText={formik.touched.city && formik.errors.city}
+      />
+
+      <TextField
+        fullwidth
+        mb="0.75rem"
+        name="street"
+        label="Street Address"
+        onBlur={handleBlur}
+        onChange={handleChange}
+        value={formik.values.street}
+        errorText={formik.touched.street && formik.errors.street}
+      />
+
       <TextField
         fullwidth
         mb="0.75rem"
@@ -207,17 +251,6 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
         onChange={handleChange}
         value={formik.values.postalCode}
         errorText={formik.touched.postalCode && formik.errors.postalCode}
-      />
-
-      <TextField
-        fullwidth
-        mb="0.75rem"
-        name="country"
-        label="Country"
-        onBlur={handleBlur}
-        onChange={handleChange}
-        value={formik.values.country}
-        errorText={formik.touched.country && formik.errors.country}
       />
 
       {Object.keys(formik.errors).length > 0 && (

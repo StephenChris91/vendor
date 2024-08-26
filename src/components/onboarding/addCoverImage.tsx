@@ -67,19 +67,24 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
   const handleUpload = useCallback(
     (url: string) => {
       setIsUploading(false);
-      formik.setFieldValue("coverImage", url);
+      formik.setFieldValue("coverImage", url, true);
       updateFormData({ banner: url });
       toast.success("Shop cover image uploaded successfully!");
-      formik.validateForm();
     },
     [formik, updateFormData]
   );
 
   const handleRemoveCoverImage = () => {
-    formik.setFieldValue("coverImage", "");
+    formik.setFieldValue("coverImage", "", true);
     updateFormData({ banner: "" });
-    formik.validateForm();
   };
+
+  useEffect(() => {
+    // This effect will run whenever the coverImage value changes
+    formik.validateForm().then((errors) => {
+      setStepValidation(Object.keys(errors).length === 0);
+    });
+  }, [formik.values.coverImage]);
 
   return (
     <Box className="content" width="auto" height="auto" paddingBottom={6}>

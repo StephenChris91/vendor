@@ -69,11 +69,11 @@ export const shopAddressSchema = z.object({
 
 // Address sub-schema
 export const addressSchema = z.object({
-  street: z.string(),
-  city: z.string(),
-  state: z.string(),
-  postalCode: z.string(),
-  country: z.string(),
+  street: z.string().min(1, "Street address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  postalCode: z.string().min(1, "Postal code is required"),
+  country: z.string().min(1, "Country is required"),
 });
 
 // Payment info sub-schema
@@ -108,12 +108,13 @@ export const shopSchema = z.object({
   address: addressSchema,
   paymentInfo: paymentInfoSchema,
   shopSettings: shopSettingsSchema,
-  status: z.enum(["pending", "approved", "rejected"]).optional(),
+  status: z.enum(["Pending", "Approved", "Rejected"]).optional(),
   hasPaid: z.boolean().optional(),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
   deletedAt: z.date().optional(),
   userId: z.string().optional(),
+  category: z.string(),
 });
 
 // You can also export the sub-schemas if you need to use them separately

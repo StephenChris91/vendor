@@ -1,21 +1,20 @@
 'use server';
-import { paymentInfoSchema, shopAddressSchema, shopSettingsSchema } from './../schemas/index';
+import { addressSchema, paymentInfoSchema, shopAddressSchema, shopSettingsSchema } from './../schemas/index';
 import { shopSchema } from "schemas";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "auth";
 import { ShopStatus, Prisma } from '@prisma/client';
 import { db } from '../../prisma/prisma';
-import { redirect } from 'next/navigation';
 
 // Extend the shopSchema to include nested objects and additional fields
 const extendedShopSchema = shopSchema.extend({
-    address: shopAddressSchema,
+    address: addressSchema,
     paymentInfo: paymentInfoSchema,
     shopSettings: shopSettingsSchema,
     status: z.nativeEnum(ShopStatus),
     hasPaid: z.boolean(),
-    categoryName: z.string(), // Change this from categoryId to categoryName
+    category: z.string(), // Changed from categoryName to category
 });
 
 export async function createShop(values: z.infer<typeof extendedShopSchema>) {
@@ -46,23 +45,23 @@ export async function createShop(values: z.infer<typeof extendedShopSchema>) {
         status,
         paymentInfo,
         shopSettings,
-        categoryName, // Use categoryName instead of categoryId
+        category, // Changed from categoryName to category
     } = validInput.data;
 
     try {
-        // First, find or create the category
-        let category = await db.category.findFirst({
-            where: { name: categoryName },
-        });
+        // // First, find or create the category
+        // let categoryRecord = await db.category.findFirst({
+        //     where: { name: category },
+        // });
 
-        if (!category) {
-            category = await db.category.create({
-                data: {
-                    name: categoryName,
-                    slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
-                },
-            });
-        }
+        // if (!categoryRecord) {
+        //     categoryRecord = await db.category.create({
+        //         data: {
+        //             name: category,
+        //             slug: category.toLowerCase().replace(/\s+/g, '-'),
+        //         },
+        //     });
+        // }
 
         const shop = await db.shop.create({
             data: {
@@ -101,15 +100,12 @@ export async function createShop(values: z.infer<typeof extendedShopSchema>) {
                         isActive: shopSettings.isActive,
                     },
                 },
-                category: {
-                    connect: { id: category.id },
-                },
+
             },
             include: {
                 address: true,
                 paymentInfo: true,
                 shopSettings: true,
-                category: true,
             },
         });
 

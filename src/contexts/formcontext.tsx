@@ -2,8 +2,17 @@
 
 import { createContext, useContext, useState } from "react";
 
-interface FormData {
-  logo: string;
+interface Address {
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  state: string;
+}
+
+export interface FormData {
+  address?: Address;
+  logo?: string;
   shopName: string;
   slug: string;
   description: string;
@@ -13,13 +22,7 @@ interface FormData {
     accountNumber: string;
     bankName: string;
   };
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-  };
+
   shopSettings: {
     phoneNumber: string;
     website: string;
@@ -56,15 +59,15 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     coverImage: "",
     paymentInfo: {
       accountName: "",
-      accountNumber: "", // Initialize as empty string
+      accountNumber: "",
       bankName: "",
     },
     address: {
       street: "",
       city: "",
-      state: "",
       postalCode: "",
-      country: "",
+      country: "NG",
+      state: "",
     },
     shopSettings: {
       phoneNumber: "",
