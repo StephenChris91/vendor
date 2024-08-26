@@ -5,9 +5,7 @@ export async function GET() {
     try {
         const opticsShops = await db.shop.findMany({
             where: {
-                category: {
-                    name: 'Optics',
-                }
+                category: 'Optics'
             },
         });
         return NextResponse.json(opticsShops);

@@ -5,9 +5,7 @@ export async function GET() {
     try {
         const mobileShops = await db.shop.findMany({
             where: {
-                category: {
-                    name: 'mobile'
-                }
+                category: 'mobile'
             },
         });
         return NextResponse.json(mobileShops);
