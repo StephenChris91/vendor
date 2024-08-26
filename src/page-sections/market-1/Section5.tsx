@@ -36,6 +36,8 @@ export default function Section5() {
   } = useQuery<Product[], Error>({
     queryKey: ["newArrivals"],
     queryFn: fetchNewArrivals,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    refetchInterval: 10 * 60 * 1000, // 10 minutes
   });
 
   if (isLoading) return <Spinner />;
@@ -52,18 +54,17 @@ export default function Section5() {
     >
       <Card p="1rem" borderRadius={8}>
         <Grid container spacing={6}>
-          {productList.length > 0 ? (
-            productList.map((item) => (
-              <Grid item lg={2} md={3} sm={4} xs={6} key={item.id}>
-                <ProductCard2
-                  slug={item.slug}
-                  title={item.name}
-                  price={item.price}
-                  imgUrl={item.image || ""}
-                />
-              </Grid>
-            ))
-          ) : (
+          {productList.map((item) => (
+            <Grid item lg={2} md={3} sm={4} xs={6} key={item.id}>
+              <ProductCard2
+                slug={item.slug}
+                title={item.name}
+                price={item.price}
+                imgUrl={item.image || ""}
+              />
+            </Grid>
+          ))}
+          {productList.length === 0 && (
             <Grid item xs={12}>
               <p>No new arrivals available.</p>
             </Grid>

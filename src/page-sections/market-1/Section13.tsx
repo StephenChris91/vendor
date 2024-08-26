@@ -53,6 +53,8 @@ export default function Section13() {
   } = useQuery<Product[], Error>({
     queryKey: ["bigDiscounts"],
     queryFn: fetchBigDiscounts,
+    staleTime: Infinity, // Keep the data fresh indefinitely
+    gcTime: 1000 * 60 * 60 * 24, // Refresh every 60 seconds after
   });
 
   if (isLoading) return <Spinner />;

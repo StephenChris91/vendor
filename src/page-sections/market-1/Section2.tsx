@@ -9,7 +9,7 @@ import CategorySectionCreator from "@component/CategorySectionCreator";
 import useWindowSize from "@hook/useWindowSize";
 import Product from "@models/product.model";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Spinner from "@component/Spinner";
 
 // =============================================================
@@ -33,6 +33,7 @@ export default function Section2() {
   const width = useWindowSize();
   const [visibleSlides, setVisibleSlides] = useState(4);
 
+  const queryClient = useQueryClient();
   useEffect(() => {
     if (width < 500) setVisibleSlides(1);
     else if (width < 650) setVisibleSlides(2);
@@ -40,16 +41,15 @@ export default function Section2() {
     else setVisibleSlides(4);
   }, [width]);
 
-  // Using useQuery to fetch and manage the data
   const {
     data: flashDealsData,
     isLoading,
     error,
   } = useQuery<Product[], Error>({
-    queryKey: ["newArrivals"],
+    queryKey: ["flashDeals"],
     queryFn: fetchFlashDeals,
-    refetchInterval: 60000, // Refetch every 10 minutes
-    refetchIntervalInBackground: true, // Refresh every 10 minutes after
+    staleTime: Infinity, // Keep the data fresh indefinitely
+    gcTime: 1000 * 60 * 60 * 24, // Replace cacheTime with gcTime
   });
 
   if (isLoading) return <Spinner />;
@@ -91,4 +91,9 @@ export default function Section2() {
       </Box>
     </CategorySectionCreator>
   );
+}
+
+export function invalidateFlashDealsCache() {
+  const queryClient = useQueryClient();
+  queryClient.invalidateQueries({ queryKey: ["flashDeals"] });
 }

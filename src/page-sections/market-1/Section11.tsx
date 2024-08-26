@@ -32,6 +32,8 @@ export default function Section11() {
   } = useQuery<Product[], Error>({
     queryKey: ["moreItems"],
     queryFn: fetchMore,
+    staleTime: Infinity, // Keep the data fresh indefinitely
+    gcTime: 1000 * 60 * 60 * 24, // Refresh every 60 seconds after last update
   });
 
   if (isLoading) return <Spinner />;
