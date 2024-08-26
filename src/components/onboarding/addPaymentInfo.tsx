@@ -14,6 +14,7 @@ interface PaymentInfo {
 interface AddPaymentInfoProps {
   updateFormData: (data: { paymentInfo: PaymentInfo }) => void;
   initialPaymentInfo: PaymentInfo;
+  setStepValidation: (isValid: boolean) => void;
 }
 
 const formSchema = yup.object().shape({
@@ -28,6 +29,7 @@ const formSchema = yup.object().shape({
 const AddPaymentInfo: React.FC<AddPaymentInfoProps> = ({
   updateFormData,
   initialPaymentInfo,
+  setStepValidation,
 }) => {
   const formik = useFormik<PaymentInfo>({
     initialValues: {
@@ -39,6 +41,25 @@ const AddPaymentInfo: React.FC<AddPaymentInfoProps> = ({
     onSubmit: (values) => {
       updateFormData({ paymentInfo: values });
     },
+    validate: (values) => {
+      try {
+        formSchema.validateSync(values, { abortEarly: false });
+        setStepValidation(true);
+        return {};
+      } catch (err) {
+        if (err instanceof yup.ValidationError) {
+          const errors: { [key: string]: string } = {};
+          err.inner.forEach((error) => {
+            if (error.path) {
+              errors[error.path] = error.message;
+            }
+          });
+          setStepValidation(false);
+          return errors;
+        }
+        return {};
+      }
+    },
   });
 
   useEffect(() => {
@@ -46,6 +67,10 @@ const AddPaymentInfo: React.FC<AddPaymentInfoProps> = ({
       formik.setValues(initialPaymentInfo);
     }
   }, [initialPaymentInfo]);
+
+  useEffect(() => {
+    formik.validateForm();
+  }, []);
 
   const handleBlur = (e: React.FocusEvent<any>) => {
     formik.handleBlur(e);

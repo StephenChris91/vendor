@@ -15,6 +15,7 @@ interface AddLogoProps {
   initialLogo: string;
   userName: string;
   userId: string;
+  setStepValidation: (isValid: boolean) => void;
 }
 
 const validationSchema = Yup.object().shape({
@@ -26,6 +27,7 @@ const AddLogo: React.FC<AddLogoProps> = ({
   initialLogo,
   userName,
   userId,
+  setStepValidation,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -37,6 +39,19 @@ const AddLogo: React.FC<AddLogoProps> = ({
     onSubmit: (values) => {
       updateFormData({ logo: values.logo });
     },
+    validate: (values) => {
+      try {
+        validationSchema.validateSync(values);
+        setStepValidation(true);
+        return {};
+      } catch (error) {
+        if (error instanceof Yup.ValidationError) {
+          setStepValidation(false);
+          return { [error.path as string]: error.message };
+        }
+        return {};
+      }
+    },
   });
 
   useEffect(() => {
@@ -44,6 +59,10 @@ const AddLogo: React.FC<AddLogoProps> = ({
       formik.setFieldValue("logo", initialLogo);
     }
   }, [initialLogo]);
+
+  useEffect(() => {
+    formik.validateForm();
+  }, []);
 
   const handleUpload = useCallback(
     (url: string) => {

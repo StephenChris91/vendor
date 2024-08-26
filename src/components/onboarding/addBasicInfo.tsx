@@ -8,11 +8,24 @@ import TextField from "@component/text-field";
 import TextArea from "@component/textarea";
 import { H3, H5 } from "@component/Typography";
 
-const AddBasicInfo = ({
+interface AddBasicInfoProps {
+  updateFormData: (data: {
+    shopName: string;
+    slug: string;
+    description: string;
+  }) => void;
+  initialShopName: string;
+  initialSlug: string;
+  initialDescription: string;
+  setStepValidation: (isValid: boolean) => void;
+}
+
+const AddBasicInfo: React.FC<AddBasicInfoProps> = ({
   updateFormData,
   initialShopName,
   initialSlug,
   initialDescription,
+  setStepValidation,
 }) => {
   const formSchema = yup.object().shape({
     shopName: yup.string().required("Shop name is required"),
@@ -50,12 +63,35 @@ const AddBasicInfo = ({
         description: values.description,
       });
     },
+    validate: (values) => {
+      try {
+        formSchema.validateSync(values, { abortEarly: false });
+        setStepValidation(true);
+        return {};
+      } catch (err) {
+        if (err instanceof yup.ValidationError) {
+          const errors: { [key: string]: string } = {};
+          err.inner.forEach((error) => {
+            if (error.path) {
+              errors[error.path] = error.message;
+            }
+          });
+          setStepValidation(false);
+          return errors;
+        }
+        return {};
+      }
+    },
   });
 
   useEffect(() => {
     const newSlug = generateSlug(formik.values.shopName);
     formik.setFieldValue("slug", newSlug);
   }, [formik.values.shopName]);
+
+  useEffect(() => {
+    formik.validateForm();
+  }, []);
 
   const handleBlur = (e: React.FocusEvent<any>) => {
     formik.handleBlur(e);

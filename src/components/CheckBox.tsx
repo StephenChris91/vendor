@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, useEffect, useState } from "react";
+import React, { InputHTMLAttributes, useState, useEffect } from "react";
 import styled from "styled-components";
 import { color, compose, space, SpaceProps } from "styled-system";
 import systemCss from "@styled-system/css";
@@ -19,7 +19,7 @@ type CheckBoxProps = {
 
 type WrapperProps = { labelPlacement?: "start" | "end" };
 
-const StyledCheckBox = styled.input<CheckBoxProps>`
+const StyledCheckBox = styled.input<CheckBoxProps & { $isChecked: boolean }>`
   appearance: none;
   outline: none;
   cursor: pointer;
@@ -28,8 +28,12 @@ const StyledCheckBox = styled.input<CheckBoxProps>`
   border: 2px solid ${(props) => props.theme.colors.text.hint};
   border-radius: 2px;
   position: relative;
-  background-color: ${(props) => (props.checked ? props.color : "transparent")};
+  background-color: ${(props) =>
+    props.$isChecked
+      ? props.theme.colors[props.color || "primary"].main
+      : "transparent"};
   display: inline-block;
+  transition: all 0.2s ease-in-out;
 
   &:checked::after {
     content: "";
@@ -61,25 +65,41 @@ const Wrapper = styled.div.withConfig({
     cursor: pointer;
   }
   input[disabled] + label {
-    color: disabled;
-    cursor: unset;
+    color: ${(props) => props.theme.colors.text.disabled};
+    cursor: not-allowed;
   }
 
   ${color}
   ${space}
 `;
 
-const CheckBox = ({
+const CheckBox: React.FC<
+  InputHTMLAttributes<HTMLInputElement> & CheckBoxProps & SpaceProps
+> = ({
   id,
   label,
   labelPlacement,
   labelColor = "secondary",
   color = "primary",
+  checked,
+  onChange,
   ...props
-}: InputHTMLAttributes<HTMLInputElement> & CheckBoxProps & SpaceProps) => {
+}) => {
+  const [isChecked, setIsChecked] = useState(checked || false);
   const [checkboxId, setCheckboxId] = useState(
     id || `checkbox-${Math.random().toString(36).substr(2, 9)}`
   );
+
+  useEffect(() => {
+    setIsChecked(checked || false);
+  }, [checked]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsChecked(event.target.checked);
+    if (onChange) {
+      onChange(event);
+    }
+  };
 
   // extract spacing props
   let spacingProps: any = {};
@@ -99,7 +119,10 @@ const CheckBox = ({
       <StyledCheckBox
         id={checkboxId}
         type="checkbox"
-        color={`${color}`}
+        color={color}
+        checked={isChecked}
+        onChange={handleChange}
+        $isChecked={isChecked}
         {...props}
       />
       <label htmlFor={checkboxId}>{label}</label>

@@ -26,6 +26,7 @@ interface AddShopAddressProps {
   userName: string;
   userEmail: string;
   userId: string;
+  setStepValidation: (isValid: boolean) => void;
 }
 
 const formSchema = yup.object().shape({
@@ -42,6 +43,7 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
   userName,
   userEmail,
   userId,
+  setStepValidation,
 }) => {
   const [isDetectingLocation, setIsDetectingLocation] = React.useState(false);
 
@@ -57,6 +59,25 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
     onSubmit: (values) => {
       updateFormData({ address: values });
     },
+    validate: (values) => {
+      try {
+        formSchema.validateSync(values, { abortEarly: false });
+        setStepValidation(true);
+        return {};
+      } catch (err) {
+        if (err instanceof yup.ValidationError) {
+          const errors: { [key: string]: string } = {};
+          err.inner.forEach((error) => {
+            if (error.path) {
+              errors[error.path] = error.message;
+            }
+          });
+          setStepValidation(false);
+          return errors;
+        }
+        return {};
+      }
+    },
   });
 
   useEffect(() => {
@@ -64,6 +85,10 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
       formik.setValues(initialAddress);
     }
   }, [initialAddress]);
+
+  useEffect(() => {
+    formik.validateForm();
+  }, []);
 
   const handleBlur = (e: React.FocusEvent<any>) => {
     formik.handleBlur(e);
@@ -74,8 +99,6 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
     formik.handleChange(e);
     formik.submitForm();
   };
-
-  //TODO: Retreive list of cities from terminal africa and populate the select option with it
 
   const detectLocation = () => {
     setIsDetectingLocation(true);

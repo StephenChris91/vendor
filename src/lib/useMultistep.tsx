@@ -44,6 +44,7 @@ const MultiStepForm = () => {
   const [isPaymentProcessed, setPaymentProcessed] = useState(false);
   const [showPaymentWarning, setShowPaymentWarning] = useState(false);
   const [documentsUploaded, setDocumentsUploaded] = useState(false);
+  const [stepValidation, setStepValidation] = useState(steps.map(() => false));
   const router = useRouter();
 
   const handleNextStep = () => {
@@ -154,7 +155,12 @@ const MultiStepForm = () => {
       setPaymentProcessed,
       formData,
       onNextStep: handleNextStep,
-      setDocumentsUploaded, // Pass this to the UploadVerificationDocuments component
+      setDocumentsUploaded,
+      setStepValidation: (isValid: boolean) => {
+        const newStepValidation = [...stepValidation];
+        newStepValidation[currentStep] = isValid;
+        setStepValidation(newStepValidation);
+      },
     };
   };
 
@@ -216,7 +222,10 @@ const MultiStepForm = () => {
               variant="contained"
               color="primary"
               onClick={handleNextStep}
-              disabled={currentStep >= 6 && !isPaymentProcessed}
+              disabled={
+                !stepValidation[currentStep] ||
+                (currentStep >= 6 && !isPaymentProcessed)
+              }
             >
               {currentStep === steps.length - 2 ? "Submit Documents" : "Next"}
             </Button>
@@ -226,7 +235,7 @@ const MultiStepForm = () => {
               variant="contained"
               color="primary"
               onClick={handleFinish}
-              disabled={!documentsUploaded} // Disable if documents are not uploaded
+              disabled={!documentsUploaded}
             >
               Finish
             </Button>

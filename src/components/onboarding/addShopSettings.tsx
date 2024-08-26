@@ -13,6 +13,7 @@ import CheckBox from "@component/CheckBox";
 interface AddShopSettingsProps {
   updateFormData: (data: { shopSettings: ShopSettings }) => void;
   initialShopSettings: ShopSettings;
+  setStepValidation: (isValid: boolean) => void;
 }
 
 interface ShopSettings {
@@ -62,6 +63,7 @@ const deliveryOptions = [
 const AddShopSettings: React.FC<AddShopSettingsProps> = ({
   updateFormData,
   initialShopSettings,
+  setStepValidation,
 }) => {
   const formik = useFormik({
     initialValues: {
@@ -74,6 +76,25 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
     },
     validationSchema: formSchema,
     onSubmit: () => {}, // Empty onSubmit as we're not submitting the form here
+    validate: (values) => {
+      try {
+        formSchema.validateSync(values, { abortEarly: false });
+        setStepValidation(true);
+        return {};
+      } catch (err) {
+        if (err instanceof yup.ValidationError) {
+          const errors: { [key: string]: string } = {};
+          err.inner.forEach((error) => {
+            if (error.path) {
+              errors[error.path] = error.message;
+            }
+          });
+          setStepValidation(false);
+          return errors;
+        }
+        return {};
+      }
+    },
   });
 
   useEffect(() => {
@@ -82,11 +103,16 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
     }
   }, [initialShopSettings]);
 
+  useEffect(() => {
+    formik.validateForm();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<any>) => {
     formik.handleChange(e);
     updateFormData({
       shopSettings: { ...formik.values, [e.target.name]: e.target.value },
     });
+    formik.validateForm();
   };
 
   const handleCategoryChange = (selectedOption: CategoryOption | null) => {
@@ -95,6 +121,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
       updateFormData({
         shopSettings: { ...formik.values, category: selectedOption.value },
       });
+      formik.validateForm();
     }
   };
 
@@ -106,6 +133,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
     updateFormData({
       shopSettings: { ...formik.values, deliveryOptions: updatedOptions },
     });
+    formik.validateForm();
   };
 
   const handleIsActiveChange = () => {
@@ -114,6 +142,7 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
     updateFormData({
       shopSettings: { ...formik.values, isActive: newIsActive },
     });
+    formik.validateForm();
   };
 
   return (

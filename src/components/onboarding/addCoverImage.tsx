@@ -15,6 +15,7 @@ interface AddCoverImageProps {
   initialCoverImage: string;
   userName: string;
   userId: string;
+  setStepValidation: (isValid: boolean) => void;
 }
 
 const validationSchema = Yup.object().shape({
@@ -26,6 +27,7 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
   initialCoverImage,
   userName,
   userId,
+  setStepValidation,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -37,6 +39,19 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
     onSubmit: (values) => {
       updateFormData({ banner: values.coverImage });
     },
+    validate: (values) => {
+      try {
+        validationSchema.validateSync(values);
+        setStepValidation(true);
+        return {};
+      } catch (error) {
+        if (error instanceof Yup.ValidationError) {
+          setStepValidation(false);
+          return { [error.path as string]: error.message };
+        }
+        return {};
+      }
+    },
   });
 
   useEffect(() => {
@@ -45,12 +60,17 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
     }
   }, [initialCoverImage]);
 
+  useEffect(() => {
+    formik.validateForm();
+  }, []);
+
   const handleUpload = useCallback(
     (url: string) => {
       setIsUploading(false);
       formik.setFieldValue("coverImage", url);
       updateFormData({ banner: url });
       toast.success("Shop cover image uploaded successfully!");
+      formik.validateForm();
     },
     [formik, updateFormData]
   );
@@ -58,6 +78,7 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
   const handleRemoveCoverImage = () => {
     formik.setFieldValue("coverImage", "");
     updateFormData({ banner: "" });
+    formik.validateForm();
   };
 
   return (
