@@ -30,7 +30,7 @@ export default function ProductCard8({
 }: ProductCard8Props) {
   return (
     <Card p="1rem" borderRadius={8} {...props}>
-      <Link href={`/product/${slug}`}>
+      <Link href={`/product/${id}`}>
         <HoverBox mb="0.75rem" borderRadius={8} overflow="hidden">
           <NextImage
             src={imgUrl || "/assets/images/products/Rectangle 116.png"}
@@ -40,7 +40,13 @@ export default function ProductCard8({
           />
         </HoverBox>
 
-        <SemiSpan title={title} mb="0.25rem" color="inherit" ellipsis display="block">
+        <SemiSpan
+          title={title}
+          mb="0.25rem"
+          color="inherit"
+          ellipsis
+          display="block"
+        >
           {title}
         </SemiSpan>
 

@@ -13,6 +13,7 @@ import {
 import { getRelatedProducts } from "actions/products/getRelatedProducts";
 import { getFrequentlyBought } from "actions/products/getFrequentlyBought";
 import Product from "@models/product.model";
+import Spinner from "@component/Spinner";
 
 export default function ProductDetails() {
   const params = useParams();
@@ -24,7 +25,7 @@ export default function ProductDetails() {
       queryKey: ["product", id],
       queryFn: () => getProduct(id as string),
       enabled: !!id, // Only fetch if `id` exists
-      refetchInterval: false, // Automatically refetch the product every 5 seconds
+      refetchInterval: 0, // Automatically refetch the product every 5 seconds
     }
   );
 
@@ -34,6 +35,7 @@ export default function ProductDetails() {
   >({
     queryKey: ["availableShops"],
     queryFn: getAvailableShop,
+    refetchInterval: 0,
   });
 
   const { data: relatedProducts, isLoading: relatedLoading } = useQuery<
@@ -42,14 +44,14 @@ export default function ProductDetails() {
   >({
     queryKey: ["relatedProducts", id],
     queryFn: () => getRelatedProducts(id as string),
-    enabled: !!product, // Fetch related products only after product is fetched
+    // enabled: !!product, // Fetch related products only after product is fetched
   });
 
   const { data: frequentlyBought, isLoading: frequentlyBoughtLoading } =
     useQuery<Product[], Error>({
       queryKey: ["frequentlyBought", id],
       queryFn: () => getFrequentlyBought(id as string),
-      enabled: !!product, // Fetch frequently bought products only after product is fetched
+      // enabled: !!product, // Fetch frequently bought products only after product is fetched
     });
 
   if (
@@ -58,7 +60,18 @@ export default function ProductDetails() {
     relatedLoading ||
     frequentlyBoughtLoading
   ) {
-    return <div>Loading...</div>;
+    return (
+      <Spinner
+        style={{
+          width: "70px",
+          height: "70px",
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      />
+    );
   }
 
   if (!product) {
