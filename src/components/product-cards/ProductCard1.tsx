@@ -241,7 +241,7 @@ export default function ProductCard1({
             </Icon>
           </FlexBox>
 
-          <Link href={`/product/${slug}`}>
+          <Link href={`/product/${id}`}>
             <ImageWrapper>
               <NextImage
                 alt={title}
@@ -256,7 +256,7 @@ export default function ProductCard1({
         <div className="details">
           <FlexBox>
             <Box flex="1 1 0" minWidth="0px" mr="0.5rem">
-              <Link href={`/product/${slug}`}>
+              <Link href={`/product/${id}`}>
                 <H3
                   mb="10px"
                   title={title}

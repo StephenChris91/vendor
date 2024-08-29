@@ -12,7 +12,13 @@ const SettingsSection = styled(Box)`
   margin-bottom: 2rem;
 `;
 
-const PaymentSettings: React.FC = () => {
+interface PaymentSettingsProps {
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const PaymentSettings: React.FC<PaymentSettingsProps> = ({
+  setHasUnsavedChanges,
+}) => {
   return (
     <Box>
       <H5 mb={3}>Payment Settings</H5>

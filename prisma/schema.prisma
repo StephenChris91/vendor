@@ -410,7 +410,7 @@ model MainCarousel {
   description String?
   buttonText  String?
   buttonLink  String?
-  image       String
+  imgUrl      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

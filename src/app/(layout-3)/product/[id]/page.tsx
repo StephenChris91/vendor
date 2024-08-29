@@ -15,12 +15,16 @@ import { getFrequentlyBought } from "actions/products/getFrequentlyBought";
 import Product from "@models/product.model";
 
 export default function ProductDetails() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id; // Ensure `id` is correctly extracted
 
+  // Fetch the product details using `useQuery`
   const { data: product, isLoading: productLoading } = useQuery<Product, Error>(
     {
       queryKey: ["product", id],
       queryFn: () => getProduct(id as string),
+      enabled: !!id, // Only fetch if `id` exists
+      refetchInterval: false, // Automatically refetch the product every 5 seconds
     }
   );
 
@@ -38,14 +42,14 @@ export default function ProductDetails() {
   >({
     queryKey: ["relatedProducts", id],
     queryFn: () => getRelatedProducts(id as string),
-    enabled: !!product,
+    enabled: !!product, // Fetch related products only after product is fetched
   });
 
   const { data: frequentlyBought, isLoading: frequentlyBoughtLoading } =
     useQuery<Product[], Error>({
       queryKey: ["frequentlyBought", id],
       queryFn: () => getFrequentlyBought(id as string),
-      enabled: !!product,
+      enabled: !!product, // Fetch frequently bought products only after product is fetched
     });
 
   if (
@@ -64,7 +68,6 @@ export default function ProductDetails() {
   return (
     <Fragment>
       <ProductIntro product={product} />
-
       <ProductView
         product={product}
         shops={shops || []}

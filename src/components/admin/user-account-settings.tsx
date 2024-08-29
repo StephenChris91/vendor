@@ -12,7 +12,13 @@ const SettingsSection = styled(Box)`
   margin-bottom: 2rem;
 `;
 
-const UserAccountSettings: React.FC = () => {
+interface UserAccountSettingsProps {
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const UserAccountSettings: React.FC<UserAccountSettingsProps> = ({
+  setHasUnsavedChanges,
+}) => {
   return (
     <Box>
       <H5 mb={3}>User Account Settings</H5>

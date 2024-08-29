@@ -12,7 +12,13 @@ const SettingsSection = styled(Box)`
   margin-bottom: 2rem;
 `;
 
-const ShippingSettings: React.FC = () => {
+interface ShippingSettingsProps {
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const ShippingSettings: React.FC<ShippingSettingsProps> = ({
+  setHasUnsavedChanges,
+}) => {
   return (
     <Box>
       <H5 mb={3}>Shipping Settings</H5>

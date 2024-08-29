@@ -12,7 +12,11 @@ const SettingsSection = styled(Box)`
   margin-bottom: 2rem;
 `;
 
-const TaxSettings: React.FC = () => {
+interface TaxSettingsProps {
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const TaxSettings: React.FC<TaxSettingsProps> = ({ setHasUnsavedChanges }) => {
   return (
     <Box>
       <H5 mb={3}>Tax Settings</H5>

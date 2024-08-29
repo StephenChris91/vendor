@@ -12,7 +12,13 @@ const SettingsSection = styled(Box)`
   margin-bottom: 2rem;
 `;
 
-const EmailSettings: React.FC = () => {
+interface EmailSettingsProps {
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const EmailSettings: React.FC<EmailSettingsProps> = ({
+  setHasUnsavedChanges,
+}) => {
   return (
     <Box>
       <H5 mb={3}>Email Settings</H5>

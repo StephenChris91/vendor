@@ -11,7 +11,11 @@ const SettingsSection = styled(Box)`
   margin-bottom: 2rem;
 `;
 
-const APISettings: React.FC = () => {
+interface APISettingsProps {
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const APISettings: React.FC<APISettingsProps> = ({ setHasUnsavedChanges }) => {
   return (
     <Box>
       <H5 mb={3}>API Settings</H5>

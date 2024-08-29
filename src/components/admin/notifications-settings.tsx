@@ -11,7 +11,13 @@ const SettingsSection = styled(Box)`
   margin-bottom: 2rem;
 `;
 
-const NotificationSettings: React.FC = () => {
+interface NotificationSettingsProps {
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const NotificationSettings: React.FC<NotificationSettingsProps> = ({
+  setHasUnsavedChanges,
+}) => {
   return (
     <Box>
       <H5 mb={3}>Notification Settings</H5>

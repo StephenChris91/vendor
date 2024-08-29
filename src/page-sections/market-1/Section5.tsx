@@ -46,6 +46,8 @@ export default function Section5() {
   // Ensure newArrivalsList is an array
   const productList = Array.isArray(newArrivalsList) ? newArrivalsList : [];
 
+  console.log("New Products: ", productList);
+
   return (
     <CategorySectionCreator
       iconName="new-product-1"
@@ -57,6 +59,7 @@ export default function Section5() {
           {productList.map((item) => (
             <Grid item lg={2} md={3} sm={4} xs={6} key={item.id}>
               <ProductCard2
+                id={item.id}
                 slug={item.slug}
                 title={item.name}
                 price={item.price}

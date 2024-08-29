@@ -12,7 +12,13 @@ const SettingsSection = styled(Box)`
   margin-bottom: 2rem;
 `;
 
-const CommissionSettings: React.FC = () => {
+interface CommissionSettingsProps {
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const CommissionSettings: React.FC<CommissionSettingsProps> = ({
+  setHasUnsavedChanges,
+}) => {
   return (
     <Box>
       <H5 mb={3}>Commission Settings</H5>

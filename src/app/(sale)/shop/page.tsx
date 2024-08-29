@@ -20,6 +20,8 @@ export default function SalePage() {
     refetchIntervalInBackground: true, // Optional: refetch even when the tab is not active
   });
 
+  console.log("From SalesProduct2 Component", data);
+
   if (isLoading)
     return (
       <Spinner

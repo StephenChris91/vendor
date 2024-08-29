@@ -286,6 +286,26 @@ export interface CartItem {
 }
 
 
+export interface MainCarouselItem {
+    id?: string;
+    title?: string;
+    description?: string;
+    buttonText?: string;
+    buttonLink?: string;
+    image: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+export interface CreateCarouselItemInput {
+    title?: string;
+    description?: string;
+    buttonText?: string;
+    buttonLink?: string;
+    image: string;
+}
+
+
 
 
 

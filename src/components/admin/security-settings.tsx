@@ -13,7 +13,13 @@ const SettingsSection = styled(Box)`
   margin-bottom: 2rem;
 `;
 
-const SecuritySettings: React.FC = () => {
+interface SecuritySettingsProps {
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const SecuritySettings: React.FC<SecuritySettingsProps> = ({
+  setHasUnsavedChanges,
+}) => {
   return (
     <Box>
       <H5 mb={3}>Security Settings</H5>

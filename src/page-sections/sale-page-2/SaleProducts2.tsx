@@ -26,6 +26,8 @@ export default function SaleProducts2({ products, meta, onPageChange }: Props) {
     onPageChange(selected + 1);
   };
 
+  console.log("From ProductCard1", products);
+
   return (
     <>
       <Grid container spacing={6}>

@@ -24,7 +24,7 @@ export default function ProductView({
   shops,
   relatedProducts,
   frequentlyBought,
-}: Props) {
+}) {
   const [selectedOption, setSelectedOption] = useState<
     "description" | "review"
   >("description");
