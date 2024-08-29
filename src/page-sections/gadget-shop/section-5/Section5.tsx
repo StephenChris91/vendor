@@ -24,6 +24,7 @@ export default function Section5({ products }: Props) {
         {products.map((item) => (
           <div key={item.id}>
             <ProductCard2
+              id={item.id}
               slug={item.slug}
               price={item.price}
               title={item.name}
