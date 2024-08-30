@@ -1,4 +1,4 @@
-import navigations from "@data/navigations";
+import { navigations } from "@data/navigations";
 import MegaMenu1 from "./mega-menu/MegaMenu1";
 import MegaMenu2 from "./mega-menu/MegaMenu2";
 import CategoryMenuItem from "./CategoryMenuItem";

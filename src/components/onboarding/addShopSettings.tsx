@@ -9,7 +9,7 @@ import { H5, Small } from "@component/Typography";
 import TextField from "@component/text-field";
 import Select from "@component/Select";
 import CheckBox from "@component/CheckBox";
-
+import { vendorCategories } from "@data/vendor-categories";
 interface AddShopSettingsProps {
   updateFormData: (data: { shopSettings: ShopSettings }) => void;
   initialShopSettings: ShopSettings;
@@ -44,15 +44,6 @@ const formSchema = yup.object().shape({
     .min(1, "Select at least one delivery option"),
   isActive: yup.boolean(),
 });
-
-const categoryOptions: CategoryOption[] = [
-  { value: "electronics", label: "Electronics" },
-  { value: "clothing", label: "Clothing" },
-  { value: "food", label: "Food & Beverages" },
-  { value: "home", label: "Home & Garden" },
-  { value: "beauty", label: "Beauty & Health" },
-  { value: "other", label: "Other" },
-];
 
 const deliveryOptions = [
   { value: "pickup", label: "In-store Pickup" },
@@ -192,8 +183,8 @@ const AddShopSettings: React.FC<AddShopSettingsProps> = ({
       />
 
       <Select
-        options={categoryOptions}
-        value={categoryOptions.find(
+        options={vendorCategories}
+        value={vendorCategories.find(
           (option) => option.value === formik.values.category
         )}
         onChange={handleCategoryChange}

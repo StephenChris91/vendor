@@ -22,6 +22,7 @@ import { validationSchema } from "schemas";
 import { uploadToS3 } from "@utils/s3Client";
 import { LuHash } from "react-icons/lu";
 import { updateProduct } from "actions/update-product";
+import { primaryCategories } from "@data/primary-categories";
 
 const StyledDropZone = styled(DropZone)`
   width: 100%;
@@ -70,6 +71,11 @@ const productTypeOptions: SelectOption[] = [
   { value: "Simple", label: "Simple" },
   { value: "Variable", label: "Variable" },
 ];
+
+const categoryOptions: SelectOption[] = primaryCategories.map((category) => ({
+  value: category.toLowerCase().replace(/\s+/g, "-"),
+  label: category,
+}));
 
 export default function ProductUpdateForm({
   product,
@@ -176,7 +182,7 @@ export default function ProductUpdateForm({
         product?.categories?.map((pc) => ({
           value: pc.categoryId,
           label:
-            categoryOption.find((cat) => cat.value === pc.categoryId)?.label ||
+            categoryOptions.find((cat) => cat.value === pc.categoryId)?.label ||
             "",
         })) || [],
       brandId: product?.brandId || null,
@@ -514,21 +520,13 @@ export default function ProductUpdateForm({
                 <Grid item sm={6} xs={12}>
                   <Select
                     isMulti
-                    isCreatable
-                    options={categoryOption}
+                    options={categoryOptions}
                     value={values.categories}
                     onChange={(newValue) =>
                       setFieldValue("categories", newValue)
                     }
-                    onCreateOption={(inputValue) => {
-                      const newCategory = handleCreateCategory(inputValue);
-                      setFieldValue("categories", [
-                        ...values.categories,
-                        newCategory,
-                      ]);
-                    }}
                     label="Categories"
-                    placeholder="Select or Create Categories"
+                    placeholder="Select Categories"
                     errorText={
                       touched.categories && (errors.categories as string)
                     }
