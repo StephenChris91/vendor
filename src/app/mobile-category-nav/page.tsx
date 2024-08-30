@@ -19,7 +19,7 @@ import useWindowSize from "@hook/useWindowSize";
 import { MobileCategoryNavStyle } from "./styles";
 import MobileCategoryImageBox from "./MobileCategoryImageBox";
 
-import navigations from "@data/navigations";
+import { navigations } from "@data/navigations";
 
 // ==============================================================
 interface Suggestion {
@@ -56,7 +56,10 @@ export default function MobileCategoryNav() {
           {navigations.map((item) => (
             <div
               key={item.title}
-              className={clsx({ "main-category-box": true, active: category?.href === item.href })}
+              className={clsx({
+                "main-category-box": true,
+                active: category?.href === item.href,
+              })}
               onClick={handleCategoryClick(item)}
               // borderLeft={`${category?.href === item.href ? "3" : "0"}px solid`}
             >
@@ -64,7 +67,12 @@ export default function MobileCategoryNav() {
                 {item.icon}
               </Icon>
 
-              <Typography className="ellipsis" textAlign="center" fontSize="11px" lineHeight="1">
+              <Typography
+                className="ellipsis"
+                textAlign="center"
+                fontSize="11px"
+                lineHeight="1"
+              >
                 {item.title}
               </Typography>
             </div>
@@ -138,41 +146,41 @@ const suggestion = [
   {
     title: "Belt",
     href: "/belt",
-    imgUrl: "/assets/images/products/categories/belt.png"
+    imgUrl: "/assets/images/products/categories/belt.png",
   },
   {
     title: "Hat",
     href: "/Hat",
-    imgUrl: "/assets/images/products/categories/hat.png"
+    imgUrl: "/assets/images/products/categories/hat.png",
   },
   {
     title: "Watches",
     href: "/Watches",
-    imgUrl: "/assets/images/products/categories/watch.png"
+    imgUrl: "/assets/images/products/categories/watch.png",
   },
   {
     title: "Sunglasses",
     href: "/Sunglasses",
-    imgUrl: "/assets/images/products/categories/sunglass.png"
+    imgUrl: "/assets/images/products/categories/sunglass.png",
   },
   {
     title: "Sneakers",
     href: "/Sneakers",
-    imgUrl: "/assets/images/products/categories/sneaker.png"
+    imgUrl: "/assets/images/products/categories/sneaker.png",
   },
   {
     title: "Sandals",
     href: "/Sandals",
-    imgUrl: "/assets/images/products/categories/sandal.png"
+    imgUrl: "/assets/images/products/categories/sandal.png",
   },
   {
     title: "Formal",
     href: "/Formal",
-    imgUrl: "/assets/images/products/categories/shirt.png"
+    imgUrl: "/assets/images/products/categories/shirt.png",
   },
   {
     title: "Casual",
     href: "/Casual",
-    imgUrl: "/assets/images/products/categories/t-shirt.png"
-  }
+    imgUrl: "/assets/images/products/categories/t-shirt.png",
+  },
 ];
