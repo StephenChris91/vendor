@@ -100,6 +100,7 @@ model user {
   addresses          CustomerAddress[]
   paymentMethods     PaymentMethod[]
   wishlistItems      Wishlist[]
+  rating             Rating[]
 
   @@map("users")
 }
@@ -234,6 +235,7 @@ model product {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  rating    Rating[]
 }
 
 model category {
@@ -413,4 +415,18 @@ model MainCarousel {
   imgUrl      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
 }

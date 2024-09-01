@@ -8,7 +8,10 @@ import { StyledCategory } from "./styles";
 type CategoriesProps = { open?: boolean; children: ReactElement };
 // =====================================================================
 
-export default function Categories({ open: isOpen, children }: CategoriesProps) {
+export default function Categories({
+  open: isOpen,
+  children,
+}: CategoriesProps) {
   const [open, setOpen] = useState<boolean>(isOpen as boolean);
   const popoverRef = useRef(open);
   popoverRef.current = open;
@@ -32,7 +35,7 @@ export default function Categories({ open: isOpen, children }: CategoriesProps) 
       {cloneElement(children, {
         open,
         onClick: toggleMenu,
-        className: `${children.props.className} cursor-pointer`
+        className: `${children.props.className} cursor-pointer`,
       })}
       <CategoryDropdown open={open} />
     </StyledCategory>

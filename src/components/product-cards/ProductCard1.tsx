@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useCallback, useState } from "react";
+import { Fragment, useCallback, useState, useEffect } from "react";
 import styled from "styled-components";
+import toast from "react-hot-toast";
 
 import { useCart } from "hooks/useCart";
+import { useAuth } from "@context/authContext";
 
 import Box from "@component/Box";
 import Rating from "@component/rating";
@@ -16,14 +18,15 @@ import NextImage from "@component/NextImage";
 import Card, { CardProps } from "@component/Card";
 import Typography, { H3, SemiSpan } from "@component/Typography";
 import ProductQuickView from "@component/products/ProductQuickView";
+import Modal from "@component/Modal";
 
-import { calculateDiscount, currency, getTheme } from "@utils/utils";
+import { currency, getTheme } from "@utils/utils";
 import { deviceSize } from "@utils/constants";
 import Product from "@models/product.model";
 import { ProductStatus, ProductType } from "@prisma/client";
+import { getProductRating, rateProduct } from "actions/products/rating";
 
-// STYLED COMPONENT
-
+// Styled components (keep your existing styled components here)
 const ImageWrapper = styled.div`
   width: 230px;
   height: 230px;
@@ -136,7 +139,6 @@ interface ProductCard1Props extends CardProps {
   } | null;
   sale_price: number;
 }
-
 // =======================================================================
 
 export default function ProductCard1({
@@ -154,14 +156,46 @@ export default function ProductCard1({
   ...props
 }: ProductCard1Props) {
   const [open, setOpen] = useState(false);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const { cartItems, addToCart, removeFromCart } = useCart();
+  const { user } = useAuth();
   const cartItem = cartItems.find((item) => item.id === id);
+  const [currentRating, setCurrentRating] = useState(rating);
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleDialog = useCallback(() => setOpen((open) => !open), []);
+  const toggleRatingModal = useCallback(
+    () => setIsRatingModalOpen((open) => !open),
+    []
+  );
+
+  const handleRatingClick = () => {
+    if (user) {
+      toggleRatingModal();
+    } else {
+      toast.error("Please log in to rate this product");
+      // You might want to redirect to login page or open a login modal here
+    }
+  };
+
+  useEffect(() => {
+    const fetchCurrentRating = async () => {
+      try {
+        const fetchedRating = await getProductRating(id);
+        setCurrentRating(fetchedRating);
+      } catch (error) {
+        console.error("Error fetching product rating:", error);
+        toast.error("Failed to fetch product rating");
+      }
+    };
+
+    fetchCurrentRating();
+  }, [id]);
 
   const handleCartAmountChange = (amount: number) => () => {
     if (amount === 0) {
       removeFromCart(id);
+      toast.success("Product removed from cart");
     } else {
       addToCart({
         id,
@@ -172,6 +206,28 @@ export default function ProductCard1({
         quantity: amount,
         shopId: shopId,
       });
+      toast.success("Product added to cart");
+    }
+  };
+
+  const handleRatingChange = async (newRating: number) => {
+    if (user) {
+      setIsLoading(true);
+      try {
+        await rateProduct(id, newRating, ""); // Passing an empty string as the comment
+        const updatedRating = await getProductRating(id);
+        setCurrentRating(updatedRating);
+        toast.success("Thank you for rating this product!");
+        toggleRatingModal();
+      } catch (error) {
+        console.error("Error rating product:", error);
+        toast.error("Failed to submit rating. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      toast.error("Please log in to rate this product");
+      // You might want to redirect to login page or open a login modal here
     }
   };
 
@@ -181,14 +237,14 @@ export default function ProductCard1({
     price,
     description: "", // Use a default or placeholder value
     discountPercentage: off,
-    sku: 0, // Provide default values if needed
+    sku: 0,
     quantity: 0,
     in_stock: false,
     is_taxable: false,
     status: ProductStatus.Published,
     product_type: ProductType.Simple,
     image: imgUrl,
-    ratings: rating,
+    ratings: currentRating,
     total_reviews: 0,
     my_review: null,
     in_wishlist: false,
@@ -269,22 +325,28 @@ export default function ProductCard1({
                   {title}
                 </H3>
                 <Typography as="p" text-muted fontSize="12px">
-                  Sold by: {shop ? shop?.shopName : null}
-                </Typography>{" "}
-                {/* Ensure shopName is correctly accessed */}
+                  Sold by: {shop ? shop?.shopName : "Unknown"}
+                </Typography>
               </Link>
 
-              <Rating value={rating} outof={5} color="warn" readOnly />
+              <FlexBox alignItems="center" mt="10px">
+                <Rating
+                  value={currentRating}
+                  outof={5}
+                  color="warn"
+                  // onClick={toggleRatingModal}
+                />
+                <SemiSpan ml="10px">{currentRating?.toFixed(1)}</SemiSpan>
+              </FlexBox>
 
               <FlexBox alignItems="center" mt="10px">
                 <SemiSpan pr="0.5rem" fontWeight="600" color="primary.main">
-                  {/* {calculateDiscount(price, off)} */}
                   {currency(price)}
                 </SemiSpan>
 
                 {!!off && (
                   <SemiSpan fontSize="14px" color="text.muted" fontWeight="500">
-                    <del> {currency(sale_price)}</del>
+                    <del>{currency(sale_price)}</del>
                   </SemiSpan>
                 )}
               </FlexBox>
@@ -333,6 +395,33 @@ export default function ProductCard1({
       </Wrapper>
 
       <ProductQuickView open={open} onClose={toggleDialog} product={product} />
+
+      <Modal open={isRatingModalOpen} onClose={toggleRatingModal}>
+        <Card p="2rem">
+          <H3 mb="1rem">Rate this product</H3>
+          <Rating
+            value={currentRating}
+            outof={5}
+            color="warn"
+            onChange={handleRatingChange}
+            readOnly={!user || isLoading}
+          />
+          {!user && (
+            <Typography color="error.main" mt="1rem">
+              Please log in to rate this product
+            </Typography>
+          )}
+          <Button
+            mt="1rem"
+            color="primary"
+            variant="contained"
+            onClick={toggleRatingModal}
+            disabled={isLoading}
+          >
+            {isLoading ? "Submitting..." : "Close"}
+          </Button>
+        </Card>
+      </Modal>
     </>
   );
 }

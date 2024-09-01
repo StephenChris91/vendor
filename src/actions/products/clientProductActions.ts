@@ -17,6 +17,11 @@ export async function getProduct(id: string): Promise<Product> {
                         slug: true,
                     },
                 },
+
+                rating: id ? {
+                    where: { id: id, },
+                    select: { rating: true },
+                } : false
             },
         });
 

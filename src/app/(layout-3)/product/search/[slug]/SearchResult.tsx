@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Box from "@component/Box";
 import Card from "@component/Card";
 import Select from "@component/Select";
@@ -16,18 +17,26 @@ import ProductFilterCard from "@component/products/ProductFilterCard";
 import useWindowSize from "@hook/useWindowSize";
 import Product, { Category } from "@models/product.model";
 import { getAllProducts } from "actions/products";
+import { navigations } from "@data/navigations";
 
 type Props = {
   sortOptions: { label: string; value: string }[];
 };
 
-// Define a type that matches the structure returned by getAllProducts
 type ProductWithDetails = Awaited<ReturnType<typeof getAllProducts>>[number];
 
 export default function SearchResult({ sortOptions }: Props) {
   const width = useWindowSize();
   const [view, setView] = useState<"grid" | "list">("grid");
   const [products, setProducts] = useState<ProductWithDetails[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<
+    ProductWithDetails[]
+  >([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const searchParams = useSearchParams();
+
+  const isTablet = width < 1025;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -37,22 +46,73 @@ export default function SearchResult({ sortOptions }: Props) {
     fetchProducts();
   }, []);
 
-  const isTablet = width < 1025;
+  useEffect(() => {
+    const category = searchParams.get("category");
+    const query = searchParams.get("query");
+    setSelectedCategory(category);
+    setSearchQuery(query || "");
+    filterProducts(category, query || "");
+  }, [searchParams, products]);
+
+  const filterProducts = (category: string | null, query: string) => {
+    let filtered = [...products];
+
+    if (category) {
+      const categoryHierarchy = findCategoryHierarchy(category);
+      filtered = filtered.filter((product) =>
+        product.categories.some((cat) => categoryHierarchy.includes(cat.name))
+      );
+    }
+
+    if (query) {
+      filtered = filtered.filter((product) =>
+        product.name.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+
+    setFilteredProducts(filtered);
+  };
+
+  const findCategoryHierarchy = (categoryName: string): string[] => {
+    const hierarchy: string[] = [];
+    const findCategory = (items: any[]): boolean => {
+      for (const item of items) {
+        if (item.title.toLowerCase() === categoryName.toLowerCase()) {
+          hierarchy.push(item.title);
+          return true;
+        }
+        if (item.menuData && item.menuData.categories) {
+          hierarchy.push(item.title);
+          if (findCategory(item.menuData.categories)) {
+            return true;
+          }
+          hierarchy.pop();
+        }
+      }
+      return false;
+    };
+    findCategory(navigations);
+    return hierarchy;
+  };
+
   const toggleView = useCallback((v: "grid" | "list") => () => setView(v), []);
 
-  // Transform ProductWithDetails to Product
-  const transformedProducts: Product[] = products.map((p) => ({
-    ...p,
-    stock: p.quantity,
-    shop: { id: "", shopName: p.shop_name || "" },
-    user: null,
-    brandId: p.brand?.id || null,
-    categories: p.categories.map((cat) => ({
-      productId: p.id,
-      categoryId: cat.id,
-      ...cat,
-    })) as Category[],
-  }));
+  const transformProducts = (prods: ProductWithDetails[]): Product[] =>
+    prods.map((p) => ({
+      ...p,
+      stock: p.quantity,
+      shop: { id: "", shopName: p.shop_name || "" },
+      user: null,
+      brandId: p.brand?.id || null,
+      categories: p.categories.map((cat) => ({
+        productId: p.id,
+        categoryId: cat.id,
+        ...cat,
+      })) as Category[],
+    }));
+
+  const transformedFilteredProducts = transformProducts(filteredProducts);
+  const transformedAllProducts = transformProducts(products);
 
   return (
     <>
@@ -67,9 +127,15 @@ export default function SearchResult({ sortOptions }: Props) {
         justifyContent="space-between"
       >
         <div>
-          <H5>Searching for “ mobile phone ”</H5>
+          <H5>
+            {selectedCategory
+              ? `Searching for "${selectedCategory}"`
+              : searchQuery
+              ? `Searching for "${searchQuery}"`
+              : "All Products"}
+          </H5>
           <Paragraph color="text.muted">
-            {products.length} results found
+            {filteredProducts.length} results found
           </Paragraph>
         </div>
 
@@ -132,10 +198,37 @@ export default function SearchResult({ sortOptions }: Props) {
         </Grid>
 
         <Grid item lg={9} xs={12}>
+          {filteredProducts.length === 0 &&
+          (selectedCategory || searchQuery) ? (
+            <Box mb="2rem">
+              <Paragraph fontSize="18px" fontWeight="600" mb="1rem">
+                No products matching your selection
+              </Paragraph>
+              <Paragraph fontSize="14px" mb="2rem">
+                We couldn't find any products that match your current selection.
+                Here are some recommendations you might like:
+              </Paragraph>
+            </Box>
+          ) : null}
+
           {view === "grid" ? (
-            <ProductGridView products={transformedProducts} />
+            <ProductGridView
+              products={
+                filteredProducts.length > 0 ||
+                (!selectedCategory && !searchQuery)
+                  ? transformedFilteredProducts
+                  : transformedAllProducts
+              }
+            />
           ) : (
-            <ProductListView products={transformedProducts} />
+            <ProductListView
+              products={
+                filteredProducts.length > 0 ||
+                (!selectedCategory && !searchQuery)
+                  ? transformedFilteredProducts
+                  : transformedAllProducts
+              }
+            />
           )}
         </Grid>
       </Grid>

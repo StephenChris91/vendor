@@ -24,8 +24,7 @@ export default function ProductDetails() {
     {
       queryKey: ["product", id],
       queryFn: () => getProduct(id as string),
-      enabled: !!id, // Only fetch if `id` exists
-      refetchInterval: 0, // Automatically refetch the product every 5 seconds
+      refetchOnWindowFocus: false, // Disable refetching on window focus
     }
   );
 
@@ -35,7 +34,8 @@ export default function ProductDetails() {
   >({
     queryKey: ["availableShops"],
     queryFn: getAvailableShop,
-    refetchInterval: 0,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: false, // Disable refetching on window focus
   });
 
   const { data: relatedProducts, isLoading: relatedLoading } = useQuery<
@@ -44,14 +44,17 @@ export default function ProductDetails() {
   >({
     queryKey: ["relatedProducts", id],
     queryFn: () => getRelatedProducts(id as string),
-    // enabled: !!product, // Fetch related products only after product is fetched
+    enabled: !!product, // Fetch related products only after product is fetched
+    refetchIntervalInBackground: true,
+    refetchInterval: 0,
+    refetchOnWindowFocus: false, // Disable refetching on window focus
   });
 
   const { data: frequentlyBought, isLoading: frequentlyBoughtLoading } =
     useQuery<Product[], Error>({
       queryKey: ["frequentlyBought", id],
       queryFn: () => getFrequentlyBought(id as string),
-      // enabled: !!product, // Fetch frequently bought products only after product is fetched
+      refetchOnWindowFocus: false, // Disable refetching on window focus
     });
 
   if (
