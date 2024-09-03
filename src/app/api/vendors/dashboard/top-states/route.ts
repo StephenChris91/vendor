@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     try {
         const vendorId = session.user.id;
-        
+
         const totalSales = await db.shopOrder.aggregate({
             where: { shop: { userId: vendorId } },
             _sum: { totalPrice: true },

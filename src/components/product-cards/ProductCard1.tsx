@@ -160,8 +160,9 @@ export default function ProductCard1({
   const { cartItems, addToCart, removeFromCart } = useCart();
   const { user } = useAuth();
   const cartItem = cartItems.find((item) => item.id === id);
-  const [currentRating, setCurrentRating] = useState(rating);
+  const [currentRating, setCurrentRating] = useState<number | null>(rating);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRating, setIsLoadingRating] = useState(false);
 
   const toggleDialog = useCallback(() => setOpen((open) => !open), []);
   const toggleRatingModal = useCallback(
@@ -179,17 +180,32 @@ export default function ProductCard1({
   };
 
   useEffect(() => {
+    let isMounted = true;
+    setIsLoadingRating(true);
+
     const fetchCurrentRating = async () => {
       try {
         const fetchedRating = await getProductRating(id);
-        setCurrentRating(fetchedRating);
+        if (isMounted) {
+          setCurrentRating(fetchedRating);
+        }
       } catch (error) {
         console.error("Error fetching product rating:", error);
-        toast.error("Failed to fetch product rating");
+        if (isMounted) {
+          setCurrentRating(0); // Default to 0 if there's an error
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingRating(false);
+        }
       }
     };
 
     fetchCurrentRating();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   const handleCartAmountChange = (amount: number) => () => {
@@ -210,26 +226,35 @@ export default function ProductCard1({
     }
   };
 
-  const handleRatingChange = async (newRating: number) => {
+  const handleRatingChange = (newRating: number) => {
     if (user) {
-      setIsLoading(true);
-      try {
-        await rateProduct(id, newRating, ""); // Passing an empty string as the comment
-        const updatedRating = await getProductRating(id);
-        setCurrentRating(updatedRating);
-        toast.success("Thank you for rating this product!");
-        toggleRatingModal();
-      } catch (error) {
-        console.error("Error rating product:", error);
-        toast.error("Failed to submit rating. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
+      setIsRatingModalOpen(true);
+      setCurrentRating(newRating);
     } else {
       toast.error("Please log in to rate this product");
-      // You might want to redirect to login page or open a login modal here
     }
   };
+
+  // const handleRatingChange = async (newRating: number) => {
+  //   if (user) {
+  //     setIsLoading(true);
+  //     try {
+  //       await rateProduct(id, newRating, ""); // Passing an empty string as the comment
+  //       const updatedRating = await getProductRating(id);
+  //       setCurrentRating(updatedRating);
+  //       toast.success("Thank you for rating this product!");
+  //       toggleRatingModal();
+  //     } catch (error) {
+  //       console.error("Error rating product:", error);
+  //       toast.error("Failed to submit rating. Please try again.");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   } else {
+  //     toast.error("Please log in to rate this product");
+  //     // You might want to redirect to login page or open a login modal here
+  //   }
+  // };
 
   const product: Product = {
     id,
@@ -330,13 +355,20 @@ export default function ProductCard1({
               </Link>
 
               <FlexBox alignItems="center" mt="10px">
-                <Rating
-                  value={currentRating}
-                  outof={5}
-                  color="warn"
-                  // onClick={toggleRatingModal}
-                />
-                <SemiSpan ml="10px">{currentRating?.toFixed(1)}</SemiSpan>
+                {isLoadingRating ? (
+                  <span>Loading rating...</span>
+                ) : (
+                  <>
+                    <Rating
+                      value={currentRating}
+                      outof={5}
+                      color="warn"
+                      onChange={handleRatingChange}
+                      readOnly={!user}
+                    />
+                    <SemiSpan ml="10px">{currentRating.toFixed(1)}</SemiSpan>
+                  </>
+                )}
               </FlexBox>
 
               <FlexBox alignItems="center" mt="10px">

@@ -7,13 +7,44 @@ import { Carousel } from "@component/carousel";
 import { ProductCard6 } from "@component/product-cards";
 import CategorySectionCreator from "@component/CategorySectionCreator";
 import useWindowSize from "@hook/useWindowSize";
-import Category from "@models/category.model";
 
-// =====================================================
-type Props = { categoryList: Category[] };
-// =====================================================
+// Define the Category type
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+  image: string;
+};
 
-export default function Section3({ categoryList }: Props) {
+// Predefined array of categories with image paths
+const topCategories: Category[] = [
+  {
+    id: "1",
+    name: "Sunglasses",
+    slug: "sunglasses",
+    image: "/assets/images/top-categories/glasses.png",
+  },
+  {
+    id: "2",
+    name: "Watches",
+    slug: "watches",
+    image: "/assets/images/top-categories/watch.png",
+  },
+  {
+    id: "3",
+    name: "Jewelries",
+    slug: "jewelries",
+    image: "/assets/images/top-categories/jewelry.png",
+  },
+  {
+    id: "4",
+    name: "Headphones",
+    slug: "headphones",
+    image: "/assets/images/top-categories/gadgets.png",
+  },
+];
+
+export default function Section3() {
   const width = useWindowSize();
   const [visibleSlides, setVisibleSlides] = useState(3);
 
@@ -29,13 +60,16 @@ export default function Section3({ categoryList }: Props) {
       title="Top Categories"
       seeMoreLink="#"
     >
-      <Carousel totalSlides={categoryList.length} visibleSlides={visibleSlides}>
-        {categoryList.map((item, ind) => (
-          <Link href={`/product/search/${item.slug}`} key={ind}>
+      <Carousel
+        totalSlides={topCategories.length}
+        visibleSlides={visibleSlides}
+      >
+        {topCategories.map((item) => (
+          <Link href={`/product/search/${item.slug}`} key={item.id}>
             <ProductCard6
               title={item.name}
-              imgUrl="https://picsum.photos/500/300?random=1"
               subtitle={item.name}
+              imgUrl={item.image}
             />
           </Link>
         ))}

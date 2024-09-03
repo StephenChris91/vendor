@@ -51,6 +51,8 @@ export async function rateProduct(productId: string, rating: number, comment: st
     }
 }
 
+// actions/products/rating.ts
+
 export async function getProductRating(id: string): Promise<number> {
     try {
         const product = await db.product.findUnique({
@@ -59,12 +61,13 @@ export async function getProductRating(id: string): Promise<number> {
         });
 
         if (!product) {
-            throw new Error("Product not found");
+            console.warn(`Product with id ${id} not found`);
+            return 0;
         }
 
         return product.ratings || 0;
     } catch (error) {
         console.error("Error fetching product rating:", error);
-        throw new Error("Failed to fetch product rating");
+        return 0; // Return 0 instead of throwing an error
     }
 }

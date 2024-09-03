@@ -399,76 +399,7 @@ export const navigations = [
       ]
     }
   },
-  {
-    icon: "smart-home",
-    title: "Smart Home",
-    href: "/product/search/smart-home",
-    menuComponent: "MegaMenu1",
-    menuData: {
-      categories: [
-        {
-          title: "Other Solutions",
-          href: "/product/search/other-smart-solutions",
-        },
-        {
-          title: "Smart Home Lighting",
-          href: "/product/search/smart-home-lighting",
-        },
-        {
-          title: "WIFI and Networking",
-          href: "/product/search/wifi-networking",
-        },
-        {
-          title: "Lawn and Garden",
-          href: "/product/search/smart-lawn-garden",
-        },
-        {
-          title: "Vacuums and Mops",
-          href: "/product/search/smart-vacuums-mops",
-        },
-        {
-          title: "Voice Assistants and Hubs",
-          href: "/product/search/voice-assistants-hubs",
-        },
-        {
-          title: "Kitchen",
-          href: "/product/search/smart-kitchen",
-        },
-        {
-          title: "Detectors and Sensors",
-          href: "/product/search/smart-detectors-sensors",
-        },
-        {
-          title: "New Smart Devices",
-          href: "/product/search/new-smart-devices",
-        },
-        {
-          title: "Pet",
-          href: "/product/search/smart-pet-devices",
-        },
-        {
-          title: "Home Entertainment",
-          href: "/product/search/smart-home-entertainment",
-        },
-        {
-          title: "Heating and Cooling",
-          href: "/product/search/smart-heating-cooling",
-        },
-        {
-          title: "Security Cameras and Systems",
-          href: "/product/search/smart-security-cameras-systems",
-        },
-        {
-          title: "Plugs and Outlets",
-          href: "/product/search/smart-plugs-outlets",
-        },
-        {
-          title: "Smart Locks and Entry",
-          href: "/product/search/smart-locks-entry",
-        }
-      ]
-    }
-  },
+
   {
     icon: "tools",
     title: "Tools & Home Improvement",
@@ -605,68 +536,7 @@ export const navigations = [
       ]
     }
   },
-  {
-    icon: "palette",
-    title: "Arts & Crafts",
-    href: "/product/search/arts-crafts",
-    menuComponent: "MegaMenu1",
-    menuData: {
-      categories: [
-        {
-          title: "Painting, Drawing & Art Supplies",
-          href: "/product/search/painting-drawing-art-supplies",
-        },
-        {
-          title: "Beading & Jewelry Making",
-          href: "/product/search/beading-jewelry-making",
-        },
-        {
-          title: "Crafting",
-          href: "/product/search/crafting",
-        },
-        {
-          title: "Fabric",
-          href: "/product/search/fabric",
-        },
-        {
-          title: "Gift Wrapping Supplies",
-          href: "/product/search/gift-wrapping-supplies",
-        },
-        {
-          title: "Party Decorations & Supplies",
-          href: "/product/search/party-decorations-supplies",
-        },
-        {
-          title: "Sewing",
-          href: "/product/search/sewing",
-        },
-        {
-          title: "Scrapbooking & Stamping",
-          href: "/product/search/scrapbooking-stamping",
-        },
-        {
-          title: "Printmaking",
-          href: "/product/search/printmaking",
-        },
-        {
-          title: "Organization, Storage & Transport",
-          href: "/product/search/organization-storage-transport",
-        },
-        {
-          title: "Needlework",
-          href: "/product/search/needlework",
-        },
-        {
-          title: "Knitting & Crochet",
-          href: "/product/search/knitting-crochet",
-        },
-        {
-          title: "Fabric Decorating",
-          href: "/product/search/fabric-decorating",
-        }
-      ]
-    }
-  },
+
   {
     icon: "devices",
     title: "Electronics",
@@ -745,76 +615,7 @@ export const navigations = [
       ]
     }
   },
-  {
-    icon: "computer",
-    title: "Computers",
-    href: "/product/search/computers",
-    menuComponent: "MegaMenu1",
-    menuData: {
-      categories: [
-        {
-          title: "Servers",
-          href: "/product/search/servers",
-        },
-        {
-          title: "Scanners",
-          href: "/product/search/scanners",
-        },
-        {
-          title: "Printers",
-          href: "/product/search/printers",
-        },
-        {
-          title: "Power Strips & Surge Protectors",
-          href: "/product/search/power-strips-surge-protectors",
-        },
-        {
-          title: "Networking Products",
-          href: "/product/search/networking-products",
-        },
-        {
-          title: "Monitors",
-          href: "/product/search/monitors",
-        },
-        {
-          title: "Laptop Accessories",
-          href: "/product/search/laptop-accessories",
-        },
-        {
-          title: "External Components",
-          href: "/product/search/external-components",
-        },
-        {
-          title: "Data Storage",
-          href: "/product/search/data-storage",
-        },
-        {
-          title: "Computers & Tablets",
-          href: "/product/search/computers-tablets",
-        },
-        {
-          title: "Computer Components",
-          href: "/product/search/computer-components",
-        },
-        {
-          title: "Computer Accessories & Peripherals",
-          href: "/product/search/computer-accessories-peripherals",
-        },
-        {
-          title: "Warranties & Services",
-          href: "/product/search/warranties-services",
-        },
-        {
-          title: "Tablet Replacement Parts",
-          href: "/product/search/tablet-replacement-parts",
-        },
-        {
-          title: "Tablet Accessories",
-          href: "/product/search/tablet-accessories",
-        }
-      ]
-    }
-  },
+
   {
     icon: "videogame_asset",
     title: "Video Games",
@@ -1007,68 +808,7 @@ export const navigations = [
       ]
     }
   },
-  {
-    icon: "medical_services",
-    title: "Health and Household",
-    href: "/product/search/health-household",
-    menuComponent: "MegaMenu1",
-    menuData: {
-      categories: [
-        {
-          title: "Vitamins & Dietary Supplements",
-          href: "/product/search/vitamins-dietary-supplements",
-        },
-        {
-          title: "Vision Care",
-          href: "/product/search/vision-care",
-        },
-        {
-          title: "Stationery & Gift Wrapping Supplies",
-          href: "/product/search/stationery-gift-wrapping-supplies",
-        },
-        {
-          title: "Sports Nutrition",
-          href: "/product/search/sports-nutrition",
-        },
-        {
-          title: "Sexual Wellness",
-          href: "/product/search/sexual-wellness",
-        },
-        {
-          title: "Personal Care",
-          href: "/product/search/personal-care",
-        },
-        {
-          title: "Oral Care",
-          href: "/product/search/oral-care",
-        },
-        {
-          title: "Medical Supplies & Equipment",
-          href: "/product/search/medical-supplies-equipment",
-        },
-        {
-          title: "Household Supplies",
-          href: "/product/search/household-supplies",
-        },
-        {
-          title: "Health Care",
-          href: "/product/search/health-care",
-        },
-        {
-          title: "Baby & Child Care",
-          href: "/product/search/baby-child-care",
-        },
-        {
-          title: "Wellness & Relaxation",
-          href: "/product/search/wellness-relaxation",
-        },
-        {
-          title: "Sex Toys",
-          href: "/product/search/sex-toys",
-        }
-      ]
-    }
-  },
+
   {
     icon: "baby_changing_station",
     title: "Baby",

@@ -11,7 +11,6 @@ import {
   BorderRadiusProps,
 } from "styled-system";
 
-// Update the type definition for src to include StaticImageData
 type NextImageProps = Omit<ImageProps, "src"> &
   SpaceProps &
   BorderRadiusProps & {
@@ -30,17 +29,21 @@ const NextImage = ({
   alt,
   ...props
 }: NextImageProps) => {
-  // Ensure imgSrc can handle both string and StaticImageData types
   const [imgSrc, setImgSrc] = useState<string | StaticImageData>(
     src || fallbackSrc
   );
+
+  console.log("NextImage src:", src); // Add this line for debugging
 
   return (
     <StyledImage
       {...props}
       src={imgSrc}
       alt={alt}
-      onError={() => setImgSrc(fallbackSrc)}
+      onError={() => {
+        console.error(`Error loading image: ${src}`);
+        setImgSrc(fallbackSrc);
+      }}
     />
   );
 };

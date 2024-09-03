@@ -1,17 +1,22 @@
+import React from "react";
 import Box from "@component/Box";
 import Card from "@component/Card";
 import { Chip } from "@component/Chip";
 import NextImage from "@component/NextImage";
 
-// ===========================================================================
 type ProductCard6Props = {
   title: string;
-  imgUrl: string;
   subtitle: string;
+  imgUrl: string;
 };
-// ===========================================================================
 
-const ProductCard6 = ({ title, subtitle, imgUrl }: ProductCard6Props) => {
+const ProductCard6: React.FC<ProductCard6Props> = ({
+  title,
+  subtitle,
+  imgUrl,
+}) => {
+  console.log("ProductCard6 imgUrl:", imgUrl); // Add this line for debugging
+
   return (
     <Card position="relative" padding="1rem" borderRadius={8}>
       <Chip
@@ -23,7 +28,8 @@ const ProductCard6 = ({ title, subtitle, imgUrl }: ProductCard6Props) => {
         fontSize="10px"
         fontWeight="600"
         bg="secondary.main"
-        position="absolute">
+        position="absolute"
+      >
         {title}
       </Chip>
 
@@ -36,12 +42,21 @@ const ProductCard6 = ({ title, subtitle, imgUrl }: ProductCard6Props) => {
         fontSize="10px"
         color="gray.800"
         fontWeight="600"
-        position="absolute">
+        position="absolute"
+      >
         {subtitle}
       </Chip>
 
       <Box borderRadius={8} display="flex" overflow="hidden">
-        <NextImage src={imgUrl} width={345} height={120} alt="bonik" />
+        <NextImage
+          src={imgUrl}
+          width={345}
+          height={120}
+          alt={title}
+          fallbackSrc="/placeholder-image.jpg"
+          layout="responsive"
+          objectFit="cover"
+        />
       </Box>
     </Card>
   );
