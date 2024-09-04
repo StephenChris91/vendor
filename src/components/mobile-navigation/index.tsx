@@ -1,5 +1,4 @@
 import styled from "styled-components";
-
 import { Chip } from "@component/Chip";
 import Icon from "@component/icon/Icon";
 import NavLink from "@component/nav-link";
@@ -7,7 +6,9 @@ import { useAppContext } from "@context/app-context";
 import useWindowSize from "@hook/useWindowSize";
 import { getTheme } from "@utils/utils";
 import { layoutConstant } from "@utils/constants";
-
+import { useAuth } from "@context/authContext";
+import Login from "@sections/auth/Login";
+import LoginDialog from "@component/header/LoginDialog";
 // STYLED COMPONENT
 const Wrapper = styled.div`
   left: 0;
@@ -47,6 +48,16 @@ const Wrapper = styled.div`
 export default function MobileNavigationBar() {
   const width = useWindowSize();
   const { state } = useAppContext();
+  const { user, signIn } = useAuth();
+
+  const LOGIN_HANDLE = (
+    <div className="link" onClick={() => signIn()}>
+      <Icon className="icon" variant="small">
+        user
+      </Icon>
+      {user ? user.firstname : "Login"}
+    </div>
+  );
 
   if (width <= 900) {
     return (
@@ -67,12 +78,25 @@ export default function MobileNavigationBar() {
                 bg="primary.main"
                 position="absolute"
                 color="primary.text"
-                left="calc(50% + 8px)">
+                left="calc(50% + 8px)"
+              >
                 {state.cart.length}
               </Chip>
             )}
           </NavLink>
         ))}
+        {user ? (
+          <NavLink className="link" href="/profile">
+            <Icon className="icon" variant="small">
+              user
+            </Icon>
+            {user.firstname}
+          </NavLink>
+        ) : (
+          <LoginDialog handle={LOGIN_HANDLE}>
+            <Login />
+          </LoginDialog>
+        )}
       </Wrapper>
     );
   }
@@ -84,5 +108,4 @@ const list = [
   { title: "Home", icon: "home", href: "/" },
   { title: "Category", icon: "category", href: "/mobile-category-nav" },
   { title: "Cart", icon: "bag", href: "/cart" },
-  { title: "Account", icon: "user-2", href: "/profile" }
 ];

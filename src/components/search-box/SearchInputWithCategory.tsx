@@ -11,6 +11,7 @@ import MenuItem from "@component/MenuItem";
 import { Span } from "@component/Typography";
 import TextField from "@component/text-field";
 import StyledSearchBox from "./styled";
+import { primaryCategories } from "@data/primary-categories";
 
 export default function SearchInputWithCategory() {
   const [resultList, setResultList] = useState<string[]>([]);
@@ -22,7 +23,7 @@ export default function SearchInputWithCategory() {
     const value = e.target?.value;
 
     if (!value) setResultList([]);
-    else setResultList(dummySearchResult);
+    else setResultList(primaryCategories);
   }, 200);
 
   const hanldeSearch = useCallback((event: any) => {
@@ -59,8 +60,9 @@ export default function SearchInputWithCategory() {
               <span>{category}</span>
               <Icon variant="small">chevron-down</Icon>
             </FlexBox>
-          }>
-          {categories.map((item) => (
+          }
+        >
+          {primaryCategories.map((item) => (
             <MenuItem key={item} onClick={handleCategoryChange(item)}>
               {item}
             </MenuItem>
@@ -69,7 +71,14 @@ export default function SearchInputWithCategory() {
       </StyledSearchBox>
 
       {!!resultList.length && (
-        <Card position="absolute" top="100%" py="0.5rem" width="100%" boxShadow="large" zIndex={99}>
+        <Card
+          position="absolute"
+          top="100%"
+          py="0.5rem"
+          width="100%"
+          boxShadow="large"
+          zIndex={99}
+        >
           {resultList.map((item) => (
             <Link href={`/product/search/${item}`} key={item}>
               <MenuItem key={item}>
@@ -83,15 +92,9 @@ export default function SearchInputWithCategory() {
   );
 }
 
-const categories = [
-  "All Categories",
-  "Car",
-  "Clothes",
-  "Electronics",
-  "Laptop",
-  "Desktop",
-  "Camera",
-  "Toys"
-];
-
-const dummySearchResult = ["Macbook Air 13", "Ksus K555LA", "Acer Aspire X453", "iPad Mini 3"];
+// const dummySearchResult = [
+//   "Macbook Air 13",
+//   "Ksus K555LA",
+//   "Acer Aspire X453",
+//   "iPad Mini 3",
+// ];

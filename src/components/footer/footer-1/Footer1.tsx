@@ -32,9 +32,8 @@ export default function Footer1() {
                 </Link>
 
                 <Paragraph mb="1.25rem" color="gray.500">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Auctor libero id et, in gravida. Sit diam duis mauris nulla
-                  cursus. Erat et lectus vel ut sollicitudin elit at amet.
+                  Vendorsot is the Nigeria's safest platform for worry-free
+                  buying, selling, and finding trusted vendors close to you.
                 </Paragraph>
 
                 <AppStore />
@@ -89,15 +88,15 @@ export default function Footer1() {
                 </Typography>
 
                 <Typography py="0.3rem" color="gray.500">
-                  70 Washington Square South, New York, NY 10012, United States
+                  Lagos, Nigeria{" "}
                 </Typography>
 
                 <Typography py="0.3rem" color="gray.500">
-                  Email: uilib.help@gmail.com
+                  Email: support@vendorspot.ng
                 </Typography>
 
                 <Typography py="0.3rem" mb="1rem" color="gray.500">
-                  Phone: +1 1123 456 780
+                  Phone:
                 </Typography>
 
                 <FlexBox className="flex" mx="-5px">
