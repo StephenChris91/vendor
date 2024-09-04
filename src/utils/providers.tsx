@@ -15,9 +15,9 @@ import Modal from "@component/Modal";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
-  // useIdleTimer(3600000, 300000); // Log out after 1 hour of inactivity, with a 5-minute warning
+  useIdleTimer(3600000, 300000); // Log out after 1 hour of inactivity, with a 5-minute warning
 
-  useIdleTimer(120000, 60000);
+  // useIdleTimer(120000, 60000);
 
   return (
     <AppProvider>
