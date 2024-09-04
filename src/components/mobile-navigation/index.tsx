@@ -8,6 +8,7 @@ import { getTheme } from "@utils/utils";
 import { layoutConstant } from "@utils/constants";
 import { useAuth } from "@context/authContext";
 import Login from "@sections/auth/Login";
+import { Button } from "@component/buttons";
 import LoginDialog from "@component/header/LoginDialog";
 // STYLED COMPONENT
 const Wrapper = styled.div`
@@ -48,16 +49,21 @@ const Wrapper = styled.div`
 export default function MobileNavigationBar() {
   const width = useWindowSize();
   const { state } = useAppContext();
-  const { user, signIn } = useAuth();
+  const { user, signIn, signOut } = useAuth();
 
   const LOGIN_HANDLE = (
-    <div className="link" onClick={() => signIn()}>
+    <div className="link">
       <Icon className="icon" variant="small">
         user
       </Icon>
-      {user ? user.firstname : "Login"}
+      Login
     </div>
   );
+
+  const handleLogout = () => {
+    signOut();
+    // You might want to add additional logic here, like redirecting to the home page
+  };
 
   if (width <= 900) {
     return (
@@ -86,12 +92,17 @@ export default function MobileNavigationBar() {
           </NavLink>
         ))}
         {user ? (
-          <NavLink className="link" href="/profile">
+          <Button
+            className="link"
+            variant="text"
+            color="primary"
+            onClick={handleLogout}
+          >
             <Icon className="icon" variant="small">
-              user
+              logout
             </Icon>
-            {user.firstname}
-          </NavLink>
+            Logout
+          </Button>
         ) : (
           <LoginDialog handle={LOGIN_HANDLE}>
             <Login />
