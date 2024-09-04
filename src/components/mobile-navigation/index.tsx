@@ -8,8 +8,8 @@ import { getTheme } from "@utils/utils";
 import { layoutConstant } from "@utils/constants";
 import { useAuth } from "@context/authContext";
 import Login from "@sections/auth/Login";
-import { Button } from "@component/buttons";
 import LoginDialog from "@component/header/LoginDialog";
+
 // STYLED COMPONENT
 const Wrapper = styled.div`
   left: 0;
@@ -31,6 +31,12 @@ const Wrapper = styled.div`
     align-items: center;
     flex-direction: column;
     justify-content: center;
+    color: inherit;
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
 
     .icon {
       display: flex;
@@ -92,17 +98,12 @@ export default function MobileNavigationBar() {
           </NavLink>
         ))}
         {user ? (
-          <Button
-            className="link"
-            variant="text"
-            color="primary"
-            onClick={handleLogout}
-          >
+          <button className="link" onClick={handleLogout}>
             <Icon className="icon" variant="small">
               logout
             </Icon>
             Logout
-          </Button>
+          </button>
         ) : (
           <LoginDialog handle={LOGIN_HANDLE}>
             <Login />
