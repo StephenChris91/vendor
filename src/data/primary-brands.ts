@@ -1,0 +1,21 @@
+export const popularBrands = [
+    "Coca-Cola", "Nestlé", "PepsiCo", "Kraft Heinz", "Kellogg's",
+    "Samsonite", "Travelpro", "Delsey", "American Tourister", "Briggs & Riley",
+    "Microsoft", "Adobe", "Salesforce", "Oracle", "SAP",
+    "Purina", "Pedigree", "Kong", "Petmate", "Blue Buffalo",
+    "3M", "Honeywell", "Bosch", "Siemens", "Mitsubishi Electric",
+    "LEGO", "Hasbro", "Mattel", "Fisher-Price", "Melissa & Doug",
+    "Nike", "Adidas", "The North Face", "Columbia", "Patagonia",
+    "Google Nest", "Amazon Echo", "Philips Hue", "Ring", "Ecobee",
+    "DeWalt", "Black & Decker", "Makita", "Milwaukee", "Craftsman",
+    "KitchenAid", "Cuisinart", "Dyson", "Instant Pot", "Calphalon",
+    "Crayola", "Faber-Castell", "Cricut", "Michaels", "Strathmore",
+    "Apple", "Samsung", "Sony", "LG", "Panasonic",
+    "Dell", "HP", "Lenovo", "ASUS", "Acer",
+    "Nintendo", "Sony PlayStation", "Microsoft Xbox", "Ubisoft", "Electronic Arts",
+    "Zara", "H&M", "Gucci", "Louis Vuitton",
+    "Johnson & Johnson", "Procter & Gamble", "Clorox", "Unilever", "Colgate-Palmolive",
+    "Pampers", "Gerber", "Graco", "Carter's", "Chicco",
+    "Toyota", "Ford", "BMW", "Honda", "Michelin",
+    "L'Oréal", "Estée Lauder", "Dove", "Maybelline", "MAC Cosmetics"
+];

@@ -1,4 +1,6 @@
 import TawkToChat from "@component/chat";
+import useIdleTimer from "@component/idleTimer";
+import Modal from "@component/Modal";
 import Providers from "@utils/providers";
 import SessionProviderServer from "@utils/session-provider-server";
 import type { Metadata } from "next";

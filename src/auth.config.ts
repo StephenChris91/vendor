@@ -77,7 +77,6 @@ export default {
                 session.user.isOnboardedVendor = token.isOnboardedVendor as boolean;
                 session.user.hasPaid = token.hasPaid as boolean;
                 session.user.shopStatus = token.shopStatus as string | undefined;
-
             }
 
             console.log("Session callback - session after:", session);
@@ -89,7 +88,7 @@ export default {
     },
     session: {
         strategy: "jwt",
-        maxAge: 60 * 60 * 24, // 1 day
+        maxAge: 60 * 60, // 1 hour in seconds
     },
     secret: process.env.NEXTAUTH_SECRET,
 } satisfies NextAuthConfig;

@@ -1,5 +1,5 @@
-import NextAuth from "next-auth";
-import authConfig from "auth.config";
+import { NextResponse } from 'next/server';
+import { auth } from './auth';
 import {
     DEFAULT_LOGIN_REDIRECT,
     DEFAULT_ADMIN_REDIRECT,
@@ -9,11 +9,7 @@ import {
     apiAuthPrefix,
     adminRoutes,
     vendorRoutes
-} from "routes";
-import { getToken } from "next-auth/jwt";
-
-
-const { auth } = NextAuth(authConfig);
+} from "./routes";
 
 export default auth((req) => {
     const { nextUrl } = req;
@@ -28,44 +24,24 @@ export default auth((req) => {
     const isApiDataRoute = nextUrl.pathname.startsWith('/api/');
     const isShopRoute = nextUrl.pathname.startsWith('/shops/');
 
-    // if (isLoggedIn) {
-    //     const token = await getToken({ req });
-    //     const lastActivity = token?.lastActivity as number | undefined;
-    //     const currentTime = Date.now();
-    //     const idleTime = 5 * 60 * 1000; // 5 minutes in milliseconds
-
-    //     if (lastActivity && currentTime - lastActivity > idleTime) {
-    //       // User has been idle for more than 5 minutes
-    //       return Response.redirect(new URL("/api/auth/signout", nextUrl));
-    //     }
-
-    //     // Update last activity time
-    //     token.lastActivity = currentTime;
-    //     req.auth = { ...req.auth, token };
-    //   }
-
-    // Then in your middleware logic:
     if (isApiAuthRoute || isApiDataRoute || isShopRoute) {
-        return null;
-    }
-
-    if (isApiAuthRoute) {
         return null;
     }
 
     if (isAuthRoute) {
         if (isLoggedIn) {
-            // Special case for onboarding and confirmation
             if ((nextUrl.pathname === '/onboarding' || nextUrl.pathname === '/onboarding/confirmation')
                 && req.auth?.user?.role === "Vendor") {
-                return null; // Allow access to onboarding and confirmation for vendors
+                return null;
             }
 
-            // Redirect based on user role
             if (req.auth?.user?.role === "Admin") {
                 return Response.redirect(new URL(DEFAULT_ADMIN_REDIRECT, nextUrl));
             } else if (req.auth?.user?.role === "Vendor") {
-                if (!req.auth?.user?.isOnboardedVendor && nextUrl.pathname !== '/onboarding/confirmation') {
+                if (!req.auth?.user?.isOnboardedVendor) {
+                    return Response.redirect(new URL('/onboarding', nextUrl));
+                }
+                if (!req.auth?.user?.shop) {
                     return Response.redirect(new URL('/onboarding', nextUrl));
                 }
                 return Response.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
@@ -91,6 +67,13 @@ export default auth((req) => {
     }
 
     if (isLoggedIn) {
+        // Check if the session has expired
+        const sessionExpiry = req.auth.expires;
+        if (sessionExpiry && new Date() > new Date(sessionExpiry)) {
+            // Session has expired, redirect to login
+            return Response.redirect(new URL('/login', nextUrl));
+        }
+
         if (isAdminRoute && req.auth?.user?.role !== "Admin") {
             return Response.redirect(new URL("/", nextUrl));
         }
@@ -99,15 +82,13 @@ export default auth((req) => {
             return Response.redirect(new URL("/", nextUrl));
         }
 
-        // Vendor onboarding check
-        if (req.auth?.user?.role === "Vendor" && !req.auth?.user?.isOnboardedVendor
-            && !isPublicRoute && !req.auth?.user?.hasPaid && nextUrl.pathname !== '/onboarding' && nextUrl.pathname !== '/onboarding/confirmation') {
-            return Response.redirect(new URL('/onboarding', nextUrl));
-        }
-
-        //check if vendor has created a shop
-        if (req.auth?.user?.role === "Vendor" && !req.auth?.user?.shop && !publicRoutes) {
-            return Response.redirect(new URL('/onboarding', nextUrl));
+        if (req.auth?.user?.role === "Vendor") {
+            if (!req.auth?.user?.isOnboardedVendor) {
+                return Response.redirect(new URL('/onboarding', nextUrl));
+            }
+            if (!req.auth?.user?.shop && !publicRoutes.includes(nextUrl.pathname)) {
+                return Response.redirect(new URL('/onboarding', nextUrl));
+            }
         }
     }
 
@@ -116,4 +97,4 @@ export default auth((req) => {
 
 export const config = {
     matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
-}
+};

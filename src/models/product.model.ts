@@ -34,6 +34,9 @@ export interface Product {
   } | null;
   user: any; // You might want to define a more specific type for user
   brandId: string | null;
+  brand?: {
+    name: string | null;
+  };
   isFlashDeal: boolean;
   discountPercentage?: number | null;
   createdAt?: Date;

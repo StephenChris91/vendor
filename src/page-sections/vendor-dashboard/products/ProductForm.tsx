@@ -23,6 +23,7 @@ import { uploadToS3 } from "@utils/s3Client";
 import { LuHash } from "react-icons/lu";
 import { updateProduct } from "actions/update-product";
 import { primaryCategories } from "@data/primary-categories";
+import { popularBrands } from "@data/primary-brands";
 
 const StyledDropZone = styled(DropZone)`
   width: 100%;
@@ -84,41 +85,45 @@ export default function ProductUpdateForm({
 }: Props) {
   const [isSlugUnique, setIsSlugUnique] = useState(true);
   const [categoryOption, setCategoryOption] = useState(initialCategoryOptions);
-  const [selectBrandOptions, setSelectBrandOptions] =
-    useState(initialBrandOptions);
+  const [selectBrandOptions, setSelectBrandOptions] = useState<SelectOption[]>(
+    popularBrands.map((brand) => ({
+      value: brand.toLowerCase().replace(/\s+/g, "-"),
+      label: brand,
+    }))
+  );
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchCategoriesAndBrands = async () => {
-      try {
-        const [categoriesResponse, brandsResponse] = await Promise.all([
-          fetch("/api/categories/get-categories"),
-          fetch("/api/brands/get-brands"),
-        ]);
+  // useEffect(() => {
+  //   const fetchCategoriesAndBrands = async () => {
+  //     try {
+  //       const [categoriesResponse, brandsResponse] = await Promise.all([
+  //         fetch("/api/categories/get-categories"),
+  //         fetch("/api/brands/get-brands"),
+  //       ]);
 
-        const categories = await categoriesResponse.json();
-        const brands = await brandsResponse.json();
-        setCategoryOption(
-          categories.map((cat: any) => ({
-            value: cat.id,
-            label: cat.name,
-          }))
-        );
-        setSelectBrandOptions(
-          brands.map((brand: any) => ({
-            value: brand.id,
-            label: brand.name,
-          }))
-        );
-      } catch (error) {
-        toast.error("Failed to load categories and brands");
-      }
-    };
+  //       const categories = await categoriesResponse.json();
+  //       const brands = await brandsResponse.json();
+  //       setCategoryOption(
+  //         categories.map((cat: any) => ({
+  //           value: cat.id,
+  //           label: cat.name,
+  //         }))
+  //       );
+  //       setSelectBrandOptions(
+  //         brands.map((brand: any) => ({
+  //           value: brand.id,
+  //           label: brand.name,
+  //         }))
+  //       );
+  //     } catch (error) {
+  //       toast.error("Failed to load categories and brands");
+  //     }
+  //   };
 
-    console.log("This product is from the update form :", product);
+  //   console.log("This product is from the update form :", product);
 
-    fetchCategoriesAndBrands();
-  }, []);
+  //   fetchCategoriesAndBrands();
+  // }, []);
 
   const generateSKU = () => {
     return Math.floor(Math.random() * 1000000000);
@@ -138,7 +143,10 @@ export default function ProductUpdateForm({
   };
 
   const handleCreateBrand = (inputValue: string) => {
-    const newBrand = { value: inputValue.toLowerCase(), label: inputValue };
+    const newBrand = {
+      value: inputValue.toLowerCase().replace(/\s+/g, "-"),
+      label: inputValue,
+    };
     setSelectBrandOptions((prev) => [...prev, newBrand]);
     return newBrand;
   };
@@ -532,13 +540,12 @@ export default function ProductUpdateForm({
                     }
                   />
                 </Grid>
-
                 <Grid item sm={6} xs={12}>
                   <Select
                     isCreatable
                     options={selectBrandOptions}
                     value={
-                      selectBrandOptions?.find(
+                      selectBrandOptions.find(
                         (option) => option.value === values.brandId
                       ) || null
                     }
@@ -550,7 +557,7 @@ export default function ProductUpdateForm({
                     }
                     onCreateOption={(inputValue) => {
                       const newBrand = handleCreateBrand(inputValue);
-                      setFieldValue("brandId", newBrand?.label);
+                      setFieldValue("brandId", newBrand.value);
                     }}
                     label="Brand"
                     placeholder="Select or Create Brand"

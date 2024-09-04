@@ -10,9 +10,14 @@ import { AuthProvider } from "@context/authContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Provider } from "jotai";
+import useIdleTimer from "@component/idleTimer";
+import Modal from "@component/Modal";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
+  // useIdleTimer(3600000, 300000); // Log out after 1 hour of inactivity, with a 5-minute warning
+
+  useIdleTimer(120000, 60000);
 
   return (
     <AppProvider>
@@ -20,7 +25,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
           <StyledContext>
             <QueryClientProvider client={queryClient}>
-              <Provider>{children}</Provider>
+              <Provider>
+                {children}
+                <Modal />
+              </Provider>
               <ReactQueryDevtools initialIsOpen={false} />
             </QueryClientProvider>
           </StyledContext>

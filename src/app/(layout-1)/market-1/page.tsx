@@ -31,6 +31,8 @@ export default async function HomeLanding() {
 
   const topRatedProducts = await api.getTopRatedProduct();
 
+  const fashionProducts = await api.getFashionProducts();
+
   return (
     <main>
       {/* HERO CAROUSEL AREA */}
@@ -55,7 +57,7 @@ export default async function HomeLanding() {
       <Section13 />
 
       {/* CAR LIST AREA */}
-      <Section6 carBrands={carBrands} carList={carList} />
+      <Section6 fashionProducts={fashionProducts} />
 
       {/* MOBILE PHONES AREA */}
       <Section7
