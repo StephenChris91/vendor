@@ -74,7 +74,7 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
           reference={`REF-${userId}-${Date.now()}`}
           email={userEmail}
           amount={100000} // 2000 Naira in kobo
-          publicKey={process.env.PAYSTACK_LIVE_SECRET_KEY!}
+          publicKey={process.env.NEXT_PUBLIC_PAYSTACK_LIVE_KEY!}
           onSuccess={handleSuccess}
           onClose={handleClose}
         >

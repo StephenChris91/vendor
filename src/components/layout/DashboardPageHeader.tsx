@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 import Box from "@component/Box";
 import Icon from "@component/icon/Icon";
@@ -9,6 +9,7 @@ import { H2 } from "@component/Typography";
 import useWindowSize from "@hook/useWindowSize";
 import Sidenav from "@component/sidenav/Sidenav";
 import DashboardNavigation from "./DashboardNavigation";
+import { IconButton } from "@component/buttons";
 
 // ==============================================================
 export interface DashboardPageHeaderProps {
@@ -18,9 +19,18 @@ export interface DashboardPageHeaderProps {
 }
 // ==============================================================
 
-export default function DashboardPageHeader({ iconName, title, button }: DashboardPageHeaderProps) {
+export default function DashboardPageHeader({
+  iconName,
+  title,
+  button,
+}: DashboardPageHeaderProps) {
   const width = useWindowSize();
   const isTablet = width < 1025;
+  const [sidenavOpen, setSidenavOpen] = useState(false);
+
+  const toggleSidenav = () => {
+    setSidenavOpen(!sidenavOpen);
+  };
 
   return (
     <Box mb="1.5rem" mt="-1rem">
@@ -33,13 +43,25 @@ export default function DashboardPageHeader({ iconName, title, button }: Dashboa
         </FlexBox>
 
         {isTablet && (
-          <Sidenav position="left" handle={<Icon mx="1rem">menu</Icon>}>
-            <DashboardNavigation />
-          </Sidenav>
+          <IconButton onClick={toggleSidenav}>
+            <Icon>{sidenavOpen ? "close" : "menu"}</Icon>
+          </IconButton>
         )}
 
         {!isTablet && button}
       </FlexBox>
+
+      {isTablet && (
+        <Sidenav
+          position="left"
+          open={sidenavOpen}
+          width={260}
+          handle={<></>}
+          toggleSidenav={toggleSidenav}
+        >
+          <DashboardNavigation />
+        </Sidenav>
+      )}
 
       {isTablet && !!button && <Box mt="1rem">{button}</Box>}
     </Box>
