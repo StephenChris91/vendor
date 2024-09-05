@@ -38,12 +38,12 @@ export default function ProductDetails({ shop }: Props) {
         products={
           shop.products?.slice(0, 9).map((product) => ({
             ...product,
-            categories: [], // or map actual categories if available
+            categories: [],
             shop: {
               id: shop.id,
               shopName: shop.shopName,
             },
-            user: user, // or provide actual user data if available
+            user: user,
           })) as Product[]
         }
       />{" "}

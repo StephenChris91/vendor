@@ -12,6 +12,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Provider } from "jotai";
 import useIdleTimer from "@component/idleTimer";
 import Modal from "@component/Modal";
+import MobileNavigationBar from "@component/mobile-navigation";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -27,6 +28,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <QueryClientProvider client={queryClient}>
               <Provider>
                 {children}
+                <MobileNavigationBar />
                 <Modal />
               </Provider>
               <ReactQueryDevtools initialIsOpen={false} />

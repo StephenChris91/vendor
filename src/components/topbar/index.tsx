@@ -41,7 +41,7 @@ export default function Topbar() {
 
           <FlexBox alignItems="center">
             <Icon size="14px">phone-call</Icon>
-            <span>+88012 3456 7894</span>
+            <span>+234</span>
           </FlexBox>
 
           <FlexBox alignItems="center" ml="20px">
@@ -128,6 +128,6 @@ const languageList = [
 const currencyList = [
   { title: "USD", imgUrl: "/assets/images/flags/usa.png" },
   { title: "EUR", imgUrl: "/assets/images/flags/uk.png" },
-  { title: "BDT", imgUrl: "/assets/images/flags/bd.png" },
-  { title: "INR", imgUrl: "/assets/images/flags/in.png" },
+  { title: "NGN", imgUrl: "/assets/images/flags/bd.png" },
+  // { title: "INR", imgUrl: "/assets/images/flags/in.png" },
 ];

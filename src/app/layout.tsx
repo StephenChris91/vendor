@@ -27,7 +27,7 @@ export default async function RootLayout({
         <SessionProviderServer>
           <Providers>
             {children}
-            <TawkToChat />
+            {/* <TawkToChat /> */}
           </Providers>
         </SessionProviderServer>
       </body>
