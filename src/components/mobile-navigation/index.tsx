@@ -11,10 +11,9 @@ import Login from "@sections/auth/Login";
 import LoginDialog from "@component/header/LoginDialog";
 import { LogoutButton } from "@component/logout-button";
 import FlexBox from "@component/FlexBox";
-import Sidenav from "@component/sidenav/Sidenav";
-import { useCart } from "@hook/useCart";
 import { useState } from "react";
 import { BsPersonVcard } from "react-icons/bs";
+import { RxDashboard } from "react-icons/rx";
 
 // STYLED COMPONENT
 const Wrapper = styled.div`
@@ -62,35 +61,7 @@ export default function MobileNavigationBar() {
   const width = useWindowSize();
   const { state } = useAppContext();
   const { user, signIn, signOut } = useAuth();
-  const { cartItems } = useCart(); // Use the new useCart hook
   const [open, setOpen] = useState(false);
-  // const toggleSidenav = () => setOpen(!open);
-
-  // const CART_HANDLE = (
-  //   <Box ml="20px" position="relative">
-  //     <IconButton bg="gray.200" p="12px" size="small">
-  //       <Icon size="20px">bag</Icon>
-  //     </IconButton>
-
-  //     {!!cartItems.length && (
-  //       <FlexBox
-  //         top={-5}
-  //         right={-5}
-  //         height={20}
-  //         minWidth={20}
-  //         bg="primary.main"
-  //         borderRadius="50%"
-  //         alignItems="center"
-  //         position="absolute"
-  //         justifyContent="center"
-  //       >
-  //         <Tiny color="white" fontWeight="600" lineHeight={1}>
-  //           {cartItems.length}
-  //         </Tiny>
-  //       </FlexBox>
-  //     )}
-  //   </Box>
-  // );
 
   const LOGIN_HANDLE = (
     <div className="link">
@@ -127,6 +98,12 @@ export default function MobileNavigationBar() {
             )}
           </NavLink>
         ))}
+        {user && user.role === "Vendor" && (
+          <NavLink className="link" href="/vendor/dashboard">
+            <RxDashboard size={24} />
+            Dashboard
+          </NavLink>
+        )}
         <FlexBox className="header-right" alignItems="center">
           {user ? (
             <LogoutButton>{user.firstname}</LogoutButton>
