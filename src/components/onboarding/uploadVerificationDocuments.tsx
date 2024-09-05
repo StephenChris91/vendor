@@ -110,6 +110,10 @@ const UploadVerificationDocuments: React.FC<
         mb="2.25rem"
       >
         Please upload PDF or document files for verification
+        <h5>
+          2 of the this 3 documents are required to complete your registration.
+          CAC, NIN slip, Address verification no
+        </h5>
       </H5>
 
       <DropZone
