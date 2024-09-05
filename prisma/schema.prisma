@@ -163,7 +163,7 @@ model shop {
   address      Address?
   paymentInfo  PaymentInfo?
   shopSettings ShopSettings?
-  shopOrders   shopOrder[]
+  shopOrders   shopOrder[]   @relation("ShopOrders")
   category     String?
   categoryId   String?
 }
@@ -201,27 +201,28 @@ model ShopSettings {
 }
 
 model product {
-  id                 String            @id @default(uuid())
-  name               String
-  slug               String            @unique
-  description        String
-  price              Int
-  sale_price         Int
-  sku                Int               @default(autoincrement())
-  quantity           Int
-  in_stock           Boolean?
-  is_taxable         Boolean?
-  status             ProductStatus     @default(Draft)
-  product_type       ProductType       @default(Simple)
-  image              String?
-  user_id            String?
-  ratings            Float?
-  total_reviews      Int?
-  my_review          String?
-  in_wishlist        Boolean?
-  shop_id            String?
-  shop               shop?             @relation("ShopProducts", fields: [shop_id], references: [id], onDelete: Cascade)
-  user               user?             @relation("UserProducts", fields: [user_id], references: [id], onDelete: Cascade)
+  id            String        @id @default(uuid())
+  name          String
+  slug          String        @unique
+  description   String
+  price         Int
+  sale_price    Int
+  sku           Int           @default(autoincrement())
+  quantity      Int
+  in_stock      Boolean?
+  is_taxable    Boolean?
+  status        ProductStatus @default(Draft)
+  product_type  ProductType   @default(Simple)
+  image         String?
+  user_id       String?
+  ratings       Float?
+  total_reviews Int?
+  my_review     String?
+  in_wishlist   Boolean?
+  shop_id       String?
+  shop          shop?         @relation("ShopProducts", fields: [shop_id], references: [id], onDelete: Cascade)
+  user          user?         @relation("UserProducts", fields: [user_id], references: [id], onDelete: Cascade)
+
   gallery            String[]
   shop_name          String?
   stock              Int?
@@ -328,7 +329,7 @@ model shopOrder {
   updatedAt    DateTime @updatedAt
 
   order      order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  shop       shop        @relation(fields: [shopId], references: [id])
+  shop       shop        @relation("ShopOrders", fields: [shopId], references: [id], onDelete: Cascade)
   orderItems orderItem[]
 }
 

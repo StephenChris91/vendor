@@ -20,7 +20,7 @@ import {
   TableCell,
 } from "./styles";
 import { updateVendorStatus } from "actions/updateVendorStatus";
-import { deleteVendor } from "actions/deleteVendor"; // You'll need to create this action
+import { deleteVendorAndRelatedData } from "actions/deleteVendor";
 
 interface Vendor {
   id: string;
@@ -89,7 +89,7 @@ const VendorList: React.FC<VendorListProps> = ({
     if (vendorToDelete) {
       const toastId = toast.loading("Deleting vendor...");
       try {
-        await deleteVendor(vendorToDelete);
+        await deleteVendorAndRelatedData(vendorToDelete);
         onDeleteVendor(vendorToDelete);
         toast.success("Vendor deleted successfully", { id: toastId });
       } catch (error) {

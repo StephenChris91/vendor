@@ -366,7 +366,7 @@ export default function ProductCard1({
                       onChange={handleRatingChange}
                       readOnly={!user}
                     />
-                    <SemiSpan ml="10px">{currentRating.toFixed(1)}</SemiSpan>
+                    <SemiSpan ml="10px">{currentRating?.toFixed(1)}</SemiSpan>
                   </>
                 )}
               </FlexBox>
