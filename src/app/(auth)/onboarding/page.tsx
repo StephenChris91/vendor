@@ -17,18 +17,18 @@ const Onboarding = () => {
   const router = useRouter();
 
   const handleRedirect = () => {
-    return router.push("/");
+    window.location.href = "/";
   };
 
   useEffect(() => {
     if (status === "authenticated") {
       if (session.user.role !== "Vendor") {
-        router.push("/profile");
+        window.location.href = "/profile";
       } else if (session.user.shopStatus === "Approved") {
-        router.push("/vendor/dashboard");
+        window.location.href = "/vendor/dashboard";
       }
     }
-  }, [session, status, router]);
+  }, [session, status]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -53,7 +53,6 @@ const Onboarding = () => {
             height="100%"
             backgroundColor="primary.main"
             display="flex"
-            // flexDirection="column"
             alignItems="center"
             justifyContent="center"
             p="3rem"

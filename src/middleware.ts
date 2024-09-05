@@ -54,8 +54,12 @@ export default auth((req) => {
         // Handle vendor-specific logic
         if (user?.role === "Vendor") {
             if (!user.isOnboardedVendor) {
-                // If not onboarded, only allow access to onboarding route
-                if (!isOnboardingRoute) {
+                // If not onboarded, allow access to public routes and onboarding
+                if (isPublicRoute || isOnboardingRoute) {
+                    return null;
+                }
+                // Redirect to onboarding for vendor routes
+                if (isVendorRoute) {
                     return Response.redirect(new URL('/onboarding', nextUrl));
                 }
             } else if (!user.shop) {
