@@ -1,13 +1,10 @@
 "use server"
 
-import { Resend } from "resend";
 import { db } from "../../prisma/prisma";
 import { VerificationStatus } from '@prisma/client'
-import { render } from '@react-email/components';
-import VerificationEmail from "@component/verification-email";
-import React from 'react';
+import { createTransporter, domain } from "@lib/emails/email";
+import { EmailTemplateProps, generateEmailHTML } from "@component/verification-email";
 
-const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_VERIFICATION_KEY);
 
 export async function submitVerificationDocuments(
   userId: string,
@@ -29,21 +26,38 @@ export async function submitVerificationDocuments(
       content: Buffer.from(doc.content, 'base64'),
     }));
 
-    // Render the email template
-    const emailHtml = render(
-      React.createElement(VerificationEmail, {
-        userId,
-        userEmail,
-        documentCount: documents.length
-      })
-    );
+    // Prepare email content
+    const emailProps: EmailTemplateProps = {
+      logoUrl: `${domain}/logo.png`,
+      emailHeading: 'New Verification Documents Submitted',
+      emailBody: `
+        <p>New verification documents have been submitted for review. Please find the details below:</p>
+        <p><strong>User ID:</strong> ${userId}</p>
+        <p><strong>User Email:</strong> ${userEmail}</p>
+        <p><strong>Number of Documents:</strong> ${documents.length}</p>
+        <p>Please review the attached documents and update the user's verification status accordingly.</p>
+      `,
+      callToAction: {
+        url: `${domain}/admin/users/${userId}`,
+        text: 'Review User Profile'
+      },
+      currentYear: new Date().getFullYear(),
+      privacyPolicyUrl: `${domain}/privacy`,
+      termsOfServiceUrl: `${domain}/terms`,
+    };
 
-    // Send email to admin using Resend
-    await resend.emails.send({
-      from: "Vendorspot Notification <admin@vendorspot.ng>",
+    // Generate HTML content
+    const htmlContent = generateEmailHTML(emailProps);
+
+    // Create transporter
+    const transporter = createTransporter();
+
+    // Send email to admin using Nodemailer
+    await transporter.sendMail({
+      from: '"Vendorspot Notification" <admin@vendorspot.ng>',
       to: process.env.NEXT_PUBLIC_ADMIN_EMAIL!,
       subject: "New Verification Documents Submitted",
-      html: emailHtml,
+      html: htmlContent,
       attachments: attachments,
     });
 
