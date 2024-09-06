@@ -1,125 +1,112 @@
-import React from "react";
-import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Section,
-  Text,
-  Button,
-  Link,
-  Img,
-} from "@react-email/components";
+// emailTemplate.ts
 
-interface VerificationEmailProps {
-  userId: string;
-  userEmail: string;
-  documentCount: number;
+export interface EmailTemplateProps {
+  logoUrl: string;
+  emailHeading: string;
+  emailBody: string;
+  callToAction?: {
+    url: string;
+    text: string;
+  };
+  currentYear: number;
+  privacyPolicyUrl: string;
+  termsOfServiceUrl: string;
 }
 
-export const VerificationEmail: React.FC<VerificationEmailProps> = ({
-  userId,
-  userEmail,
-  documentCount,
-}) => {
-  return (
-    <Html>
-      <Head />
-      <Body style={{ backgroundColor: "#f3f4f6", margin: 0, padding: 0 }}>
-        <Container
-          style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}
-        >
-          <Section
-            style={{
-              backgroundColor: "#ffffff",
-              padding: "24px",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <Img
-              style={{
-                margin: "0 auto",
-              }}
-              src="/public/assets/images/logo-2.svg"
-              width="64"
-              height="64"
-              alt="Logo"
-            ></Img>
-            <Text
-              style={{
-                fontSize: "24px",
-                fontWeight: "bold",
-                marginBottom: "16px",
-                color: "#fff",
-                textAlign: "center",
-                backgroundColor: "#0071FC",
-                padding: "8px",
-                borderRadius: "4px",
-                textTransform: "uppercase",
-                letterSpacing: "0.2px",
-              }}
-            >
-              New Verification Documents Submitted
-            </Text>
-            <Text style={{ marginBottom: "16px" }}>
-              New verification documents have been submitted for review. Please
-              find the details below:
-            </Text>
-            <Section style={{ marginBottom: "16px" }}>
-              <Text style={{ fontWeight: "bold" }}>User ID:</Text>
-              <Text style={{ marginLeft: "8px" }}>{userId}</Text>
-            </Section>
-            <Section style={{ marginBottom: "16px" }}>
-              <Text style={{ fontWeight: "bold" }}>User Email:</Text>
-              <Text style={{ marginLeft: "8px" }}>{userEmail}</Text>
-            </Section>
-            <Section style={{ marginBottom: "16px" }}>
-              <Text style={{ fontWeight: "bold" }}>Number of Documents:</Text>
-              <Text style={{ marginLeft: "8px" }}>{documentCount}</Text>
-            </Section>
-            <Text style={{ marginBottom: "16px" }}>
-              Please review the attached documents and update the user's
-              verification status accordingly.
-            </Text>
-            <Button
-              href={`${process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL}/users/${userId}`}
-              style={{
-                backgroundColor: "#2563eb",
-                color: "#ffffff",
-                padding: "12px 16px",
-                borderRadius: "4px",
-                textDecoration: "none",
-                display: "inline-block",
-                fontWeight: "bold",
-              }}
-            >
-              Review User Profile
-            </Button>
-          </Section>
-          <Section
-            style={{
-              marginTop: "32px",
-              textAlign: "center",
-              fontSize: "14px",
-              color: "#6b7280",
-            }}
-          >
-            <Text>
-              This is an automated message from Vendorspot. Please do not reply
-              to this email.
-            </Text>
-            <Link
-              href="https://vendorspot.ng"
-              style={{ color: "#2563eb", textDecoration: "underline" }}
-            >
-              Vendorspot.ng
-            </Link>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
-  );
-};
+export function generateEmailHTML(props: EmailTemplateProps): string {
+  const {
+    logoUrl,
+    emailHeading,
+    emailBody,
+    callToAction,
+    currentYear,
+    privacyPolicyUrl,
+    termsOfServiceUrl,
+  } = props;
 
-export default VerificationEmail;
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${emailHeading}</title>
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                font-family: Open Sans, Roboto, -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+                line-height: 1.5;
+                color: #333333;
+                background-color: #f4f4f4;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+            }
+            .header {
+                background-color: #0071FC;
+                padding: 20px;
+                text-align: center;
+            }
+            .logo {
+                max-width: 150px;
+                height: auto;
+            }
+            .content {
+                padding: 20px;
+            }
+            .footer {
+                background-color: #f8f8f8;
+                padding: 20px;
+                text-align: center;
+                font-size: 12px;
+                color: #666666;
+            }
+            .button {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #0071FC;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <img src="${logoUrl}" alt="Vendorspot Logo" class="logo">
+            </div>
+            
+            <div class="content">
+                <h1>${emailHeading}</h1>
+                
+                ${emailBody}
+                
+                ${
+                  callToAction
+                    ? `
+                <p style="text-align: center; margin-top: 30px;">
+                    <a href="${callToAction.url}" class="button">${callToAction.text}</a>
+                </p>
+                `
+                    : ""
+                }
+            </div>
+            
+            <div class="footer">
+                <p>&copy; ${currentYear} Vendorspot. All rights reserved.</p>
+                <p>
+                    <a href="${privacyPolicyUrl}">Privacy Policy</a> | 
+                    <a href="${termsOfServiceUrl}">Terms of Service</a>
+                </p>
+                <p>If you have any questions, please contact us at <a href="mailto:support@vendorspot.ng">support@vendorspot.ng</a></p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+}

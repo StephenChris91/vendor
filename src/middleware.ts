@@ -25,6 +25,7 @@ export default auth((req) => {
     const isShopRoute = nextUrl.pathname.startsWith('/shops/');
     const isProductRoute = nextUrl.pathname.startsWith('/product');
     const isOnboardingRoute = nextUrl.pathname.startsWith('/onboarding');
+    const isCheckoutRoute = nextUrl.pathname.startsWith('/checkout');
 
     // Allow access to API routes, shop routes, and product routes
     if (isApiAuthRoute || isApiDataRoute || isShopRoute || isProductRoute) {
@@ -37,7 +38,7 @@ export default auth((req) => {
         if (isPublicRoute || isAuthRoute) {
             return null;
         }
-        // Redirect to login for protected routes
+        // Redirect to login for protected routes, including checkout
         return Response.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(nextUrl.pathname)}`, nextUrl));
     }
 
@@ -49,6 +50,11 @@ export default auth((req) => {
         const sessionExpiry = req.auth.expires;
         if (sessionExpiry && new Date() > new Date(sessionExpiry)) {
             return Response.redirect(new URL('/login', nextUrl));
+        }
+
+        // Allow access to checkout for logged-in users
+        if (isCheckoutRoute) {
+            return null;
         }
 
         // Handle vendor-specific logic
