@@ -26,6 +26,12 @@ export default auth((req) => {
     const isProductRoute = nextUrl.pathname.startsWith('/product');
     const isOnboardingRoute = nextUrl.pathname.startsWith('/onboarding');
     const isCheckoutRoute = nextUrl.pathname.startsWith('/checkout');
+    const isVendorPath = nextUrl.pathname.startsWith('/vendor');
+
+    // Always block non-logged-in users from accessing vendor routes
+    if (!isLoggedIn && (isVendorRoute || isVendorPath)) {
+        return Response.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(nextUrl.pathname)}`, nextUrl));
+    }
 
     // Allow access to API routes, shop routes, and product routes
     if (isApiAuthRoute || isApiDataRoute || isShopRoute || isProductRoute) {
@@ -65,7 +71,7 @@ export default auth((req) => {
                     return null;
                 }
                 // Redirect to onboarding for vendor routes
-                if (isVendorRoute) {
+                if (isVendorRoute || isVendorPath) {
                     return Response.redirect(new URL('/onboarding', nextUrl));
                 }
             } else if (!user.shop) {
@@ -76,6 +82,11 @@ export default auth((req) => {
             } else if (isAuthRoute) {
                 // If fully set up, redirect away from auth routes
                 return Response.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
+            }
+        } else {
+            // Non-vendor users cannot access vendor routes
+            if (isVendorRoute || isVendorPath) {
+                return Response.redirect(new URL("/", nextUrl));
             }
         }
 
@@ -98,11 +109,6 @@ export default auth((req) => {
 
         // Prevent non-admins from accessing admin routes
         if (isAdminRoute && user?.role !== "Admin") {
-            return Response.redirect(new URL("/", nextUrl));
-        }
-
-        // Prevent non-vendors from accessing vendor routes
-        if (isVendorRoute && user?.role !== "Vendor") {
             return Response.redirect(new URL("/", nextUrl));
         }
     }

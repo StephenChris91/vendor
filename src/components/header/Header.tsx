@@ -9,7 +9,7 @@ import Box from "@component/Box";
 import Image from "@component/Image";
 import Icon from "@component/icon/Icon";
 import FlexBox from "@component/FlexBox";
-import MiniCart from "@component/mini-cart";
+import MiniCart from "@component/mobile-navigation/mini-cart";
 import Container from "@component/Container";
 import { Tiny } from "@component/Typography";
 import { IconButton } from "@component/buttons";

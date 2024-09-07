@@ -7,7 +7,7 @@ import Login from "@sections/auth/Login";
 
 import Icon from "@component/icon/Icon";
 import FlexBox from "@component/FlexBox";
-import MiniCart from "@component/mini-cart";
+import MiniCart from "@component/mobile-navigation/mini-cart";
 import Container from "@component/Container";
 import { Tiny } from "@component/Typography";
 import { IconButton } from "@component/buttons";
@@ -41,7 +41,8 @@ export default function HeaderTwo({ className }: HeaderProps) {
           bg="primary.main"
           alignItems="center"
           borderRadius="300px"
-          justifyContent="center">
+          justifyContent="center"
+        >
           <Tiny color="white" fontWeight="600">
             {state.cart.length}
           </Tiny>
@@ -58,7 +59,12 @@ export default function HeaderTwo({ className }: HeaderProps) {
 
   return (
     <StyledHeader className={className}>
-      <Container display="flex" alignItems="center" justifyContent="space-between" height="100%">
+      <Container
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        height="100%"
+      >
         <FlexBox className="logo" alignItems="center" mr="1rem">
           <Link href="/">
             <img src="/assets/images/logo.svg" alt="logo" />
@@ -79,7 +85,8 @@ export default function HeaderTwo({ className }: HeaderProps) {
             width={380}
             position="right"
             handle={CART_HANDLE}
-            toggleSidenav={toggleSidenav}>
+            toggleSidenav={toggleSidenav}
+          >
             <MiniCart toggleSidenav={toggleSidenav} />
           </Sidenav>
         </FlexBox>
