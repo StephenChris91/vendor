@@ -79,6 +79,26 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       validationSchema: formSchema,
     });
 
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signIn("google", { redirect: false });
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Signed in with Google successfully");
+        refreshAuth();
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
+        // You might want to add logic here to redirect based on user role
+        // This would require checking the user's role after signing in with Google
+      }
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      toast.error("An error occurred during Google sign-in. Please try again.");
+    }
+  };
+
   return (
     <StyledRoot mx="auto" my="2rem" boxShadow="large" borderRadius={8}>
       <form className="content" onSubmit={handleSubmit}>
@@ -182,6 +202,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           cursor="pointer"
           alignItems="center"
           justifyContent="center"
+          onClick={handleGoogleSignIn}
         >
           <Icon variant="small" defaultcolor="auto" mr="0.5rem">
             google-1
