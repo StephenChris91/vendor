@@ -239,7 +239,7 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
         Please provide your shop's address
       </H5>
 
-      <Button
+      {/* <Button
         mb="1rem"
         variant="outlined"
         color="primary"
@@ -247,7 +247,7 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
         disabled={isDetectingLocation}
       >
         {isDetectingLocation ? "Detecting Location..." : "Detect My Location"}
-      </Button>
+      </Button> */}
 
       <TextField
         fullwidth

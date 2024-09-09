@@ -21,6 +21,7 @@ import {
 } from "./styles";
 import { updateVendorStatus } from "actions/updateVendorStatus";
 import { deleteVendorAndRelatedData } from "actions/deleteVendor";
+import { sendVendorApprovalEmail } from "@lib/emails/vendorAprrovalNotifications";
 
 interface Vendor {
   id: string;
@@ -36,7 +37,7 @@ interface Vendor {
 interface VendorListProps {
   vendors: Vendor[];
   onToggleStatus: (id: string, newStatus: "active" | "inactive") => void;
-  onDeleteVendor: (id: string) => void; // New prop for handling vendor deletion
+  onDeleteVendor: (id: string) => void;
 }
 
 const VendorList: React.FC<VendorListProps> = ({
@@ -59,6 +60,27 @@ const VendorList: React.FC<VendorListProps> = ({
     try {
       await updateVendorStatus(vendorId, newStatus);
       onToggleStatus(vendorId, newStatus);
+
+      if (newStatus === "active") {
+        const vendor = vendors.find((v) => v.id === vendorId);
+        if (vendor) {
+          const response = await fetch("/api/admin/vendors/send-approval", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              vendorEmail: vendor.email,
+              vendorName: vendor.name,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to send approval email");
+          }
+        }
+      }
+
       toast.success(
         `Vendor ${
           newStatus === "active" ? "activated" : "deactivated"

@@ -12,6 +12,7 @@ import VendorSearchFilter from "@component/admin/vendors/vendor-search";
 import VendorStatistics from "@component/admin/vendors/vendor-statistics";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import Spinner from "@component/Spinner";
 
 const PageWrapper = styled(Box)`
   padding: 2rem;
@@ -106,7 +107,12 @@ export default function VendorsPage() {
     // Implement add vendor logic
   };
 
-  if (vendorsLoading) return <div>Loading...</div>;
+  if (vendorsLoading)
+    return (
+      <div>
+        <Spinner />
+      </div>
+    );
   if (vendorsError) return <div>Error loading vendors. Please try again.</div>;
 
   return (

@@ -86,7 +86,7 @@ export default function ShopIntroCard({ shop }: Props) {
                 </Small>
               </FlexBox>
 
-              <FlexBox color="text.muted" mb="8px" maxWidth="270px">
+              {/* <FlexBox color="text.muted" mb="8px" maxWidth="270px">
                 <Icon defaultcolor="currentColor" size="15px" mt="5px">
                   map-pin-2
                 </Icon>
@@ -104,10 +104,10 @@ export default function ShopIntroCard({ shop }: Props) {
                 <SemiSpan color="text.muted" ml="12px">
                   {shop?.shopSettings.businessHours}
                 </SemiSpan>
-              </FlexBox>
+              </FlexBox> */}
             </div>
 
-            <a href="mailto:scarletbeauty@xmail.com">
+            <a>
               <Button variant="outlined" color="primary" my="12px">
                 Contact Vendor
               </Button>
