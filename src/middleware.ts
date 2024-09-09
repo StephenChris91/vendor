@@ -65,6 +65,14 @@ export default auth((req) => {
 
         // Handle vendor-specific logic
         if (user?.role === "Vendor") {
+            // New check for vendors who have paid but haven't completed onboarding
+            if (user.hasPaid && !user.isOnboardedVendor) {
+                if (isOnboardingRoute) {
+                    return null; // Allow access to onboarding
+                }
+                return Response.redirect(new URL('/onboarding', nextUrl)); // Redirect to onboarding
+            }
+
             if (!user.isOnboardedVendor) {
                 // If not onboarded, allow access to public routes and onboarding
                 if (isPublicRoute || isOnboardingRoute) {
