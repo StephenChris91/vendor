@@ -66,7 +66,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error(error?.message);
     } finally {
       setIsLoading(false);
     }
