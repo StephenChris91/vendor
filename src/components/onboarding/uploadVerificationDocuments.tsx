@@ -35,8 +35,8 @@ const formSchema = yup.object().shape({
         type: yup.string().required(),
       })
     )
-    .min(1, "At least one document is required")
-    .required("At least one document is required"),
+    .min(2, "At least two documents are required")
+    .required("At least two documents are required"),
 });
 
 const UploadVerificationDocuments: React.FC<
@@ -50,40 +50,76 @@ const UploadVerificationDocuments: React.FC<
     },
     validationSchema: formSchema,
     onSubmit: async (values) => {
-      if (values.documents.length === 0) return;
+      if (values.documents.length < 2) {
+        toast.error("At least two documents are required");
+        return;
+      }
 
       try {
-        await submitVerificationDocuments(userId, userEmail, values.documents);
+        const result = await submitVerificationDocuments(
+          userId,
+          userEmail,
+          values.documents
+        );
 
-        toast.success("Documents submitted successfully for verification!");
-        formik.resetForm();
-        setFileNames([]);
-        setDocumentsUploaded(true); // Set documents as uploaded
+        if (result.success) {
+          toast.success(
+            result.message ||
+              "Documents submitted successfully for verification!"
+          );
+          formik.resetForm();
+          setFileNames([]);
+          setDocumentsUploaded(true);
+        } else {
+          throw new Error(result.message || "Failed to submit documents");
+        }
       } catch (error) {
         console.error("Error submitting documents:", error);
-        toast.error("Failed to submit documents. Please try again.");
-        setDocumentsUploaded(false); // Ensure documents are marked as not uploaded in case of error
+        if (error instanceof Error) {
+          toast.error(`Failed to submit documents: ${error.message}`);
+        } else {
+          toast.error("An unexpected error occurred. Please try again.");
+        }
+        setDocumentsUploaded(false);
       }
     },
   });
 
   const handleUpload = useCallback(
-    (url: string, file: File) => {
-      const newDocument: DocumentData = {
-        name: file.name,
-        content: url,
-        type: file.type,
-      };
-      formik.setFieldValue("documents", [
-        ...formik.values.documents,
-        newDocument,
-      ]);
-      setFileNames((prevNames) => [...prevNames, file.name]);
+    async (url: string, file: File) => {
+      try {
+        // Convert file to base64
+        const base64Content = await fileToBase64(file);
 
-      toast.success("Document uploaded successfully!");
+        const newDocument: DocumentData = {
+          name: file.name,
+          content: base64Content,
+          type: file.type,
+        };
+        formik.setFieldValue("documents", [
+          ...formik.values.documents,
+          newDocument,
+        ]);
+        setFileNames((prevNames) => [...prevNames, file.name]);
+
+        toast.success("Document uploaded successfully!");
+      } catch (error) {
+        console.error("Error processing file:", error);
+        toast.error("Failed to process document. Please try again.");
+      }
     },
     [formik]
   );
+
+  // Helper function to convert file to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
   const removeFile = (index: number) => {
     const newDocuments = [...formik.values.documents];
@@ -162,7 +198,7 @@ const UploadVerificationDocuments: React.FC<
         color="primary"
         fullwidth
         onClick={() => formik.handleSubmit()}
-        disabled={formik.values.documents.length === 0 || formik.isSubmitting}
+        disabled={formik.values.documents.length < 2 || formik.isSubmitting}
       >
         {formik.isSubmitting
           ? "Submitting..."

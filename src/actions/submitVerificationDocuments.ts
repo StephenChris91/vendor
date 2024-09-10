@@ -1,69 +1,66 @@
-"use server"
+// actions/submitVerificationDocuments.ts
 
-import { db } from "../../prisma/prisma";
-import { VerificationStatus } from '@prisma/client'
-import { createTransporter, domain } from "@lib/emails/email";
-import { EmailTemplateProps, generateEmailHTML } from "@component/verification-email";
+'use server'
 
+import { createTransporter, domain } from '@lib/emails/email';
+import { Attachment } from 'nodemailer/lib/mailer';
+
+interface DocumentData {
+  name: string;
+  content: string;
+  type: string;
+}
+
+// actions/submitVerificationDocuments.ts
 
 export async function submitVerificationDocuments(
   userId: string,
   userEmail: string,
-  documents: { name: string; content: string; type: string }[]
+  documents: DocumentData[]
 ) {
   try {
-    // Update user's profile to indicate documents have been submitted
-    await db.user.update({
-      where: { id: userId },
-      data: {
-        verificationStatus: VerificationStatus.Pending
-      }
-    });
+    console.log('Submitting documents for user:', userId);
+    console.log('User email:', userEmail);
+    console.log('Number of documents:', documents.length);
 
-    // Prepare attachments for the email
-    const attachments = documents.map(doc => ({
-      filename: doc.name,
-      content: Buffer.from(doc.content, 'base64'),
-    }));
-
-    // Prepare email content
-    const emailProps: EmailTemplateProps = {
-      logoUrl: `${domain}/logo.png`,
-      emailHeading: 'New Verification Documents Submitted',
-      emailBody: `
-        <p>New verification documents have been submitted for review. Please find the details below:</p>
-        <p><strong>User ID:</strong> ${userId}</p>
-        <p><strong>User Email:</strong> ${userEmail}</p>
-        <p><strong>Number of Documents:</strong> ${documents.length}</p>
-        <p>Please review the attached documents and update the user's verification status accordingly.</p>
-      `,
-      callToAction: {
-        url: `${domain}/admin/users/${userId}`,
-        text: 'Review User Profile'
-      },
-      currentYear: new Date().getFullYear(),
-      privacyPolicyUrl: `${domain}/privacy`,
-      termsOfServiceUrl: `${domain}/terms`,
-    };
-
-    // Generate HTML content
-    const htmlContent = generateEmailHTML(emailProps);
-
-    // Create transporter
     const transporter = createTransporter();
 
-    // Send email to admin using Nodemailer
-    await transporter.sendMail({
-      from: '"Vendorspot Notification" <admin@vendorspot.ng>',
+    // Prepare email attachments
+    const attachments: Attachment[] = documents.map((doc) => ({
+      filename: doc.name,
+      content: doc.content.split(',')[1],
+      encoding: 'base64',
+    }));
+
+    console.log('Prepared attachments:', attachments.map(a => a.filename));
+
+    // Test SMTP connection
+    try {
+      await transporter.verify();
+      console.log('SMTP connection successful');
+    } catch (verifyError) {
+      console.error('SMTP connection failed:', verifyError);
+      throw new Error(`SMTP connection failed: ${verifyError.message}`);
+    }
+
+    // Send email
+    const mailResult = await transporter.sendMail({
+      from: "admin@vendorspot.ng",
       to: process.env.NEXT_PUBLIC_ADMIN_EMAIL!,
-      subject: "New Verification Documents Submitted",
-      html: htmlContent,
-      attachments: attachments,
+      subject: `Verification Documents for User ${userId}`,
+      text: `User ${userId} (${userEmail}) has submitted verification documents. Please find them attached.`,
+      attachments,
     });
 
-    return { success: true };
+    console.log('Email sent:', mailResult);
+
+    return { success: true, message: 'Documents submitted successfully' };
   } catch (error) {
-    console.error("Error submitting verification documents:", error);
-    throw new Error("Failed to submit verification documents");
+    console.error("Error submitting documents:", error);
+    if (error instanceof Error) {
+      throw new Error(`Failed to submit documents: ${error.message}`);
+    } else {
+      throw new Error("Failed to submit documents: Unknown error");
+    }
   }
 }

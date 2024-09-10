@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PaystackConsumer } from "react-paystack";
+import Script from "next/script";
 import toast from "react-hot-toast";
 import { Button } from "@component/buttons";
 import Box from "@component/Box";
@@ -11,49 +11,89 @@ interface ProcessPaymentProps {
   setPaymentProcessed: (status: boolean) => void;
   userEmail: string;
   userId: string;
-  formData: any; // Replace 'any' with your actual form data type
+  updatePaymentStatus: (
+    userId: string
+  ) => Promise<{ success: boolean; message: string; user?: any }>;
   onNextStep: () => void;
   setStepValidation: (isValid: boolean) => void;
+}
+
+declare global {
+  interface Window {
+    PaystackPop: any;
+  }
 }
 
 const ProcessPayment: React.FC<ProcessPaymentProps> = ({
   setPaymentProcessed,
   userEmail,
   userId,
-  formData,
+  updatePaymentStatus,
   onNextStep,
   setStepValidation,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isPaymentCompleted, setIsPaymentCompleted] = useState(false);
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
   useEffect(() => {
-    // Initially, the step is not valid because payment hasn't been made
     setStepValidation(false);
   }, []);
 
-  const handleSuccess = () => {
+  const handlePayment = () => {
+    if (!isScriptLoaded) {
+      toast.error("Payment system is not ready. Please try again in a moment.");
+      return;
+    }
+
     setIsLoading(true);
-    // Here you would typically verify the payment on your server
-    // For now, we'll just simulate a successful verification
-    setTimeout(() => {
-      setPaymentProcessed(true);
-      setIsPaymentCompleted(true);
-      setStepValidation(true);
-      toast.success("Payment successful!");
-      onNextStep();
-      setIsLoading(false);
-    }, 1000);
+
+    const handler = window.PaystackPop.setup({
+      key:
+        process.env.NODE_ENV !== "production"
+          ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!
+          : process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY!,
+      email: userEmail,
+      amount: 200000, // 2000 Naira in kobo
+      ref: `REF-${userId}-${Date.now()}`,
+      onClose: function () {
+        setIsLoading(false);
+        toast.error("Payment cancelled. Please try again.");
+      },
+      callback: function (response: any) {
+        handlePaymentCallback(response);
+      },
+    });
+
+    handler.openIframe();
   };
 
-  const handleClose = () => {
-    toast.error("Payment cancelled. Please try again.");
-    setIsLoading(false);
-    setStepValidation(false);
+  const handlePaymentCallback = async (response: any) => {
+    try {
+      const result = await updatePaymentStatus(userId);
+      if (result.success) {
+        setPaymentProcessed(true);
+        setStepValidation(true);
+        toast.success("Payment successful!");
+        onNextStep();
+      } else {
+        throw new Error("Failed to update payment status");
+      }
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      toast.error(
+        "There was an issue processing your payment. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <Box className="content" width="auto" height="auto" paddingBottom={6}>
+      <Script
+        src="https://js.paystack.co/v1/inline.js"
+        onLoad={() => setIsScriptLoaded(true)}
+      />
       <H5
         fontWeight="600"
         fontSize="12px"
@@ -69,32 +109,19 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
         Paystack.
       </Small>
 
-      {!isPaymentCompleted ? (
-        <PaystackConsumer
-          reference={`REF-${userId}-${Date.now()}`}
-          email={userEmail}
-          amount={100000} // 2000 Naira in kobo
-          publicKey={process.env.NEXT_PUBLIC_PAYSTACK_LIVE_KEY!}
-          onSuccess={handleSuccess}
-          onClose={handleClose}
-        >
-          {({ initializePayment }) => (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => initializePayment()}
-              disabled={isLoading}
-              fullwidth
-            >
-              {isLoading ? "Processing..." : "Proceed to Payment"}
-            </Button>
-          )}
-        </PaystackConsumer>
-      ) : (
-        <Small color="success.main" mt="1rem" display="block">
-          Payment completed successfully. You can now proceed to the next step.
-        </Small>
-      )}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handlePayment}
+        disabled={isLoading || !isScriptLoaded}
+        fullwidth
+      >
+        {isLoading
+          ? "Processing..."
+          : isScriptLoaded
+          ? "Proceed to Payment"
+          : "Loading Payment System..."}
+      </Button>
 
       <Small color="text.secondary" mt="1rem" display="block">
         By clicking "Proceed to Payment", you agree to our terms of service.

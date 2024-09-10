@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Button } from "@component/buttons";
@@ -22,6 +22,12 @@ import AddShopAddress from "@component/onboarding/addShopAddress";
 import AddShopSettings from "@component/onboarding/addShopSettings";
 import ProcessPayment from "@component/onboarding/processPayment";
 import UploadVerificationDocuments from "@component/onboarding/uploadVerificationDocuments";
+import { updatePaymentStatus } from "actions/update-payment-status";
+
+// Define the correct type for updatePaymentStatus
+type UpdatePaymentStatusType = (
+  userId: string
+) => Promise<{ success: boolean; message: string; user?: any }>;
 
 const steps = [
   { component: AddLogo, label: "Shop Logo" },
@@ -30,7 +36,11 @@ const steps = [
   { component: AddPaymentInfo, label: "Payment Info" },
   { component: AddShopAddress, label: "Shop Address" },
   { component: AddShopSettings, label: "Shop Settings" },
-  { component: ProcessPayment, label: "Make Payment" },
+  {
+    component: ProcessPayment,
+    label: "Make Payment",
+    action: updatePaymentStatus as UpdatePaymentStatusType,
+  },
   {
     component: UploadVerificationDocuments,
     label: "Upload Verification Documents",
@@ -47,23 +57,39 @@ const MultiStepForm = () => {
   const [stepValidation, setStepValidation] = useState(steps.map(() => false));
   const router = useRouter();
 
+  useEffect(() => {
+    if (user?.hasPaid) {
+      setPaymentProcessed(true);
+    }
+  }, [user]);
+
   const handleNextStep = () => {
     if (currentStep === 5) {
       setShowPaymentWarning(true);
     } else if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      if (currentStep === 6 && isPaymentProcessed) {
+        // Skip payment processing if already paid
+        setCurrentStep(currentStep + 2);
+      } else {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
 
   const handlePrevious = () => {
-    if (currentStep > 0 && !isPaymentProcessed) {
+    if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
 
   const handleConfirmPayment = () => {
     setShowPaymentWarning(false);
-    setCurrentStep(currentStep + 1);
+    if (isPaymentProcessed) {
+      // Skip payment processing if already paid
+      setCurrentStep(currentStep + 2);
+    } else {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const handleFinish = async () => {
@@ -146,6 +172,8 @@ const MultiStepForm = () => {
         newStepValidation[currentStep] = isValid;
         setStepValidation(newStepValidation);
       },
+      isPaymentProcessed,
+      updatePaymentStatus: updatePaymentStatus as UpdatePaymentStatusType,
     };
   };
 
@@ -156,9 +184,9 @@ const MultiStepForm = () => {
           Payment Warning
         </H3>
         <Paragraph mb="2rem">
-          Please note that after processing the payment, you will not be able to
-          return to previous steps. Make sure all your information is correct
-          before proceeding.
+          {isPaymentProcessed
+            ? "You have already made a payment. Proceeding will take you to the document upload step."
+            : "Please note that after processing the payment, you will not be able to return to previous steps. Make sure all your information is correct before proceeding."}
         </Paragraph>
         <FlexBox justifyContent="space-between">
           <Button
@@ -173,7 +201,9 @@ const MultiStepForm = () => {
             color="primary"
             onClick={handleConfirmPayment}
           >
-            Proceed to Payment
+            {isPaymentProcessed
+              ? "Proceed to Document Upload"
+              : "Proceed to Payment"}
           </Button>
         </FlexBox>
       </Box>
@@ -192,12 +222,12 @@ const MultiStepForm = () => {
         </Box>
 
         <FlexBox justifyContent="space-between" mt="2rem">
-          {currentStep < 6 && (
+          {currentStep > 0 && (
             <Button
               variant="outlined"
               color="primary"
               onClick={handlePrevious}
-              disabled={currentStep === 0}
+              disabled={currentStep === 7} // Disable on document upload step
             >
               Previous
             </Button>
@@ -207,12 +237,9 @@ const MultiStepForm = () => {
               variant="contained"
               color="primary"
               onClick={handleNextStep}
-              disabled={
-                !stepValidation[currentStep] ||
-                (currentStep >= 6 && !isPaymentProcessed)
-              }
+              disabled={!stepValidation[currentStep]}
             >
-              {currentStep === steps.length - 2 ? "Submit Documents" : "Next"}
+              {currentStep === 5 ? "Review Payment" : "Next"}
             </Button>
           )}
           {currentStep === steps.length - 1 && (

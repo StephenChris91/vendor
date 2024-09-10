@@ -34,28 +34,42 @@ const nextConfig = {
       bodySizeLimit: "4mb", // Increase the limit to 4MB
     },
   },
-
-  // Add this new section
-  //   async headers() {
-  //     return [
-  //       {
-  //         source: "/api/data/new-arrivals",
-  //         headers: [
-  //           { key: "Access-Control-Allow-Credentials", value: "true" },
-  //           { key: "Access-Control-Allow-Origin", value: "*" },
-  //           {
-  //             key: "Access-Control-Allow-Methods",
-  //             value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
-  //           },
-  //           {
-  //             key: "Access-Control-Allow-Headers",
-  //             value:
-  //               "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
-  //           },
-  //         ],
-  //       },
-  //     ];
-  //   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value:
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co",
+          },
+        ],
+      },
+    ];
+  },
 };
+
+// Add this new section
+//   async headers() {
+//     return [
+//       {
+//         source: "/api/data/new-arrivals",
+//         headers: [
+//           { key: "Access-Control-Allow-Credentials", value: "true" },
+//           { key: "Access-Control-Allow-Origin", value: "*" },
+//           {
+//             key: "Access-Control-Allow-Methods",
+//             value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+//           },
+//           {
+//             key: "Access-Control-Allow-Headers",
+//             value:
+//               "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+//           },
+//         ],
+//       },
+//     ];
+//   },
 
 module.exports = nextConfig;

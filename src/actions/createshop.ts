@@ -113,7 +113,7 @@ export async function createShop(values: z.infer<typeof extendedShopSchema>) {
         await db.user.update({
             where: { id: session.user.id },
             data: {
-                hasPaid: true,
+                // hasPaid: true,
                 isOnboardedVendor: false, // Set to true after document verification
             },
         });
