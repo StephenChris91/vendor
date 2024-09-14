@@ -154,7 +154,6 @@ const VendorList: React.FC<VendorListProps> = ({
               <TableHeaderCell>Status</TableHeaderCell>
               <TableHeaderCell>Total Sales</TableHeaderCell>
               <TableHeaderCell>Rating</TableHeaderCell>
-              <TableHeaderCell>Has Shop</TableHeaderCell>
               <TableHeaderCell>Actions</TableHeaderCell>
             </TableRow>
           </TableHead>
