@@ -160,7 +160,12 @@ const VendorList: React.FC<VendorListProps> = ({
           <tbody>
             {vendors.map((vendor) => (
               <TableRow key={vendor.id}>
-                <TableCell>{vendor.shop?.shopName || "No Shop"}</TableCell>
+                <TableCell>
+                  {/* {vendor.shop?.shopName || "No Shop"} */}
+                  <H6 color={vendor.shop?.shopName ? "black" : "error.main"}>
+                    {vendor.shop?.shopName || "No Shop"}
+                  </H6>
+                </TableCell>
                 <TableCell>{vendor.email}</TableCell>
                 <TableCell>{vendor.registrationDate}</TableCell>
                 <TableCell>
