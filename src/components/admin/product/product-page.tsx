@@ -22,6 +22,7 @@ interface Product {
   categories: { name: string }[];
   shop: { shopName: string };
   status: "Published" | "Draft" | "Suspended" | "OutOfStock";
+  totalSold: number;
 }
 
 interface ProductStats {
@@ -30,12 +31,31 @@ interface ProductStats {
   lowStock: number;
 }
 
+// const fetchTotalSold = async (productId: string): Promise<number> => {
+//   try {
+//     const response = await fetch(`/api/admin/products/${productId}/total-sold`);
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+//     const data = await response.json();
+//     return data.totalSold;
+//   } catch (error) {
+//     console.error("Error fetching total sold:", error);
+//     return 0;
+//   }
+// };
+
 const fetchProducts = async (): Promise<Product[]> => {
-  const response = await fetch("/api/products", {});
-  if (!response.ok) {
-    throw new Error("Failed to fetch products");
+  try {
+    const response = await fetch("/api/products");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return [];
   }
-  return response.json();
 };
 
 const fetchProductStats = async (): Promise<ProductStats> => {
@@ -74,24 +94,31 @@ export default function ProductsPage() {
 
   const updateProductMutation = useMutation({
     mutationFn: async (updatedProduct: Partial<Product>) => {
-      const response = await fetch(`/api/products/${updatedProduct.id}`, {
+      console.log("Sending update request:", updatedProduct);
+      const response = await fetch(`/api/admin/products/${updatedProduct.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedProduct),
       });
+      const data = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update product");
+        console.error("Server responded with an error:", data);
+        throw new Error(
+          data.error || data.message || "Failed to update product"
+        );
       }
-      return response.json();
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["productStats"] });
       toast.success("Product updated successfully");
+      return data;
     },
     onError: (error: Error) => {
+      console.error("Error updating product:", error);
       toast.error(`Failed to update product: ${error.message}`);
+      throw error;
     },
   });
 
@@ -138,12 +165,12 @@ export default function ProductsPage() {
   };
 
   const handleUpdateProduct = async (updatedProduct: Partial<Product>) => {
-    await updateProductMutation.mutateAsync(updatedProduct);
+    try {
+      await updateProductMutation.mutateAsync(updatedProduct);
+    } catch (error) {
+      console.error("Error in handleUpdateProduct:", error);
+    }
   };
-
-  if (isLoadingProducts || isLoadingStats) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <PageWrapper>
@@ -170,6 +197,7 @@ export default function ProductsPage() {
         onSelect={handleProductSelection}
         selectedProducts={selectedProducts}
         onUpdateProduct={handleUpdateProduct}
+        // fetchTotalSold={fetchTotalSold}
       />
     </PageWrapper>
   );

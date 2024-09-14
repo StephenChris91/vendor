@@ -52,34 +52,62 @@ export async function PUT(
 ) {
     try {
         const body = await request.json();
+        console.log('Received update request for product:', params.id);
+        console.log('Update data:', body);
+
+        // Fetch the existing product
+        const existingProduct = await db.product.findUnique({
+            where: { id: params.id },
+            include: {
+                categories: true,
+                brand: true,
+            },
+        });
+
+        if (!existingProduct) {
+            return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+        }
+
+        // Prepare the update data
+        const updateData: any = {};
+        for (const [key, value] of Object.entries(body)) {
+            if (value !== undefined) {
+                updateData[key] = value;
+            }
+        }
+
+        // Handle special cases
+        if (body.status) {
+            updateData.status = body.status as ProductStatus;
+        }
+        if (body.product_type) {
+            updateData.product_type = body.product_type as ProductType;
+        }
+        if (body.shop_id) {
+            updateData.shop = { connect: { id: body.shop_id } };
+        }
+        if (body.user_id) {
+            updateData.user = { connect: { id: body.user_id } };
+        }
+        if (body.brandId) {
+            updateData.brand = { connect: { id: body.brandId } };
+        } else if (body.brandId === null) {
+            updateData.brand = { disconnect: true };
+        }
+        if (body.categories) {
+            updateData.categories = {
+                deleteMany: {},
+                create: body.categories.map((categoryId: string) => ({
+                    category: { connect: { id: categoryId } }
+                }))
+            };
+        }
+
+        console.log('Prepared update data:', updateData);
+
         const updatedProduct = await db.product.update({
             where: { id: params.id },
-            data: {
-                name: body.name,
-                slug: body.slug,
-                description: body.description,
-                price: body.price,
-                sale_price: body.sale_price,
-                sku: body.sku,
-                quantity: body.quantity,
-                in_stock: body.in_stock,
-                is_taxable: body.is_taxable,
-                status: body.status as ProductStatus,
-                product_type: body.product_type as ProductType,
-                image: body.image,
-                gallery: body.gallery,
-                isFlashDeal: body.isFlashDeal,
-                discountPercentage: body.discountPercentage,
-                shop: body.shop_id ? { connect: { id: body.shop_id } } : undefined,
-                user: body.user_id ? { connect: { id: body.user_id } } : undefined,
-                brand: body.brandId ? { connect: { id: body.brandId } } : { disconnect: true },
-                categories: {
-                    deleteMany: {},
-                    create: body.categories.map((categoryId: string) => ({
-                        category: { connect: { id: categoryId } }
-                    }))
-                },
-            },
+            data: updateData,
             include: {
                 shop: true,
                 user: true,
@@ -91,6 +119,8 @@ export async function PUT(
                 brand: true,
             },
         });
+
+        console.log('Product updated successfully:', updatedProduct);
 
         return NextResponse.json({
             ...updatedProduct,
@@ -109,7 +139,10 @@ export async function PUT(
         });
     } catch (error) {
         console.error('Error updating product:', error);
-        return NextResponse.json({ error: 'Error updating product' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Error updating product',
+            details: (error as Error).message
+        }, { status: 500 });
     }
 }
 

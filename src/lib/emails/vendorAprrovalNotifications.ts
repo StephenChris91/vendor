@@ -1,7 +1,4 @@
-// utils/vendorNotifications.ts
-
 import { createTransporter, domain } from "./email";
-
 
 export async function sendVendorApprovalEmail(vendorEmail: string, vendorName: string) {
     const transporter = createTransporter();

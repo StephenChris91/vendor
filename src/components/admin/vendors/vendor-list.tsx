@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
@@ -9,7 +7,10 @@ import { Button } from "@component/buttons";
 import Pagination from "@component/pagination";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Eye, ShieldMinus, ShieldPlus, Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
+import { CiSquareRemove } from "react-icons/ci";
+import { MdOutlineLibraryAddCheck } from "react-icons/md";
+
 import Modal from "@component/Modal";
 import {
   TableWrapper,
@@ -25,12 +26,13 @@ import { sendVendorApprovalEmail } from "@lib/emails/vendorAprrovalNotifications
 
 interface Vendor {
   id: string;
-  name: string;
+  shop: {
+    shopName: string;
+  };
   email: string;
   registrationDate: string;
-  status: "active" | "inactive";
+  status: "active" | "inactive"; // This ensures only "active" or "inactive"
   totalSales: number;
-  productCount: number;
   rating: number;
 }
 
@@ -63,36 +65,51 @@ const VendorList: React.FC<VendorListProps> = ({
 
       if (newStatus === "active") {
         const vendor = vendors.find((v) => v.id === vendorId);
-        if (vendor) {
-          const response = await fetch("/api/admin/vendors/send-approval", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              vendorEmail: vendor.email,
-              vendorName: vendor.name,
-            }),
-          });
 
-          if (!response.ok) {
-            throw new Error("Failed to send approval email");
+        if (vendor) {
+          try {
+            const response = await fetch("/api/admin/vendors/send-approval", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                vendorEmail: vendor?.email,
+                vendorName: vendor?.shop.shopName,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to send approval email");
+            }
+
+            toast.success(
+              `Vendor ${
+                newStatus === "active" ? "activated" : "deactivated"
+              } successfully`,
+              { id: toastId }
+            );
+          } catch (emailError) {
+            console.error("Failed to send approval email:", emailError);
+            toast.error("Vendor activated but failed to send approval email.", {
+              id: toastId,
+            });
           }
         }
+      } else {
+        toast.success(
+          `Vendor ${
+            newStatus === "inactive" ? "deactivated" : "activated"
+          } successfully`,
+          { id: toastId }
+        );
       }
-
-      toast.success(
-        `Vendor ${
-          newStatus === "active" ? "activated" : "deactivated"
-        } successfully`,
-        { id: toastId }
-      );
     } catch (error) {
       console.error("Failed to update vendor status:", error);
       toast.error(
         `Failed to ${
           newStatus === "active" ? "activate" : "deactivate"
-        } vendor. Please try again. ${error.message}`,
+        } vendor. Please try again.`,
         { id: toastId }
       );
     }
@@ -131,20 +148,20 @@ const VendorList: React.FC<VendorListProps> = ({
         <StyledTable>
           <TableHead>
             <TableRow>
-              <TableHeaderCell>Name</TableHeaderCell>
+              <TableHeaderCell>Shop Name</TableHeaderCell>
               <TableHeaderCell>Email</TableHeaderCell>
               <TableHeaderCell>Registration Date</TableHeaderCell>
               <TableHeaderCell>Status</TableHeaderCell>
               <TableHeaderCell>Total Sales</TableHeaderCell>
-              <TableHeaderCell>Products</TableHeaderCell>
               <TableHeaderCell>Rating</TableHeaderCell>
+              <TableHeaderCell>Has Shop</TableHeaderCell>
               <TableHeaderCell>Actions</TableHeaderCell>
             </TableRow>
           </TableHead>
           <tbody>
             {vendors.map((vendor) => (
               <TableRow key={vendor.id}>
-                <TableCell>{vendor.name}</TableCell>
+                <TableCell>{vendor.shop?.shopName || "No Shop"}</TableCell>
                 <TableCell>{vendor.email}</TableCell>
                 <TableCell>{vendor.registrationDate}</TableCell>
                 <TableCell>
@@ -157,37 +174,25 @@ const VendorList: React.FC<VendorListProps> = ({
                   </H6>
                 </TableCell>
                 <TableCell>${vendor.totalSales.toLocaleString()}</TableCell>
-                <TableCell>{vendor.productCount}</TableCell>
-                <TableCell>{vendor.rating.toFixed(1)}</TableCell>
+                <TableCell>{vendor.rating?.toFixed(1)}</TableCell>
                 <TableCell>
                   <FlexBox>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => handleViewVendor(vendor.id)}
-                      mr={1}
-                    >
+                    <Button onClick={() => handleViewVendor(vendor.id)} mr={1}>
                       <Eye />
                     </Button>
                     <Button
-                      variant="outlined"
-                      color={vendor.status === "active" ? "primary" : "warn"}
                       onClick={() =>
                         handleStatusChange(vendor.id, vendor.status)
                       }
                       mr={1}
                     >
                       {vendor.status === "active" ? (
-                        <ShieldMinus />
+                        <CiSquareRemove size={20} />
                       ) : (
-                        <ShieldPlus />
+                        <MdOutlineLibraryAddCheck size={20} />
                       )}
                     </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => handleDeleteVendor(vendor.id)}
-                    >
+                    <Button onClick={() => handleDeleteVendor(vendor.id)}>
                       <Trash2 />
                     </Button>
                   </FlexBox>
