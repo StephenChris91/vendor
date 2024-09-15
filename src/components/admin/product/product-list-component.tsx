@@ -1,6 +1,5 @@
 // product-list-component.tsx
-
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
@@ -21,7 +20,6 @@ import {
   TableHeaderCell,
   TableCell,
 } from "./styles";
-import { ProductStatus } from "@prisma/client";
 
 interface Product {
   id: string;
@@ -31,8 +29,7 @@ interface Product {
   stock: number;
   categories: { name: string }[];
   shop: { shopName: string };
-  status: ProductStatus;
-  // totalSold: number;
+  status: "Published" | "Draft" | "Suspended" | "OutOfStock";
 }
 
 interface ProductListProps {
@@ -40,7 +37,6 @@ interface ProductListProps {
   onSelect: (productId: string, isSelected: boolean) => void;
   selectedProducts: string[];
   onUpdateProduct: (updatedProduct: Partial<Product>) => Promise<void>;
-  // fetchTotalSold: (productId: string) => Promise<number>;
 }
 
 const ProductList: React.FC<ProductListProps> = ({
@@ -48,65 +44,21 @@ const ProductList: React.FC<ProductListProps> = ({
   onSelect,
   selectedProducts,
   onUpdateProduct,
-  // fetchTotalSold,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [localProducts, setLocalProducts] = useState<Product[]>(products);
   const itemsPerPage = 10;
 
-  // const fetchTotalSoldForProducts = useCallback(async () => {
-  //   const updatedProducts = await Promise.all(
-  //     products.map(async (product) => {
-  //       try {
-  //         const totalSold = await fetchTotalSold(product.id);
-  //         return {
-  //           ...product,
-  //           totalSold,
-  //           status: validateStatus(product.status),
-  //         };
-  //       } catch (error) {
-  //         console.error(
-  //           `Failed to fetch total sold for product ${product.id}:`,
-  //           error
-  //         );
-  //         return product;
-  //       }
-  //     })
-  //   );
-  //   setLocalProducts(updatedProducts);
-  // }, [products, fetchTotalSold]);
+  console.log("Products in ProductList:", products);
 
-  // useEffect(() => {
-  //   fetchTotalSoldForProducts();
-  // }, [fetchTotalSoldForProducts]);
-
-  const validateStatus = (status: string): Product["status"] => {
-    const validStatuses: Product["status"][] = [
-      "Published",
-      "Draft",
-      "Suspended",
-      "OutOfStock",
-    ];
-    return validStatuses.includes(status as Product["status"])
-      ? (status as Product["status"])
-      : "Draft";
-  };
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleCheckboxChange = (productId: string) => {
     const isSelected = selectedProducts.includes(productId);
     onSelect(productId, !isSelected);
   };
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentProducts = localProducts.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-
-  const paginate = (data: { selected: number }) =>
-    setCurrentPage(data.selected + 1);
 
   const handleEditClick = (product: Product) => {
     setEditingProduct(product);
@@ -120,11 +72,6 @@ const ProductList: React.FC<ProductListProps> = ({
     if (editingProduct) {
       try {
         await onUpdateProduct(editingProduct);
-        setLocalProducts(
-          localProducts.map((p) =>
-            p.id === editingProduct.id ? editingProduct : p
-          )
-        );
         toast.success("Product updated successfully");
         setEditingProduct(null);
       } catch (error) {
@@ -135,38 +82,14 @@ const ProductList: React.FC<ProductListProps> = ({
 
   const handleEditChange = (field: keyof Product, value: any) => {
     if (editingProduct) {
-      if (field === "categories") {
-        setEditingProduct({
-          ...editingProduct,
-          categories: [{ name: value }],
-        });
-      } else if (field === "shop") {
-        setEditingProduct({
-          ...editingProduct,
-          shop: { shopName: value },
-        });
-      } else if (field === "status") {
-        setEditingProduct({
-          ...editingProduct,
-          status: validateStatus(value),
-        });
-      } else {
-        setEditingProduct({ ...editingProduct, [field]: value });
-      }
+      setEditingProduct({ ...editingProduct, [field]: value });
     }
   };
 
   const handlePublishUnpublish = async (product: Product) => {
     const newStatus = product.status === "Published" ? "Draft" : "Published";
     try {
-      const updatedProduct = await onUpdateProduct({
-        id: product.id,
-        status: newStatus,
-      });
-      const updatedProducts = localProducts.map((p) =>
-        p.id === product.id ? { ...p, updatedProduct } : p
-      );
-      setLocalProducts(updatedProducts);
+      await onUpdateProduct({ id: product.id, status: newStatus });
       toast.success(
         `Product ${
           newStatus === "Published" ? "published" : "unpublished"
@@ -174,10 +97,6 @@ const ProductList: React.FC<ProductListProps> = ({
       );
     } catch (error) {
       console.error("Error updating product status:", error);
-      // Revert the local state change
-      setLocalProducts((prevProducts) =>
-        prevProducts.map((p) => (p.id === product.id ? product : p))
-      );
       toast.error(
         `Failed to ${
           newStatus === "Published" ? "publish" : "unpublish"
@@ -207,9 +126,9 @@ const ProductList: React.FC<ProductListProps> = ({
           <TableRow>
             <TableHeaderCell>
               <Checkbox
-                checked={selectedProducts.length === localProducts.length}
+                checked={selectedProducts.length === products.length}
                 onChange={() => {
-                  if (selectedProducts.length === localProducts.length) {
+                  if (selectedProducts.length === products.length) {
                     onSelect("all", false);
                   } else {
                     onSelect("all", true);
@@ -219,8 +138,8 @@ const ProductList: React.FC<ProductListProps> = ({
             </TableHeaderCell>
             <TableHeaderCell>Name</TableHeaderCell>
             <TableHeaderCell>SKU</TableHeaderCell>
-            <TableHeaderCell>Total Sold</TableHeaderCell>
             <TableHeaderCell>Stock</TableHeaderCell>
+            <TableHeaderCell>Price</TableHeaderCell>
             <TableHeaderCell>Category</TableHeaderCell>
             <TableHeaderCell>Vendor</TableHeaderCell>
             <TableHeaderCell>Status</TableHeaderCell>
@@ -228,62 +147,70 @@ const ProductList: React.FC<ProductListProps> = ({
           </TableRow>
         </TableHead>
         <tbody>
-          {currentProducts.map((product) => (
-            <TableRow key={product.id}>
-              <TableCell>
-                <Checkbox
-                  checked={selectedProducts.includes(product.id)}
-                  onChange={() => handleCheckboxChange(product.id)}
-                />
-              </TableCell>
-              <TableCell>{product.name}</TableCell>
-              <TableCell>{product.sku}</TableCell>
-              {/* <TableCell>${product.totalSold.toFixed(2)}</TableCell> */}
-              <TableCell>{product.stock}</TableCell>
-              <TableCell>{product.categories[0]?.name || "N/A"}</TableCell>
-              <TableCell>{product.shop?.shopName || "N/A"}</TableCell>
-              <TableCell>
-                <H6
-                  color={
-                    product.status === "Published"
-                      ? "success.main"
-                      : product.status === "Draft"
-                      ? "warning.main"
-                      : "error.main"
-                  }
-                >
-                  {product.status}
-                </H6>
-              </TableCell>
-              <TableCell>
-                <FlexBox>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    mr={1}
-                    onClick={() => handleEditClick(product)}
+          {currentProducts.length > 0 ? (
+            currentProducts.map((product) => (
+              <TableRow key={product.id}>
+                <TableCell>
+                  <Checkbox
+                    checked={selectedProducts.includes(product.id)}
+                    onChange={() => handleCheckboxChange(product.id)}
+                  />
+                </TableCell>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>{product.sku}</TableCell>
+                <TableCell>{product.stock}</TableCell>
+                <TableCell>${product.price.toFixed(2)}</TableCell>
+                <TableCell>{product.categories[0]?.name || "N/A"}</TableCell>
+                <TableCell>{product.shop?.shopName || "N/A"}</TableCell>
+                <TableCell>
+                  <H6
+                    color={
+                      product.status === "Published"
+                        ? "success.main"
+                        : product.status === "Draft"
+                        ? "warning.main"
+                        : "error.main"
+                    }
                   >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color={product.status === "Published" ? "primary" : "dark"}
-                    size="small"
-                    onClick={() => handlePublishUnpublish(product)}
-                  >
-                    {product.status === "Published" ? "Unpublish" : "Publish"}
-                  </Button>
-                </FlexBox>
-              </TableCell>
+                    {product.status}
+                  </H6>
+                </TableCell>
+                <TableCell>
+                  <FlexBox>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      mr={1}
+                      onClick={() => handleEditClick(product)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color={
+                        product.status === "Published" ? "primary" : "dark"
+                      }
+                      size="small"
+                      onClick={() => handlePublishUnpublish(product)}
+                    >
+                      {product.status === "Published" ? "Unpublish" : "Publish"}
+                    </Button>
+                  </FlexBox>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={9}>No products found</TableCell>
             </TableRow>
-          ))}
+          )}
         </tbody>
       </StyledTable>
       <Box p={2}>
         <Pagination
-          pageCount={Math.ceil(localProducts.length / itemsPerPage)}
-          onChange={paginate}
+          pageCount={Math.ceil(products.length / itemsPerPage)}
+          onChange={({ selected }) => setCurrentPage(selected + 1)}
         />
       </Box>
 
@@ -333,7 +260,9 @@ const ProductList: React.FC<ProductListProps> = ({
                 (option) => option.value === editingProduct.categories[0]?.name
               )}
               onChange={(option) =>
-                handleEditChange("categories", (option as SelectOption).value)
+                handleEditChange("categories", [
+                  { name: (option as SelectOption).value },
+                ])
               }
             />
             <TextField
@@ -341,7 +270,9 @@ const ProductList: React.FC<ProductListProps> = ({
               mb={2}
               label="Vendor"
               value={editingProduct.shop?.shopName}
-              onChange={(e) => handleEditChange("shop", e.target.value)}
+              onChange={(e) =>
+                handleEditChange("shop", { shopName: e.target.value })
+              }
             />
             <Select
               mb={3}

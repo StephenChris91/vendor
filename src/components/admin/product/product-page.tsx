@@ -22,7 +22,6 @@ interface Product {
   categories: { name: string }[];
   shop: { shopName: string };
   status: "Published" | "Draft" | "Suspended" | "OutOfStock";
-  totalSold: number;
 }
 
 interface ProductStats {
@@ -31,27 +30,24 @@ interface ProductStats {
   lowStock: number;
 }
 
-// const fetchTotalSold = async (productId: string): Promise<number> => {
-//   try {
-//     const response = await fetch(`/api/admin/products/${productId}/total-sold`);
-//     if (!response.ok) {
-//       throw new Error(`HTTP error! status: ${response.status}`);
-//     }
-//     const data = await response.json();
-//     return data.totalSold;
-//   } catch (error) {
-//     console.error("Error fetching total sold:", error);
-//     return 0;
-//   }
-// };
-
 const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await fetch("/api/products");
+    const timestamp = new Date().getTime();
+    const response = await fetch(`/api/products?t=${timestamp}`, {
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return response.json();
+
+    const data = await response.json();
+    console.log("Fetched products:", data);
+    return data;
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
@@ -76,10 +72,10 @@ export default function ProductsPage() {
   const {
     data: products = [],
     isLoading: isLoadingProducts,
-    refetch,
+    error,
   } = useQuery<Product[]>({
     queryKey: ["products", searchQuery, filters],
-    queryFn: () => fetchProducts(),
+    queryFn: fetchProducts,
     refetchInterval: 60000,
     refetchIntervalInBackground: true,
   });
@@ -131,7 +127,6 @@ export default function ProductsPage() {
   };
 
   const handleAddProduct = () => {
-    // Navigate to add product page
     console.log("Navigating to add product page");
   };
 
@@ -172,6 +167,8 @@ export default function ProductsPage() {
     }
   };
 
+  console.log("Products in ProductsPage:", products);
+
   return (
     <PageWrapper>
       <ResponsiveFlexBox
@@ -192,13 +189,18 @@ export default function ProductsPage() {
         onAction={handleBulkAction}
       />
 
-      <ProductList
-        products={products}
-        onSelect={handleProductSelection}
-        selectedProducts={selectedProducts}
-        onUpdateProduct={handleUpdateProduct}
-        // fetchTotalSold={fetchTotalSold}
-      />
+      {isLoadingProducts ? (
+        <div>Loading products...</div>
+      ) : error ? (
+        <div>Error loading products: {(error as Error).message}</div>
+      ) : (
+        <ProductList
+          products={products}
+          onSelect={handleProductSelection}
+          selectedProducts={selectedProducts}
+          onUpdateProduct={handleUpdateProduct}
+        />
+      )}
     </PageWrapper>
   );
 }

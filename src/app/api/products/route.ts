@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../prisma/prisma';
-; // Replace with actual function to fetch products from your database
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,9 +7,15 @@ export async function GET(req: NextRequest) {
       { include: { categories: true, shop: true, orderItems: true } }
     );
 
-    console.log(products)
+    console.log(products);
 
-    return NextResponse.json(products);
+    return NextResponse.json(products, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json({ message: 'Error fetching products' }, { status: 500 });
