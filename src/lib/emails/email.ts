@@ -6,7 +6,7 @@ export function createTransporter() {
         return nodemailer.createTransport({
             host: process.env.NEXT_PUBLIC_MAIL_HOST!,
             port: parseInt(process.env.NEXT_PUBLIC_MAIL_PORT! || '587'),
-            secure: process.env.NEXT_PUBLIC_MAIL_SECURE! === 'true', // true for 465, false for other ports
+            secure: true,
             auth: {
                 user: process.env.NEXT_PUBLIC_MAIL_USERNAME!,
                 pass: process.env.NEXT_PUBLIC_MAIL_PASSWORD!,

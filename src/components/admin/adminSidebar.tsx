@@ -7,16 +7,23 @@ import { usePathname } from "next/navigation";
 import Box from "@component/Box";
 import { H6 } from "@component/Typography";
 import FlexBox from "@component/FlexBox";
-import Icon from "@component/icon/Icon";
 import { Button } from "@component/buttons";
+import { IconType } from "react-icons";
+import { FaStore, FaBox, FaShoppingCart, FaUsers, FaCog } from "react-icons/fa";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
-const adminNavItems = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: "dashboard" },
-  { href: "/admin/vendors", label: "Vendors", icon: "shop" },
-  { href: "/admin/products", label: "Products", icon: "products" },
-  { href: "/admin/orders", label: "Orders", icon: "order" },
-  { href: "/admin/customers", label: "Customers", icon: "buyers" },
-  { href: "/admin/settings", label: "Settings", icon: "settings" },
+interface AdminNavItem {
+  href: string;
+  label: string;
+  icon: IconType;
+}
+
+const adminNavItems: AdminNavItem[] = [
+  { href: "/admin/vendors", label: "Vendors", icon: FaStore },
+  { href: "/admin/products", label: "Products", icon: FaBox },
+  { href: "/admin/orders", label: "Orders", icon: FaShoppingCart },
+  { href: "/admin/customers", label: "Customers", icon: FaUsers },
+  { href: "/admin/settings", label: "Settings", icon: FaCog },
 ];
 
 export default function AdminSidebar() {
@@ -36,7 +43,7 @@ export default function AdminSidebar() {
       <FlexBox justifyContent="space-between" alignItems="center" mb="2rem">
         {isOpen && <H6 color="white">Admin Panel</H6>}
         <Button p="6px" bg="gray.200" onClick={toggleSidebar}>
-          <Icon size="20px">{isOpen ? "chevron-left" : "chevron-right"}</Icon>
+          {isOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
         </Button>
       </FlexBox>
       <FlexBox flexDirection="column">
@@ -52,13 +59,13 @@ export default function AdminSidebar() {
               color={pathname === item.href ? "secondary.text" : "white"}
               alignItems="center"
             >
-              <Icon
-                mr={isOpen ? "0.5rem" : "0"}
-                size="20px"
-                color={pathname === item.href ? "primary" : "secondary"}
-              >
-                {item.icon}
-              </Icon>
+              <item.icon
+                size={20}
+                style={{
+                  marginRight: isOpen ? "0.5rem" : "0",
+                  color: pathname === item.href ? "secondary.text" : "white",
+                }}
+              />
               {isOpen && item.label}
             </FlexBox>
           </Link>

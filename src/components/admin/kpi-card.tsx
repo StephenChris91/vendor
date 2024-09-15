@@ -1,10 +1,11 @@
 // components/admin/KPICard.tsx
-import React from "react";
+import React, { ReactNode } from "react";
 import styled from "styled-components";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H3, H6 } from "@component/Typography";
 import Icon from "@component/icon/Icon";
+import { IconType } from "react-icons/lib";
 
 const StyledCard = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -33,7 +34,7 @@ const IconWrapper = styled(Box)`
 interface KPICardProps {
   title: string;
   value: string | number;
-  icon: string;
+  icon: string | ReactNode;
   trend?: {
     value: number;
     isPositive: boolean;
@@ -45,9 +46,16 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, icon, trend }) => {
     <StyledCard>
       <FlexBox alignItems="center">
         <IconWrapper>
-          <Icon size="28px" color="primary">
-            {icon}
-          </Icon>
+          {typeof icon === "string" ? (
+            <Icon size="28px" color="primary">
+              {icon}
+            </Icon>
+          ) : (
+            React.cloneElement(icon as React.ReactElement, {
+              size: 28,
+              color: "primary",
+            })
+          )}
         </IconWrapper>
         <Box>
           <H6 color="text.muted" mb="0.5rem">
