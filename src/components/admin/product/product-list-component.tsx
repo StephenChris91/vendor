@@ -11,7 +11,7 @@ import Modal from "@component/Modal";
 import TextField from "@component/text-field";
 import Select, { SelectOption } from "@component/Select";
 import toast from "react-hot-toast";
-
+import { currency } from "@utils/utils";
 import {
   TableWrapper,
   StyledTable,
@@ -159,7 +159,7 @@ const ProductList: React.FC<ProductListProps> = ({
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.sku}</TableCell>
                 <TableCell>{product.stock}</TableCell>
-                <TableCell>${product.price.toFixed(2)}</TableCell>
+                <TableCell>{currency(product.price)}</TableCell>
                 <TableCell>{product.categories[0]?.name || "N/A"}</TableCell>
                 <TableCell>{product.shop?.shopName || "N/A"}</TableCell>
                 <TableCell>
