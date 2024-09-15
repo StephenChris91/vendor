@@ -5,6 +5,8 @@ import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H4, H6 } from "@component/Typography";
 import Icon from "@component/icon/Icon";
+import Spinner from "@component/Spinner";
+import { currency } from "@utils/utils";
 
 const StatBox = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -59,7 +61,9 @@ const CustomerStatistics: React.FC<CustomerStatisticsProps> = ({
           <Box>
             <H6 color="text.muted">Total Customers</H6>
             {isLoading ? (
-              <LoadingText>Loading...</LoadingText>
+              <LoadingText>
+                <Spinner />
+              </LoadingText>
             ) : (
               <H4>{stats.totalCustomers}</H4>
             )}
@@ -72,7 +76,9 @@ const CustomerStatistics: React.FC<CustomerStatisticsProps> = ({
           <Box>
             <H6 color="text.muted">New Customers (Last 30 days)</H6>
             {isLoading ? (
-              <LoadingText>Loading...</LoadingText>
+              <LoadingText>
+                <Spinner />
+              </LoadingText>
             ) : (
               <H4>{stats.newCustomers}</H4>
             )}
@@ -85,9 +91,11 @@ const CustomerStatistics: React.FC<CustomerStatisticsProps> = ({
           <Box>
             <H6 color="text.muted">Average Spend</H6>
             {isLoading ? (
-              <LoadingText>Loading...</LoadingText>
+              <LoadingText>
+                <Spinner />
+              </LoadingText>
             ) : (
-              <H4>${stats.averageSpend.toFixed(2)}</H4>
+              <H4>{currency(stats.averageSpend)}</H4>
             )}
           </Box>
         </StatItem>

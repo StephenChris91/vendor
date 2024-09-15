@@ -5,7 +5,7 @@ import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H4, H6 } from "@component/Typography";
 import Icon from "@component/icon/Icon";
-
+import { currency } from "@utils/utils";
 import { StatBox, StatItem } from "./styles";
 
 interface OrderStats {
@@ -44,7 +44,7 @@ const OrderStatistics: React.FC<{ stats: OrderStats }> = ({ stats }) => {
           </Icon>
           <Box>
             <H6 color="text.muted">Total Revenue</H6>
-            <H4>${stats?.totalRevenue.toLocaleString()}</H4>
+            <H4>{currency(stats?.totalRevenue)}</H4>
           </Box>
         </StatItem>
         <StatItem>
@@ -53,7 +53,7 @@ const OrderStatistics: React.FC<{ stats: OrderStats }> = ({ stats }) => {
           </Icon>
           <Box>
             <H6 color="text.muted">Average Order Value</H6>
-            <H4>${stats?.averageOrderValue.toLocaleString()}</H4>
+            <H4>{currency(stats?.averageOrderValue)}</H4>
           </Box>
         </StatItem>
       </FlexBox>

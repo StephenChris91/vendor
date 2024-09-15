@@ -10,6 +10,8 @@ import Icon from "@component/icon/Icon";
 import Modal from "@component/Modal";
 import Select, { SelectOption } from "@component/Select";
 import TextField from "@component/text-field";
+import { format, parseISO } from "date-fns";
+import { currency } from "@utils/utils";
 
 const TableWrapper = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -76,6 +78,7 @@ interface CustomerListProps {
   onSelect: (customerId: string, isSelected: boolean) => void;
   selectedCustomers: string[];
   onUpdateCustomer: (customer: Partial<Customer>) => void;
+  onDeleteCustomer: (customerId: string) => void;
 }
 
 const CustomerList: React.FC<CustomerListProps> = ({
@@ -83,9 +86,13 @@ const CustomerList: React.FC<CustomerListProps> = ({
   onSelect,
   selectedCustomers,
   onUpdateCustomer,
+  onDeleteCustomer,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(
+    null
+  );
   const itemsPerPage = 10;
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -116,6 +123,21 @@ const CustomerList: React.FC<CustomerListProps> = ({
     if (editingCustomer) {
       setEditingCustomer({ ...editingCustomer, [field]: value });
     }
+  };
+
+  const handleDeleteClick = (customer: Customer) => {
+    setCustomerToDelete(customer);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (customerToDelete) {
+      onDeleteCustomer(customerToDelete.id);
+      setCustomerToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setCustomerToDelete(null);
   };
 
   if (!customers || customers.length === 0) {
@@ -180,9 +202,14 @@ const CustomerList: React.FC<CustomerListProps> = ({
               </TableCell>
               <TableCell>{customer.name}</TableCell>
               <TableCell>{customer.email}</TableCell>
-              <TableCell>{customer.registrationDate}</TableCell>
+              <TableCell>
+                {format(
+                  parseISO(customer.registrationDate),
+                  "MMM dd, yyyy HH:mm"
+                )}
+              </TableCell>
               <TableCell>{customer.totalOrders}</TableCell>
-              <TableCell>${customer.totalSpent.toFixed(2)}</TableCell>
+              <TableCell>{currency(customer.totalSpent)}</TableCell>
               <TableCell>
                 <H6
                   color={
@@ -205,17 +232,11 @@ const CustomerList: React.FC<CustomerListProps> = ({
                   </Button>
                   <Button
                     variant="outlined"
-                    color={customer.status === "Active" ? "primary" : "primary"}
+                    color="error"
                     size="small"
-                    onClick={() =>
-                      onUpdateCustomer({
-                        id: customer.id,
-                        status:
-                          customer.status === "Active" ? "Inactive" : "Active",
-                      })
-                    }
+                    onClick={() => handleDeleteClick(customer)}
                   >
-                    {customer.status === "Active" ? "Deactivate" : "Activate"}
+                    Delete
                   </Button>
                 </FlexBox>
               </TableCell>
@@ -227,7 +248,6 @@ const CustomerList: React.FC<CustomerListProps> = ({
         <Pagination
           pageCount={Math.ceil(customers.length / itemsPerPage)}
           onChange={(data) => setCurrentPage(data.selected + 1)}
-          // page={currentPage}
         />
       </Box>
 
@@ -279,6 +299,35 @@ const CustomerList: React.FC<CustomerListProps> = ({
                 onClick={handleEditSave}
               >
                 Save Changes
+              </Button>
+            </FlexBox>
+          </Box>
+        </Modal>
+      )}
+
+      {customerToDelete && (
+        <Modal open={true} onClose={handleDeleteCancel}>
+          <Box p={4}>
+            <H6 mb={3}>Confirm Deletion</H6>
+            <Paragraph mb={3}>
+              Are you sure you want to delete the customer "
+              {customerToDelete.name}"? This action cannot be undone.
+            </Paragraph>
+            <FlexBox justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                color="secondary"
+                mr={2}
+                onClick={handleDeleteCancel}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleDeleteConfirm}
+              >
+                Delete
               </Button>
             </FlexBox>
           </Box>

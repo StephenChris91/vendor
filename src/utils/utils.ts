@@ -79,7 +79,9 @@ export const calculateDiscount = (price: number, salePrice?: number): number => 
  * @returns - RETURN PRICE WITH CURRENCY
  */
 
-export function currency(price: number, fraction: number = 2) {
+export function
+
+  currency(price: number, fraction: number = 2) {
   const formatCurrency = new Intl.NumberFormat('en-NG', { // en-NG locale ensures correct formatting for Nigeria
     style: 'currency',
     currency: 'NGN', // Nigerian Naira currency code

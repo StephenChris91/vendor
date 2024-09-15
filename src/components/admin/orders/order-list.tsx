@@ -1,5 +1,3 @@
-"use client";
-
 // components/admin/OrderList.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
@@ -12,6 +10,8 @@ import Checkbox from "@component/CheckBox";
 import Icon from "@component/icon/Icon";
 import Modal from "@component/Modal";
 import Select, { SelectOption } from "@component/Select";
+import { format, parseISO } from "date-fns";
+import { currency } from "@utils/utils";
 import {
   NoOrdersWrapper,
   IconWrapper,
@@ -28,8 +28,7 @@ interface Order {
   customerName: string;
   orderDate: string;
   totalAmount: number;
-  paymentStatus: string;
-  fulfillmentStatus: string;
+  status: string;
 }
 
 interface OrderListProps {
@@ -79,10 +78,15 @@ const OrderList: React.FC<OrderListProps> = ({
     }
   };
 
-  // Convert a string to SelectOption
   const getSelectOption = (value: string, options: SelectOption[]) => {
     return options.find((option) => option.value === value) || null;
   };
+
+  const statusOptions: SelectOption[] = [
+    { label: "Pending", value: "Pending" },
+    { label: "Processing", value: "Processing" },
+    { label: "Complete", value: "Complete" },
+  ];
 
   if (!orders || orders.length === 0) {
     return (
@@ -105,21 +109,6 @@ const OrderList: React.FC<OrderListProps> = ({
       </NoOrdersWrapper>
     );
   }
-
-  // Define the options for payment and fulfillment status
-  const paymentStatusOptions: SelectOption[] = [
-    { label: "Paid", value: "Paid" },
-    { label: "Pending", value: "Pending" },
-    { label: "Failed", value: "Failed" },
-  ];
-
-  const fulfillmentStatusOptions: SelectOption[] = [
-    { label: "Pending", value: "Pending" },
-    { label: "Processing", value: "Processing" },
-    { label: "Shipped", value: "Shipped" },
-    { label: "Delivered", value: "Delivered" },
-    { label: "Cancelled", value: "Cancelled" },
-  ];
 
   return (
     <TableWrapper>
@@ -144,8 +133,7 @@ const OrderList: React.FC<OrderListProps> = ({
             <TableHeaderCell>Customer</TableHeaderCell>
             <TableHeaderCell>Date</TableHeaderCell>
             <TableHeaderCell>Amount</TableHeaderCell>
-            <TableHeaderCell>Payment Status</TableHeaderCell>
-            <TableHeaderCell>Fulfillment Status</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
             <TableHeaderCell>Actions</TableHeaderCell>
           </TableRow>
         </TableHead>
@@ -160,36 +148,21 @@ const OrderList: React.FC<OrderListProps> = ({
               </TableCell>
               <TableCell>{order.id}</TableCell>
               <TableCell>{order.customerName}</TableCell>
-              <TableCell>{order.orderDate}</TableCell>
-              <TableCell>${order.totalAmount.toFixed(2)}</TableCell>
               <TableCell>
-                <H6
-                  color={
-                    order.paymentStatus === "Paid"
-                      ? "success.main"
-                      : order.paymentStatus === "Pending"
-                      ? "warning.main"
-                      : "error.main"
-                  }
-                >
-                  {order.paymentStatus}
-                </H6>
+                {format(parseISO(order.orderDate), "MMM dd, yyyy HH:mm")}
               </TableCell>
+              <TableCell>{currency(order.totalAmount)}</TableCell>
               <TableCell>
                 <H6
                   color={
-                    order.fulfillmentStatus === "Delivered"
+                    order.status === "Complete"
                       ? "success.main"
-                      : order.fulfillmentStatus === "Shipped"
-                      ? "info.main"
-                      : order.fulfillmentStatus === "Processing"
+                      : order.status === "Processing"
                       ? "warning.main"
-                      : order.fulfillmentStatus === "Cancelled"
-                      ? "error.main"
                       : "text.muted"
                   }
                 >
-                  {order.fulfillmentStatus}
+                  {order.status}
                 </H6>
               </TableCell>
               <TableCell>
@@ -224,36 +197,13 @@ const OrderList: React.FC<OrderListProps> = ({
           <Box p={4}>
             <H6 mb={3}>Edit Order</H6>
             <Select
-              // fullwidth
-              mb={2}
-              label="Payment Status"
-              value={getSelectOption(
-                editingOrder.paymentStatus,
-                paymentStatusOptions
-              )}
-              onChange={(option) =>
-                handleEditChange(
-                  "paymentStatus",
-                  (option as SelectOption).value
-                )
-              }
-              options={paymentStatusOptions}
-            />
-            <Select
-              // fullwidth
               mb={3}
-              label="Fulfillment Status"
-              value={getSelectOption(
-                editingOrder.fulfillmentStatus,
-                fulfillmentStatusOptions
-              )}
+              label="Status"
+              value={getSelectOption(editingOrder.status, statusOptions)}
               onChange={(option) =>
-                handleEditChange(
-                  "fulfillmentStatus",
-                  (option as SelectOption).value
-                )
+                handleEditChange("status", (option as SelectOption).value)
               }
-              options={fulfillmentStatusOptions}
+              options={statusOptions}
             />
             <FlexBox justifyContent="flex-end">
               <Button

@@ -27,8 +27,7 @@ interface Order {
   customerName: string;
   orderDate: string;
   totalAmount: number;
-  paymentStatus: string;
-  fulfillmentStatus: string;
+  status: string;
 }
 
 interface OrderStats {
@@ -99,19 +98,19 @@ export default function OrdersPage() {
         case "markAsPaid":
           await updateOrderMutation.mutateAsync({
             id: orderId,
-            paymentStatus: "Paid",
+            status: "Processing",
           });
           break;
         case "markAsShipped":
           await updateOrderMutation.mutateAsync({
             id: orderId,
-            fulfillmentStatus: "Shipped",
+            status: "Complete",
           });
           break;
         case "cancel":
           await updateOrderMutation.mutateAsync({
             id: orderId,
-            fulfillmentStatus: "Cancelled",
+            status: "Cancelled",
           });
           break;
       }

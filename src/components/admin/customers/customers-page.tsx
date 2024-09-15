@@ -11,6 +11,7 @@ import CustomerSearchFilter from "@component/admin/customers/customer-search";
 import CustomerList from "@component/admin/customers/customer-list";
 import BulkActions from "@component/admin/bulk-actions-button";
 import CustomerStatistics from "./customer-stats";
+import Spinner from "@component/Spinner";
 
 const PageWrapper = styled(Box)`
   padding: 2rem;
@@ -30,6 +31,7 @@ interface Customer {
   totalOrders: number;
   totalSpent: number;
   status: string;
+  role: string;
 }
 
 interface CustomerStats {
@@ -62,12 +64,17 @@ export default function CustomersPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: customers = [], isLoading: isLoadingCustomers } = useQuery<
+  const { data: allCustomers = [], isLoading: isLoadingCustomers } = useQuery<
     Customer[]
   >({
     queryKey: ["customers", filters],
     queryFn: () => fetchCustomers(filters),
   });
+
+  // Filter customers to only include those with the role "Customer"
+  const customers = allCustomers.filter(
+    (customer) => customer.role === "Customer"
+  );
 
   const { data: stats, isLoading: isLoadingStats } = useQuery<CustomerStats>({
     queryKey: ["customerStats"],
@@ -80,6 +87,17 @@ export default function CustomersPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedCustomer),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["customerStats"] });
+    },
+  });
+
+  const deleteCustomerMutation = useMutation({
+    mutationFn: (customerId: string) =>
+      fetch(`/api/admin/customers/${customerId}`, {
+        method: "DELETE",
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
@@ -123,8 +141,16 @@ export default function CustomersPage() {
     );
   };
 
+  const handleDeleteCustomer = async (customerId: string) => {
+    await deleteCustomerMutation.mutateAsync(customerId);
+  };
+
   if (isLoadingCustomers || isLoadingStats) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <Spinner />
+      </div>
+    );
   }
 
   return (
@@ -151,6 +177,7 @@ export default function CustomersPage() {
         onSelect={handleCustomerSelection}
         selectedCustomers={selectedCustomers}
         onUpdateCustomer={updateCustomerMutation.mutate}
+        onDeleteCustomer={handleDeleteCustomer}
       />
     </PageWrapper>
   );
