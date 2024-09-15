@@ -16,7 +16,7 @@ import { generateReports } from "utils/reportGenerator";
 import { FcSalesPerformance, FcShop } from "react-icons/fc";
 import { RiShoppingBasket2Line } from "react-icons/ri";
 import { FaUsers } from "react-icons/fa";
-
+import { currency } from '@utils/utils'
 import {
   DashboardWrapper,
   KPIWrapper,
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
       <KPIWrapper>
         <KPICard
           title="Total Sales"
-          value={`$${data.totalSales.toLocaleString()}`}
+          value={`${currency(data.totalSales)}`}
           icon={<FcSalesPerformance />}
           trend={{ value: 0, isPositive: true }}
         />

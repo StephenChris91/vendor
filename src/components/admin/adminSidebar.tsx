@@ -11,6 +11,7 @@ import { Button } from "@component/buttons";
 import { IconType } from "react-icons";
 import { FaStore, FaBox, FaShoppingCart, FaUsers, FaCog } from "react-icons/fa";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { MdSpaceDashboard } from "react-icons/md";
 
 interface AdminNavItem {
   href: string;
@@ -19,6 +20,7 @@ interface AdminNavItem {
 }
 
 const adminNavItems: AdminNavItem[] = [
+  { href: "/admin/dashboard", label: "Dashboard", icon: MdSpaceDashboard },
   { href: "/admin/vendors", label: "Vendors", icon: FaStore },
   { href: "/admin/products", label: "Products", icon: FaBox },
   { href: "/admin/orders", label: "Orders", icon: FaShoppingCart },

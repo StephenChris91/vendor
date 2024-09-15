@@ -5,6 +5,7 @@ import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H4, Paragraph } from "@component/Typography";
 import { Button } from "@component/buttons";
+import { currency } from "@utils/utils";
 
 const OrderCard = styled(Box)`
   background: ${(props) => props.theme.colors.body.paper};
@@ -52,7 +53,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ orders }) => {
           alignItems="center"
         >
           <Paragraph>{order.user}</Paragraph>
-          <Paragraph fontWeight="600">${order.amount}</Paragraph>
+          <Paragraph fontWeight="600">{currency(order.amount)}</Paragraph>
           <Paragraph
             color={
               order.status === "Completed"
