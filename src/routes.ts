@@ -10,7 +10,7 @@ export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/admin/
  * An array of routes accessible to only authenticated users who visit the site.
  * @type {string[]}
  */
-export const authRoutes: (string | undefined)[] = ['/login', '/signup', '/new-password', '/onboarding', '/onboarding/confirmation', '/checkout', '/vendor', '/vendor/*', '/vendor/dashboard'];
+export const authRoutes: (string | undefined)[] = ['/login', '/signup', '/new-password', '/onboarding', '/onboarding/confirmation', '/checkout', '/vendor', '/vendor/*', '/vendor/dashboard', '/orders', '/orders/*', '/orders/:id',];
 
 /**
  * @description: Authenticated routes

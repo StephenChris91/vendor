@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { signOut } from "next-auth/react";
 import { Button } from "@component/buttons";
 import { useAuth } from "@context/authContext";
+import { useCart } from "hooks/useCart"; // Import the useCart hook
 
 interface LogoutButtonProps {
   children?: React.ReactNode;
@@ -16,13 +17,17 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
   children,
   onLogout,
 }) => {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { setUser } = useAuth();
+  const { clearCart } = useCart(); // Use the clearCart function from useCart
 
   const onClick = async () => {
     try {
       setIsLoading(true);
+
+      // Clear the cart
+      clearCart();
+
       await signOut({
         redirect: true,
         callbackUrl: "/",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Fragment } from "react";
+import { useAtom } from "jotai";
 
 import Avatar from "@component/avatar";
 import Icon from "@component/icon/Icon";
@@ -8,15 +9,22 @@ import Divider from "@component/Divider";
 import FlexBox from "@component/FlexBox";
 import { Button } from "@component/buttons";
 import Typography, { H5, Paragraph, Tiny } from "@component/Typography";
-import { useCart } from "hooks/useCart";
 import { currency } from "@utils/utils";
 import { StyledMiniCart } from "./styles";
+import {
+  cartItemsAtom,
+  cartTotalAtom,
+  removeFromCartAtom,
+  updateCartItemQuantityAtom,
+} from "store/cartStore";
 
 type MiniCartProps = { toggleSidenav?: () => void };
 
 export default function MiniCart({ toggleSidenav = () => {} }: MiniCartProps) {
-  const { cartItems, removeFromCart, updateCartItemQuantity, cartTotal } =
-    useCart();
+  const [cartItems, setCartItems] = useAtom(cartItemsAtom);
+  const [cartTotal] = useAtom(cartTotalAtom);
+  const [, removeFromCart] = useAtom(removeFromCartAtom);
+  const [, updateCartItemQuantity] = useAtom(updateCartItemQuantityAtom);
 
   const handleCartAmountChange = (item: any, amount: number) => {
     if (amount < 1) {
@@ -24,6 +32,12 @@ export default function MiniCart({ toggleSidenav = () => {} }: MiniCartProps) {
     } else {
       updateCartItemQuantity({ itemId: item.id, quantity: amount });
     }
+  };
+
+  const handleRemoveFromCart = (itemId: string) => {
+    removeFromCart(itemId);
+    // Force re-render
+    setCartItems((prev) => [...prev]);
   };
 
   return (
@@ -134,7 +148,7 @@ export default function MiniCart({ toggleSidenav = () => {} }: MiniCartProps) {
                 size="1rem"
                 ml="1.25rem"
                 className="clear-icon"
-                onClick={() => removeFromCart(item.id)} // Direct call to removeFromCart
+                onClick={() => handleRemoveFromCart(item.id)}
               >
                 close
               </Icon>
@@ -146,25 +160,11 @@ export default function MiniCart({ toggleSidenav = () => {} }: MiniCartProps) {
 
       {!!cartItems.length && (
         <div className="actions">
-          <Link href="/checkout">
-            <Button
-              fullwidth
-              color="primary"
-              variant="contained"
-              onClick={toggleSidenav}
-            >
-              <Typography fontWeight={600}>
-                Checkout Now ({currency(cartTotal)})
-              </Typography>
-            </Button>
-          </Link>
-
           <Link href="/cart">
             <Button
               fullwidth
               color="primary"
               variant="outlined"
-              mt="1rem"
               onClick={toggleSidenav}
             >
               <Typography fontWeight={600}>View Cart</Typography>

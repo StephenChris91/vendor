@@ -79,8 +79,11 @@ export const addToCartAtom = atom(
 export const removeFromCartAtom = atom(
     null,
     (get, set, itemId: string) => {
+        console.log('Removing item from cart:', itemId);
         const currentItems = get(cartItemsAtom);
+        console.log('Current items:', currentItems);
         const updatedItems = currentItems.filter(item => item.id !== itemId);
+        console.log('Updated items:', updatedItems);
         set(cartItemsAtom, updatedItems);
 
         // Remove shipping rate for vendor if no items left
