@@ -21,10 +21,10 @@ import {
 type MiniCartProps = { toggleSidenav?: () => void };
 
 export default function MiniCart({ toggleSidenav = () => {} }: MiniCartProps) {
-  const [cartItems, setCartItems] = useAtom(cartItemsAtom);
-  const [cartTotal] = useAtom(cartTotalAtom);
+  // const [cartTotal] = useAtom(cartTotalAtom);
   const [, removeFromCart] = useAtom(removeFromCartAtom);
   const [, updateCartItemQuantity] = useAtom(updateCartItemQuantityAtom);
+  const [cartItems] = useAtom(cartItemsAtom);
 
   const handleCartAmountChange = (item: any, amount: number) => {
     if (amount < 1) {
@@ -35,9 +35,8 @@ export default function MiniCart({ toggleSidenav = () => {} }: MiniCartProps) {
   };
 
   const handleRemoveFromCart = (itemId: string) => {
+    console.log("Attempting to remove item:", itemId);
     removeFromCart(itemId);
-    // Force re-render
-    setCartItems((prev) => [...prev]);
   };
 
   return (

@@ -76,6 +76,8 @@ export const addToCartAtom = atom(
     }
 );
 
+
+
 export const removeFromCartAtom = atom(
     null,
     (get, set, itemId: string) => {

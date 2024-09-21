@@ -34,7 +34,13 @@ const Icon = forwardRef<HTMLDivElement, ComponentProps>((props, ref) => {
   if (typeof children !== "string") return null;
 
   return (
-    <StyledSvgWrapper ref={ref} variant={variant} defaultcolor={defaultcolor} {...others}>
+    <StyledSvgWrapper
+      ref={ref}
+      variant={variant}
+      defaultcolor={defaultcolor}
+      {...others}
+      onClick={onClick}
+    >
       <ReactSVG src={`/assets/images/icons/${children}.svg`} />
     </StyledSvgWrapper>
   );
