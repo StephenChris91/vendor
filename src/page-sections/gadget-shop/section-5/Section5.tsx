@@ -25,7 +25,7 @@ export default function Section5({ products }: Props) {
           <div key={item.id}>
             <ProductCard2
               id={item.id}
-              slug={item.slug}
+              // slug={item.slug}
               price={item.price}
               title={item.name}
               imgUrl={item.image}
