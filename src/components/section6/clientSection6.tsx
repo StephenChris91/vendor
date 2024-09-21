@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Product from "@models/product.model";
 import Shop from "@models/shop.model";
-import Section6Content from "./section6Content";
+import Section6Content from "./Section6Cont";
 
 export default function ClientSection6() {
   const [selected, setSelected] = useState("");

@@ -7,7 +7,6 @@ import Container from "@component/Container";
 import { ProductCard1 } from "@component/product-cards";
 import SkeletonGrid from "@component/skeleton/SkeletonProducts";
 import Typography from "@component/Typography";
-// import StyledProductCategory from "./styled";
 import StyledProductCategory from "@sections/market-1/styled";
 
 export default function Section6Content({
