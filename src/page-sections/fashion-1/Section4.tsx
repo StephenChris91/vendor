@@ -35,7 +35,7 @@ export default function Section4({ products }: Props) {
             <Box py="0.25rem" key={item.id}>
               <ProductCard2
                 id={item.id}
-                slug={item.slug}
+                // slug={item.slug}
                 price={item.price}
                 title={item.name}
                 imgUrl={item.image}
