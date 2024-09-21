@@ -16,8 +16,8 @@ type NextImageProps = Omit<ImageProps, "src"> &
   BorderRadiusProps & {
     src: string | StaticImageData | null | undefined;
     fallbackSrc?: string;
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
   };
 
 const StyledImage = styled(Image)<NextImageProps>(
