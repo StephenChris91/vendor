@@ -34,9 +34,9 @@ export default function ProductCard8({
         <HoverBox mb="0.75rem" borderRadius={8} overflow="hidden">
           <NextImage
             src={imgUrl || "/assets/images/products/Rectangle 116.png"}
-            width={500}
-            height={500}
-            alt="bonik"
+            width={181}
+            height={181}
+            alt=""
           />
         </HoverBox>
 

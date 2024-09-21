@@ -14,6 +14,8 @@ import { getRelatedProducts } from "actions/products/getRelatedProducts";
 import { getFrequentlyBought } from "actions/products/getFrequentlyBought";
 import Product from "@models/product.model";
 import Spinner from "@component/Spinner";
+import Container from "@component/Container";
+import SkeletonGrid from "@component/skeleton/SkeletonProducts";
 
 export default function ProductDetails() {
   const params = useParams();
@@ -64,16 +66,9 @@ export default function ProductDetails() {
     frequentlyBoughtLoading
   ) {
     return (
-      <Spinner
-        style={{
-          width: "70px",
-          height: "70px",
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
-      />
+      <Container>
+        <SkeletonGrid count={8} />
+      </Container>
     );
   }
 

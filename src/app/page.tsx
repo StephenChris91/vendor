@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <Box id="top" overflow="hidden" bg="gray.white">
       <Topbar />
-      <MobileNavigationBar />
+      {/* <MobileNavigationBar /> */}
       <Header />
       <HomeLanding />
       <Footer1 />

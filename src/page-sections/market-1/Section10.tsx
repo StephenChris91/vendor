@@ -30,7 +30,7 @@ export default function Section10() {
           <Grid item lg={2} md={3} sm={4} xs={12} key={index}>
             <Link href="/" passHref>
               <Card
-                as="a"
+                // as="a"
                 hoverEffect
                 p="1rem"
                 display="block"

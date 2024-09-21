@@ -16,6 +16,7 @@ import { useAppContext } from "@context/app-context";
 import { currency } from "@utils/utils";
 import { useCart } from "@hook/useCart";
 import Product from "@models/product.model";
+import NextImage from "@component/NextImage";
 
 // ========================================
 type ProductIntroProps = {
@@ -59,11 +60,12 @@ export default function ProductIntro({ product }: ProductIntroProps) {
               borderRadius={16}
               justifyContent="center"
             >
-              <Image
-                width={300}
-                height={300}
+              <NextImage
+                width={500}
+                height={500}
                 src={image || ""}
-                style={{ display: "block", width: "100%", height: "auto" }}
+                style={{ borderRadius: "5px" }}
+                alt=""
               />
             </FlexBox>
 
