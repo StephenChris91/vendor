@@ -3,14 +3,14 @@
  * An array of routes accessible to all users who visit the site.
  * @type {string[]}
  */
-export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/admin/adminLogin', '/address', '/address/:id', '/orders', '/orders/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shop', '/shops', '/shops/:id', '/shops/*', '/product', '/product/*', '/product/id', '/product/:id', '/product/search', '/product/search/:id', '/product/search/*', '/shops/:slug', '/track', '/compare', '/support', '/verification'];
+export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/admin/adminLogin', '/address', '/address/:id', '/orders', '/orders/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shop', '/shops', '/shops/:id', '/shops/*', '/product', '/product/*', '/product/id', '/product/:id', '/product/search', '/product/search/:id', '/product/search/*', '/shops/:slug', '/track', '/compare', '/support', '/verification', '/orders', '/orders/*', '/orders/:id'];
 
 /**
  * @description: Authenticated routes
  * An array of routes accessible to only authenticated users who visit the site.
  * @type {string[]}
  */
-export const authRoutes: (string | undefined)[] = ['/login', '/signup', '/new-password', '/onboarding', '/onboarding/confirmation', '/checkout', '/vendor', '/vendor/*', '/vendor/dashboard', '/orders', '/orders/*', '/orders/:id',];
+export const authRoutes: (string | undefined)[] = ['/login', '/signup', '/new-password', '/onboarding', '/onboarding/confirmation', '/checkout', '/vendor', '/vendor/*', '/vendor/dashboard',];
 
 /**
  * @description: Authenticated routes
