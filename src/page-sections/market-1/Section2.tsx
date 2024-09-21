@@ -11,6 +11,7 @@ import Product from "@models/product.model";
 import axios from "axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Spinner from "@component/Spinner";
+import SkeletonGrid from "@component/skeleton/SkeletonProducts";
 
 // =============================================================
 // Function to fetch new arrivals
@@ -52,7 +53,7 @@ export default function Section2() {
     gcTime: 1000 * 60 * 60 * 24, // Replace cacheTime with gcTime
   });
 
-  if (isLoading) return <Spinner />;
+  if (isLoading) return <SkeletonGrid count={4} />;
   if (error) return <div>An error occurred: {error.message}</div>;
 
   // Ensure newArrivalsList is an array

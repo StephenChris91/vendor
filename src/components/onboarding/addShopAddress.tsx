@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import toast from "react-hot-toast";
-
+import { nigerianStates } from "@data/stateList";
 import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
 import TextField from "@component/text-field";
@@ -43,46 +43,6 @@ const formSchema = yup.object().shape({
   state: yup.string().required("State code is required"),
 });
 
-const nigerianStates: SelectOption[] = [
-  { value: "Abia", label: "Abia (AB)" },
-  { value: "Adamawa", label: "Adamawa (AD)" },
-  { value: "Akwa Ibom", label: "Akwa Ibom (AK)" },
-  { value: "Anambra", label: "Anambra (AN)" },
-  { value: "Bauchi", label: "Bauchi (BA)" },
-  { value: "Bayelsa", label: "Bayelsa (BY)" },
-  { value: "Benue", label: "Benue (BE)" },
-  { value: "Borno", label: "Borno (BO)" },
-  { value: "Cross River", label: "Cross River (CR)" },
-  { value: "Delta", label: "Delta (DE)" },
-  { value: "Ebonyi", label: "Ebonyi (EB)" },
-  { value: "Edo", label: "Edo (ED)" },
-  { value: "Ekiti", label: "Ekiti (EK)" },
-  { value: "Enugu", label: "Enugu (EN)" },
-  { value: "Abuja", label: "Abuja (FCT)" },
-  { value: "Gombe", label: "Gombe (GO)" },
-  { value: "Imo", label: "Imo (IM)" },
-  { value: "Jigawa", label: "Jigawa (JI)" },
-  { value: "Kaduna", label: "Kaduna (KD)" },
-  { value: "Kano", label: "Kano (KN)" },
-  { value: "Katsina", label: "Katsina (KT)" },
-  { value: "Kebbi", label: "Kebbi (KE)" },
-  { value: "Kebbi", label: "Kogi (KO)" },
-  { value: "Kwara", label: "Kwara (KW)" },
-  { value: "Kwara", label: "Lagos (LA)" },
-  { value: "Nasarawa", label: "Nasarawa (NA)" },
-  { value: "Niger", label: "Niger (NI)" },
-  { value: "Ogun", label: "Ogun (OG)" },
-  { value: "Ondo", label: "Ondo (ON)" },
-  { value: "Osun", label: "Osun (OS)" },
-  { value: "Oyo", label: "Oyo (OY)" },
-  { value: "Plateau", label: "Plateau (PL)" },
-  { value: "RI", label: "Rivers (RI)" },
-  { value: "Rivers", label: "Sokoto (SO)" },
-  { value: "Taraba", label: "Taraba (TA)" },
-  { value: "Yobe", label: "Yobe (YO)" },
-  { value: "Zamfara", label: "Zamfara (ZA)" },
-];
-
 const AddShopAddress: React.FC<AddShopAddressProps> = ({
   updateFormData,
   initialAddress,
@@ -91,7 +51,6 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
   userId,
   setStepValidation,
 }) => {
-  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [cities, setCities] = useState<SelectOption[]>([]);
 
   const formik = useFormik({
@@ -99,6 +58,7 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
       ...initialAddress,
       country: "NG",
       state: "",
+      stateCode: "",
       cityOption: null as SelectOption | null,
     },
     validationSchema: formSchema,
@@ -109,7 +69,7 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
           city: values.cityOption ? values.cityOption.value : "",
           postalCode: values.postalCode,
           country: values.country,
-          state: values.state,
+          state: values.state, // Send state code to the database
         },
       });
     },
@@ -138,8 +98,8 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
   }, [formik.errors, formik.dirty, setStepValidation]);
 
   useEffect(() => {
-    if (formik.values.country && formik.values.state) {
-      fetchCities(formik.values.country, formik.values.state)
+    if (formik.values.country && formik.values.stateCode) {
+      fetchCities(formik.values.country, formik.values.stateCode)
         .then((fetchedCities) => {
           const cityOptions = fetchedCities.map((city) => ({
             value: city.name,
@@ -148,10 +108,10 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
           setCities(cityOptions);
         })
         .catch((error) => {
-          toast.error("Failed to fetch cities. Please try again.");
+          toast.error(`${error.message}` || "Failed to fetch cities");
         });
     }
-  }, [formik.values.country, formik.values.state]);
+  }, [formik.values.country, formik.values.stateCode]);
 
   const handleBlur = (e: React.FocusEvent<any>) => {
     formik.handleBlur(e);
@@ -175,49 +135,14 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
 
   const handleStateChange = (option: SelectOption | null) => {
     if (option) {
-      formik.setFieldValue("state", option.value);
-      formik.submitForm();
-    }
-  };
-
-  const detectLocation = () => {
-    setIsDetectingLocation(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            const addressDetails = await reverseGeocode(latitude, longitude);
-
-            formik.setValues({
-              ...formik.values,
-              street: addressDetails.street,
-              cityOption: {
-                value: addressDetails.city,
-                label: addressDetails.city,
-              },
-              state: addressDetails.state,
-              postalCode: addressDetails.postalCode,
-              country: addressDetails.country || "NG",
-            });
-            formik.submitForm();
-            toast.success("Location detected successfully!");
-          } catch (error) {
-            console.error("Error detecting location:", error);
-            toast.error("Failed to detect location. Please enter manually.");
-          } finally {
-            setIsDetectingLocation(false);
-          }
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-          toast.error("Failed to detect location. Please enter manually.");
-          setIsDetectingLocation(false);
-        }
+      const selectedState = nigerianStates.find(
+        (state) => state.value === option.value
       );
-    } else {
-      toast.error("Geolocation is not supported by your browser.");
-      setIsDetectingLocation(false);
+      if (selectedState) {
+        formik.setFieldValue("state", selectedState.value);
+        formik.setFieldValue("stateCode", selectedState.stateCode);
+        formik.submitForm();
+      }
     }
   };
 
@@ -238,16 +163,6 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
       >
         Please provide your shop's address
       </H5>
-
-      {/* <Button
-        mb="1rem"
-        variant="outlined"
-        color="primary"
-        onClick={detectLocation}
-        disabled={isDetectingLocation}
-      >
-        {isDetectingLocation ? "Detecting Location..." : "Detect My Location"}
-      </Button> */}
 
       <TextField
         fullwidth
@@ -310,4 +225,5 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
     </Box>
   );
 };
+
 export default AddShopAddress;

@@ -146,6 +146,21 @@ export default function Cart() {
     return null;
   }
 
+  if (cartItems.length === 0) {
+    return (
+      <FlexBox justifyContent="space-between" alignItems="center" margin="auto">
+        <Box mt="2rem" mb="2rem">
+          <Typography color="gray.600" mb="1rem">
+            Your cart is empty.
+          </Typography>
+          <Button size="small" variant="outlined">
+            <Link href="/shop">Continue Shopping</Link>
+          </Button>
+        </Box>
+      </FlexBox>
+    );
+  }
+
   return (
     <Fragment>
       <Grid container spacing={6}>

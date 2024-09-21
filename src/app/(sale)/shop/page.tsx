@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Container from "@component/Container";
 import SaleProducts2 from "@sections/sale-page-2/SaleProducts2";
 import { getAllProducts } from "actions/products/getProducts";
-import Spinner from "@component/Spinner";
+import SkeletonProducts from "@component/skeleton/SkeletonProducts";
 
 export default function SalePage() {
   const router = useRouter();
@@ -16,23 +16,17 @@ export default function SalePage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["products", page, PAGE_SIZE],
     queryFn: () => getAllProducts(page, PAGE_SIZE),
-    refetchInterval: 60000, // Refetch every 60 seconds (1 minute)
-    refetchIntervalInBackground: true, // Optional: refetch even when the tab is not active
+    refetchInterval: 60000,
+    refetchIntervalInBackground: true,
   });
 
-  console.log("From SalesProduct2 Component", data);
-
-  if (isLoading)
+  if (isLoading) {
     return (
-      <Spinner
-        style={{
-          marginTop: "2rem",
-          marginBottom: "2rem",
-          marginLeft: "auto",
-          marginRight: "auto",
-        }}
-      />
+      <Container mt="2rem">
+        <SkeletonProducts count={PAGE_SIZE} />
+      </Container>
     );
+  }
 
   if (error) {
     console.error("Error in SalePage:", error);
