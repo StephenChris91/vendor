@@ -36,7 +36,7 @@ export default async function HomeLanding() {
   return (
     <main>
       {/* HERO CAROUSEL AREA */}
-      <Section1  />
+      <Section1 />
 
       {/* FLASH DEAL PRODUCTS AREA */}
       <Section2 />
@@ -79,7 +79,7 @@ export default async function HomeLanding() {
       />
 
       {/* CATEGORIES AREA */}
-      <Section10 categories={bottomCategories} />
+      <Section10 />
 
       {/* MORE PRODUCTS AREA */}
       <Section11 />

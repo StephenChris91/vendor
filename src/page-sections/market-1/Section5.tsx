@@ -8,6 +8,7 @@ import CategorySectionCreator from "@component/CategorySectionCreator";
 import Product from "@models/product.model";
 import axios from "axios";
 import Spinner from "@component/Spinner";
+import SkeletonGrid from "@component/skeleton/SkeletonProducts";
 
 // Function to fetch new arrivals
 const fetchNewArrivals = async (): Promise<Product[]> => {
@@ -40,7 +41,7 @@ export default function Section5() {
     refetchInterval: 10 * 60 * 1000, // 10 minutes
   });
 
-  if (isLoading) return <Spinner />;
+  if (isLoading) return <SkeletonGrid count={6} />;
   if (error) return <div>An error occurred: {error.message}</div>;
 
   // Ensure newArrivalsList is an array

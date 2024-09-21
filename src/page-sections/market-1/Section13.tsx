@@ -17,6 +17,7 @@ import Product from "@models/product.model";
 import axios from "axios";
 import Spinner from "@component/Spinner";
 import { useQuery } from "@tanstack/react-query";
+import SkeletonGrid from "@component/skeleton/SkeletonProducts";
 
 // ========================================================
 const fetchBigDiscounts = async (): Promise<Product[]> => {
@@ -57,7 +58,7 @@ export default function Section13() {
     gcTime: 1000 * 60 * 60 * 24, // Refresh every 60 seconds after
   });
 
-  if (isLoading) return <Spinner />;
+  if (isLoading) return <SkeletonGrid count={6} />;
   if (error) return <div>An error occurred: {error.message}</div>;
 
   // Ensure newArrivalsList is an array

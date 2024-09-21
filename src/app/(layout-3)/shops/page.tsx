@@ -7,6 +7,7 @@ import Pagination from "@component/pagination";
 import ShopCard1 from "@sections/shop/ShopCard1";
 import { H2, SemiSpan } from "@component/Typography";
 import { useShopList } from "@utils/__api__/shops";
+import SkeletonGrid from "@component/skeleton/SkeletonProducts";
 
 export default function ShopList() {
   const { data: shopListData, isLoading, error, refetch } = useShopList();
@@ -19,7 +20,7 @@ export default function ShopList() {
     return () => clearInterval(interval);
   }, [refetch]);
 
-  if (isLoading) return <div>Loading shops...</div>;
+  if (isLoading) return <SkeletonGrid count={9} />;
   if (error) {
     console.error("Error in ShopList:", error);
     return <div>Error loading shops. Please try again later.</div>;
