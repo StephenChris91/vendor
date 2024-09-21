@@ -1,3 +1,5 @@
+"use client";
+
 import Box from "@component/Box";
 // PAGE SECTION COMPONENTS
 
@@ -11,6 +13,7 @@ export default function Home() {
   return (
     <Box id="top" overflow="hidden" bg="gray.white">
       <Topbar />
+      <MobileNavigationBar />
       <Header />
       <HomeLanding />
       <Footer1 />
