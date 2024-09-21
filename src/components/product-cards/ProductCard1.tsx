@@ -148,7 +148,6 @@ export default function ProductCard1({
   price,
   imgUrl,
   rating,
-  off = 0,
   images,
   shopId,
   shop = null,
@@ -256,12 +255,15 @@ export default function ProductCard1({
   //   }
   // };
 
+  const offPercentage =
+    price > sale_price ? Math.round(((price - sale_price) / price) * 100) : 0;
+
   const product: Product = {
     id,
     name: title,
     price,
     description: "", // Use a default or placeholder value
-    discountPercentage: off,
+    discountPercentage: offPercentage,
     sku: 0,
     quantity: 0,
     in_stock: false,
@@ -291,7 +293,7 @@ export default function ProductCard1({
     <>
       <Wrapper borderRadius={8} {...props}>
         <div className="image-holder">
-          {!!off && (
+          {offPercentage > 0 && (
             <Chip
               top="10px"
               left="10px"
@@ -303,7 +305,7 @@ export default function ProductCard1({
               color="primary.text"
               zIndex={1}
             >
-              {off}% off
+              {offPercentage}% off
             </Chip>
           )}
 
@@ -325,10 +327,12 @@ export default function ProductCard1({
           <Link href={`/product/${id}`}>
             <ImageWrapper>
               <NextImage
+                width={181}
+                height={181}
                 alt={title}
                 src={imgUrl}
-                layout="fill"
-                objectFit="cover"
+                // layout="fill"
+                // objectFit="cover"
               />
             </ImageWrapper>
           </Link>
@@ -373,12 +377,12 @@ export default function ProductCard1({
 
               <FlexBox alignItems="center" mt="10px">
                 <SemiSpan pr="0.5rem" fontWeight="600" color="primary.main">
-                  {currency(price)}
+                  {currency(sale_price)}
                 </SemiSpan>
 
-                {!!off && (
+                {offPercentage > 0 && (
                   <SemiSpan fontSize="14px" color="text.muted" fontWeight="500">
-                    <del>{currency(sale_price)}</del>
+                    <del>{currency(price)}</del>
                   </SemiSpan>
                 )}
               </FlexBox>

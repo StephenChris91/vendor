@@ -164,44 +164,6 @@ export const navigations = [
     }
   },
   {
-    icon: "pet",
-    title: "Pet supplies",
-    href: "/product/search/pet-supplies",
-    menuComponent: "MegaMenu1",
-    menuData: {
-      categories: [
-        {
-          title: "Dogs",
-          href: "/product/search/dogs",
-        },
-        {
-          title: "Cats",
-          href: "/product/search/cats",
-        },
-        {
-          title: "Birds",
-          href: "/product/search/birds",
-        },
-        {
-          title: "Horses",
-          href: "/product/search/horses",
-        },
-        {
-          title: "Small Animals",
-          href: "/product/search/small-animals",
-        },
-        {
-          title: "Reptiles & Amphibians",
-          href: "/product/search/reptiles-amphibians",
-        },
-        {
-          title: "Fish & Aquatic Pets",
-          href: "/product/search/fish-aquatic-pets",
-        }
-      ]
-    }
-  },
-  {
     icon: "industrial",
     title: "Industrial and Scientific",
     href: "/product/search/industrial-scientific",
@@ -295,88 +257,6 @@ export const navigations = [
         {
           title: "Abrasive & Finishing Products",
           href: "/product/search/abrasive-finishing-products",
-        }
-      ]
-    }
-  },
-  {
-    icon: "toys",
-    title: "Toys and Games",
-    href: "/product/search/toys-games",
-    menuComponent: "MegaMenu1",
-    menuData: {
-      categories: [
-        {
-          title: "Tricycles, Scooters & Wagons",
-          href: "/product/search/tricycles-scooters-wagons",
-        },
-        {
-          title: "Games",
-          href: "/product/search/games",
-        },
-        {
-          title: "Video Games",
-          href: "/product/search/video-games",
-        },
-        {
-          title: "Hobbies",
-          href: "/product/search/hobbies",
-        },
-        {
-          title: "Grown-Up Toys",
-          href: "/product/search/grown-up-toys",
-        },
-        {
-          title: "Dress Up & Pretend Play",
-          href: "/product/search/dress-up-pretend-play",
-        },
-        {
-          title: "Kids' Furniture, Décor & Storage",
-          href: "/product/search/kids-furniture-decor-storage",
-        },
-        {
-          title: "Toy Remote Control & Play Vehicles",
-          href: "/product/search/toy-remote-control-play-vehicles",
-        },
-        {
-          title: "Stuffed Animals & Plush Toys",
-          href: "/product/search/stuffed-animals-plush-toys",
-        },
-        {
-          title: "Sports & Outdoor Play",
-          href: "/product/search/sports-outdoor-play",
-        },
-        {
-          title: "Puzzles",
-          href: "/product/search/puzzles",
-        },
-        {
-          title: "Puppets",
-          href: "/product/search/puppets",
-        },
-        {
-          title: "Party Supplies",
-          href: "/product/search/party-supplies",
-        },
-        {
-          title: "Learning & Education",
-          href: "/product/search/learning-education",
-        },
-        {
-          title: "Kids' Electronics",
-          href: "/product/search/kids-electronics",
-        },
-        {
-          title: "Dolls & Accessories",
-          href: "/product/search/dolls-accessories",
-        },
-        {
-          title: "Baby & Toddler Toys",
-          href: "/product/search/baby-toddler-toys",
-        },
-        {
-          title: "Arts & Crafts",
-          href: "/product/search/arts-crafts",
         }
       ]
     }

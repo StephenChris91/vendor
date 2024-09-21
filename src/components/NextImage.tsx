@@ -16,10 +16,12 @@ type NextImageProps = Omit<ImageProps, "src"> &
   BorderRadiusProps & {
     src: string | StaticImageData | null | undefined;
     fallbackSrc?: string;
+    width: number;
+    height: number;
   };
 
 const StyledImage = styled(Image)<NextImageProps>(
-  { width: "100%", height: "auto" },
+  { objectFit: "cover" },
   compose(space, borderRadius)
 );
 
@@ -27,19 +29,21 @@ const NextImage = ({
   src,
   fallbackSrc = "/placeholder-image.jpg",
   alt,
+  width,
+  height,
   ...props
 }: NextImageProps) => {
   const [imgSrc, setImgSrc] = useState<string | StaticImageData>(
     src || fallbackSrc
   );
 
-  console.log("NextImage src:", src); // Add this line for debugging
-
   return (
     <StyledImage
       {...props}
       src={imgSrc}
       alt={alt}
+      width={width}
+      height={height}
       onError={() => {
         console.error(`Error loading image: ${src}`);
         setImgSrc(fallbackSrc);

@@ -37,7 +37,12 @@ export default function Section11() {
     gcTime: 1000 * 60 * 60 * 24, // Refresh every 60 seconds after last update
   });
 
-  if (isLoading) return <SkeletonGrid count={6} />;
+  if (isLoading)
+    return (
+      <Container mb="70px">
+        <SkeletonGrid count={8} />
+      </Container>
+    );
   if (error) return <div>An error occurred: {error.message}</div>;
 
   // Ensure newArrivalsList is an array

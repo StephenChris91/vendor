@@ -4,20 +4,18 @@ import { H4 } from "@component/Typography";
 import NextImage from "@component/NextImage";
 import { currency } from "@utils/utils";
 
-// ========================================================
-// type ProductCard2Props = {
-//   id: string;
-//   slug: string;
-//   title: string;
-//   price: number;
-//   imgUrl: string;
-// };
-// ========================================================
-
-export default function ProductCard2({ id, imgUrl, title, price, slug }) {
+export default function ProductCard2({ id, imgUrl, title, price }) {
   return (
     <Link href={`/product/${id}`}>
-      <HoverBox borderRadius={8} mb="0.5rem" display="flex">
+      <HoverBox
+        borderRadius={8}
+        mb="0.5rem"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        width={181}
+        height={181}
+      >
         <NextImage src={imgUrl} width={181} height={181} alt={title} />
       </HoverBox>
 

@@ -45,10 +45,10 @@ export default async function HomeLanding() {
       <Section3 />
 
       {/* TOP RATING AND BRANDS AREA */}
-      <Section4
+      {/* <Section4
         topRatedList={topRatedProducts}
         topRatedBrands={topRatedBrands}
-      />
+      /> */}
 
       {/* NEW ARRIVALS AREA */}
       <Section5 />
@@ -57,26 +57,26 @@ export default async function HomeLanding() {
       <Section13 />
 
       {/* CAR LIST AREA */}
-      <Section6 fashionProducts={fashionProducts} />
+      <Section6 />
 
       {/* MOBILE PHONES AREA */}
-      <Section7
+      {/* <Section7
         shops={mobileShops}
         brands={mobileBrands}
         title="Mobile Phones"
         productList={mobileList}
-      />
+      /> */}
 
       {/* DISCOUNT BANNERS AREA */}
       <Section8 />
 
       {/* OPTICS AND WATCH AREA */}
-      <Section7
+      {/* <Section7
         shops={opticsShops}
         brands={opticsBrands}
         title="Optics / Watch"
         productList={opticsList}
-      />
+      /> */}
 
       {/* CATEGORIES AREA */}
       <Section10 />

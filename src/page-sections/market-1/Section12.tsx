@@ -33,7 +33,7 @@ export default function Section12({ serviceList }: Props) {
                 borderRadius="300px"
                 justifyContent="center"
               >
-                <Icon color="secondary" size="1.75rem">
+                <Icon color="primary" size="1.75rem">
                   {item.icon}
                 </Icon>
               </FlexBox>

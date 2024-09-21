@@ -18,6 +18,7 @@ import axios from "axios";
 import Spinner from "@component/Spinner";
 import { useQuery } from "@tanstack/react-query";
 import SkeletonGrid from "@component/skeleton/SkeletonProducts";
+import Container from "@component/Container";
 
 // ========================================================
 const fetchBigDiscounts = async (): Promise<Product[]> => {
@@ -58,7 +59,12 @@ export default function Section13() {
     gcTime: 1000 * 60 * 60 * 24, // Refresh every 60 seconds after
   });
 
-  if (isLoading) return <SkeletonGrid count={6} />;
+  if (isLoading)
+    return (
+      <Container>
+        <SkeletonGrid count={6} />
+      </Container>
+    );
   if (error) return <div>An error occurred: {error.message}</div>;
 
   // Ensure newArrivalsList is an array
@@ -79,10 +85,15 @@ export default function Section13() {
             <Box py="0.25rem" key={item.id}>
               <Card p="1rem" borderRadius={8}>
                 <Link href={`/product/${item.slug}`}>
-                  <HoverBox borderRadius={8} mb="0.5rem" display="flex">
+                  <HoverBox
+                    borderRadius={8}
+                    mb="0.5rem"
+                    display="flex"
+                    height="auto"
+                  >
                     <NextImage
-                      width={500}
-                      height={500}
+                      width={181}
+                      height={181}
                       alt={item.name}
                       src={item.image}
                     />

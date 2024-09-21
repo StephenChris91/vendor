@@ -9,6 +9,7 @@ import Product from "@models/product.model";
 import axios from "axios";
 import Spinner from "@component/Spinner";
 import SkeletonGrid from "@component/skeleton/SkeletonProducts";
+import Container from "@component/Container";
 
 // Function to fetch new arrivals
 const fetchNewArrivals = async (): Promise<Product[]> => {
@@ -41,8 +42,13 @@ export default function Section5() {
     refetchInterval: 10 * 60 * 1000, // 10 minutes
   });
 
-  if (isLoading) return <SkeletonGrid count={6} />;
-  if (error) return <div>An error occurred: {error.message}</div>;
+  if (isLoading)
+    return (
+      <Container>
+        <SkeletonGrid count={6} />
+      </Container>
+    );
+  if (error) return <Container>An error occurred: {error.message}</Container>;
 
   // Ensure newArrivalsList is an array
   const productList = Array.isArray(newArrivalsList) ? newArrivalsList : [];
@@ -61,7 +67,7 @@ export default function Section5() {
             <Grid item lg={2} md={3} sm={4} xs={6} key={item.id}>
               <ProductCard2
                 id={item.id}
-                slug={item.slug}
+                // slug={item.slug}
                 title={item.name}
                 price={item.price}
                 imgUrl={item.image || ""}

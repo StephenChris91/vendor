@@ -92,6 +92,10 @@ const CarouselSettings: React.FC<CarouselSettingsProps> = ({
             acceptedFileTypes={{ "image/*": [".png", ".jpg", ".jpeg", ".gif"] }}
             onUpload={handleImageUpload}
           />
+          <small>
+            Please upload an image with a maximum size of 4MB. For best results,
+            image size should be 338px x 373px
+          </small>
         </Box>
         {formData.imgUrl && (
           <Box mb={2}>

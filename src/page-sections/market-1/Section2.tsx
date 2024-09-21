@@ -12,6 +12,7 @@ import axios from "axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Spinner from "@component/Spinner";
 import SkeletonGrid from "@component/skeleton/SkeletonProducts";
+import Container from "@component/Container";
 
 // =============================================================
 // Function to fetch new arrivals
@@ -49,11 +50,16 @@ export default function Section2() {
   } = useQuery<Product[], Error>({
     queryKey: ["flashDeals"],
     queryFn: fetchFlashDeals,
-    staleTime: Infinity, // Keep the data fresh indefinitely
-    gcTime: 1000 * 60 * 60 * 24, // Replace cacheTime with gcTime
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24,
   });
 
-  if (isLoading) return <SkeletonGrid count={4} />;
+  if (isLoading)
+    return (
+      <Container>
+        <SkeletonGrid count={4} />
+      </Container>
+    );
   if (error) return <div>An error occurred: {error.message}</div>;
 
   // Ensure newArrivalsList is an array
