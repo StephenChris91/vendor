@@ -36,7 +36,7 @@ export default async function HomeLanding() {
   return (
     <main>
       {/* HERO CAROUSEL AREA */}
-      <Section1 carouselData={mainCarouselData} />
+      <Section1  />
 
       {/* FLASH DEAL PRODUCTS AREA */}
       <Section2 />

@@ -7,8 +7,9 @@ import { Button } from "@component/buttons";
 import TextField from "@component/text-field";
 import FlexBox from "@component/FlexBox";
 import Box from "@component/Box";
+import DropZone from "@component/DropZone";
 import { CreateCarouselItemInput } from "types";
-
+import { toast } from "react-hot-toast";
 interface CarouselSettingsProps {
   createCarouselItem: (item: CreateCarouselItemInput) => Promise<void>;
   setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,30 +23,37 @@ const CarouselSettings: React.FC<CarouselSettingsProps> = ({
     title: "",
     description: "",
     buttonText: "",
-    buttonLink: "",
-    image: "",
+    buttonLink: "/shop",
+    imgUrl: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setHasUnsavedChanges(true);
+  };
+
+  const handleImageUpload = (url: string, file: File) => {
+    setFormData({ ...formData, imgUrl: url });
+    setHasUnsavedChanges(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await createCarouselItem(formData);
-      // Reset form after successful submission
+
       setFormData({
         title: "",
         description: "",
         buttonText: "",
-        buttonLink: "",
-        image: "",
+        buttonLink: "/shop",
+        imgUrl: "",
       });
-      alert("Carousel item created successfully!");
+      setHasUnsavedChanges(false);
+      toast.success("Carousel item created successfully!");
     } catch (error) {
       console.error("Error creating carousel item:", error);
-      alert("Failed to create carousel item. Please try again.");
+      toast.error("Failed to create carousel item. Please try again.");
     }
   };
 
@@ -77,22 +85,23 @@ const CarouselSettings: React.FC<CarouselSettingsProps> = ({
           value={formData.buttonText}
           onChange={handleChange}
         />
-        <TextField
-          fullwidth
-          mb={2}
-          name="buttonLink"
-          label="Button Link"
-          value={formData.buttonLink}
-          onChange={handleChange}
-        />
-        <TextField
-          fullwidth
-          mb={2}
-          name="image"
-          label="Image URL"
-          value={formData.image}
-          onChange={handleChange}
-        />
+        <Box mb={2}>
+          <DropZone
+            uploadType="carousel-image"
+            maxSize={4 * 1024 * 1024} // 4MB limit
+            acceptedFileTypes={{ "image/*": [".png", ".jpg", ".jpeg", ".gif"] }}
+            onUpload={handleImageUpload}
+          />
+        </Box>
+        {formData.imgUrl && (
+          <Box mb={2}>
+            <img
+              src={formData.imgUrl}
+              alt="Uploaded"
+              style={{ maxWidth: "100%", maxHeight: "200px" }}
+            />
+          </Box>
+        )}
         <FlexBox justifyContent="flex-end">
           <Button variant="contained" color="primary" type="submit">
             Create Carousel Item

@@ -292,7 +292,7 @@ export interface MainCarouselItem {
     description?: string;
     buttonText?: string;
     buttonLink?: string;
-    image: string;
+    imgUrl: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -302,7 +302,7 @@ export interface CreateCarouselItemInput {
     description?: string;
     buttonText?: string;
     buttonLink?: string;
-    image: string;
+    imgUrl: string;
 }
 
 

@@ -58,7 +58,12 @@ interface Props {
 }
 // ===============================================
 
-export default function CarouselCard1({ title, image, buttonText, description }: Props) {
+export default function CarouselCard1({
+  title,
+  image,
+  buttonText,
+  description,
+}: Props) {
   return (
     <StyledCarouselCard1>
       <div>
@@ -67,7 +72,12 @@ export default function CarouselCard1({ title, image, buttonText, description }:
           {description}
         </Typography>
 
-        <Button className="button-link" variant="contained" color="primary" p="1rem 1.5rem">
+        <Button
+          className="button-link"
+          variant="contained"
+          color="primary"
+          p="1rem 1.5rem"
+        >
           {buttonText}
         </Button>
       </div>

@@ -51,7 +51,6 @@ export default function DropZone({
   const handleUpload = async () => {
     if (files.length > 0 && useS3) {
       setIsUploading(true);
-      console.log("Starting upload for files:", files);
       try {
         const formData = new FormData();
         formData.append("file", files[0]);
@@ -59,7 +58,6 @@ export default function DropZone({
         const result = await uploadFile(formData);
 
         if (result.url) {
-          console.log("Upload successful, URL:", result.url);
           toast.success("File uploaded successfully!");
           if (onUpload) {
             onUpload(result.url, files[0]); // Call onUpload with the returned URL and the file
