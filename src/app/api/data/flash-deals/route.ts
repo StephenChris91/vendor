@@ -5,6 +5,13 @@ export async function GET() {
     try {
         const flashDeals = await db.product.findMany({
             where: { isFlashDeal: true },
+            include: {
+                shop: {
+                    include: {
+                        products: true,
+                    }
+                }
+            }
         });
         return NextResponse.json(flashDeals);
     } catch (error) {

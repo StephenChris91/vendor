@@ -8,16 +8,17 @@ import Select from "@component/Select";
 import Icon from "@component/icon/Icon";
 import Grid from "@component/grid/Grid";
 import FlexBox from "@component/FlexBox";
-import { IconButton } from "@component/buttons";
+import { Button, IconButton } from "@component/buttons";
 import Sidenav from "@component/sidenav/Sidenav";
 import { H5, Paragraph } from "@component/Typography";
 import ProductGridView from "@component/products/ProductCard1List";
 import ProductListView from "@component/products/ProductCard9List";
-import ProductFilterCard from "@component/products/ProductFilterCard";
 import useWindowSize from "@hook/useWindowSize";
 import Product, { Category } from "@models/product.model";
 import { getAllProducts } from "actions/products";
 import { navigations } from "@data/navigations";
+import CheckBox from "@component/CheckBox";
+import TextField from "@component/text-field";
 
 type Props = {
   sortOptions: { label: string; value: string }[];
@@ -34,6 +35,10 @@ export default function SearchResult({ sortOptions }: Props) {
   >([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
+  const [sortOption, setSortOption] = useState(sortOptions[0].value);
   const searchParams = useSearchParams();
 
   const isTablet = width < 1025;
@@ -42,6 +47,10 @@ export default function SearchResult({ sortOptions }: Props) {
     const fetchProducts = async () => {
       const data = await getAllProducts();
       setProducts(data);
+      if (data.length > 0) {
+        const prices = data.map((p) => p.price);
+        setPriceRange([Math.min(...prices), Math.max(...prices)]);
+      }
     };
     fetchProducts();
   }, []);
@@ -52,7 +61,14 @@ export default function SearchResult({ sortOptions }: Props) {
     setSelectedCategory(category);
     setSearchQuery(query || "");
     filterProducts(category, query || "");
-  }, [searchParams, products]);
+  }, [
+    searchParams,
+    products,
+    priceRange,
+    selectedBrands,
+    selectedRatings,
+    sortOption,
+  ]);
 
   const filterProducts = (category: string | null, query: string) => {
     let filtered = [...products];
@@ -68,6 +84,33 @@ export default function SearchResult({ sortOptions }: Props) {
       filtered = filtered.filter((product) =>
         product.name.toLowerCase().includes(query.toLowerCase())
       );
+    }
+
+    filtered = filtered.filter(
+      (product) =>
+        product.price >= priceRange[0] && product.price <= priceRange[1]
+    );
+
+    if (selectedBrands.length > 0) {
+      filtered = filtered.filter((product) =>
+        selectedBrands.includes(product.brand?.name || "")
+      );
+    }
+
+    if (selectedRatings.length > 0) {
+      filtered = filtered.filter((product) =>
+        selectedRatings.includes(Math.floor(product.ratings || 0))
+      );
+    }
+
+    switch (sortOption) {
+      case "Price Low to High":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "Price High to Low":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      // Remove the Date sorting option for now
     }
 
     setFilteredProducts(filtered);
@@ -96,6 +139,31 @@ export default function SearchResult({ sortOptions }: Props) {
   };
 
   const toggleView = useCallback((v: "grid" | "list") => () => setView(v), []);
+
+  const handlePriceRangeChange = (newRange: [number, number]) => {
+    setPriceRange([
+      Math.min(newRange[0], newRange[1]),
+      Math.max(newRange[0], newRange[1]),
+    ]);
+  };
+
+  const handleBrandChange = (brand: string) => {
+    setSelectedBrands((prev) =>
+      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
+    );
+  };
+
+  const handleRatingChange = (rating: number) => {
+    setSelectedRatings((prev) =>
+      prev.includes(rating)
+        ? prev.filter((r) => r !== rating)
+        : [...prev, rating]
+    );
+  };
+
+  const handleSortChange = (option: { label: string; value: string }) => {
+    setSortOption(option.value);
+  };
 
   const transformProducts = (prods: ProductWithDetails[]): Product[] =>
     prods.map((p) => ({
@@ -129,26 +197,18 @@ export default function SearchResult({ sortOptions }: Props) {
         <div>
           <H5>
             {selectedCategory
-              ? `Searching for "${selectedCategory}"`
-              : searchQuery
-              ? `Searching for "${searchQuery}"`
-              : "All Products"}
+              ? `${selectedCategory} - ${filteredProducts.length} items found`
+              : `${filteredProducts.length} items found for "${searchQuery}"`}
           </H5>
-          <Paragraph color="text.muted">
-            {filteredProducts.length} results found
-          </Paragraph>
         </div>
 
         <FlexBox alignItems="center" flexWrap="wrap">
-          <Paragraph color="text.muted" mr="1rem">
-            Sort by:
-          </Paragraph>
-
           <Box flex="1 1 0" mr="1.75rem" minWidth="150px">
             <Select
               placeholder="Sort by"
-              defaultValue={sortOptions[0]}
               options={sortOptions}
+              value={sortOptions.find((option) => option.value === sortOption)}
+              onChange={handleSortChange}
             />
           </Box>
 
@@ -186,7 +246,63 @@ export default function SearchResult({ sortOptions }: Props) {
                 </IconButton>
               }
             >
-              <ProductFilterCard />
+              {/* Filter content */}
+              <Card>
+                <Box mb={4}>
+                  <H5 mb={2}>Price Range</H5>
+                  <FlexBox alignItems="center">
+                    <TextField
+                      type="number"
+                      placeholder="Min"
+                      value={priceRange[0]}
+                      onChange={(e) =>
+                        handlePriceRangeChange([
+                          Number(e.target.value),
+                          priceRange[1],
+                        ])
+                      }
+                    />
+                    <Box mx={1}>-</Box>
+                    <TextField
+                      type="number"
+                      placeholder="Max"
+                      value={priceRange[1]}
+                      onChange={(e) =>
+                        handlePriceRangeChange([
+                          priceRange[0],
+                          Number(e.target.value),
+                        ])
+                      }
+                    />
+                  </FlexBox>
+                </Box>
+
+                <Box mb={4}>
+                  <H5 mb={2}>Brands</H5>
+                  {Array.from(new Set(products.map((p) => p.brand?.name))).map(
+                    (brand) => (
+                      <CheckBox
+                        key={brand}
+                        label={brand || ""}
+                        checked={selectedBrands.includes(brand || "")}
+                        onChange={() => handleBrandChange(brand || "")}
+                      />
+                    )
+                  )}
+                </Box>
+
+                <Box mb={4}>
+                  <H5 mb={2}>Ratings</H5>
+                  {[5, 4, 3, 2, 1].map((rating) => (
+                    <CheckBox
+                      key={rating}
+                      label={`${rating} Star`}
+                      checked={selectedRatings.includes(rating)}
+                      onChange={() => handleRatingChange(rating)}
+                    />
+                  ))}
+                </Box>
+              </Card>
             </Sidenav>
           )}
         </FlexBox>
@@ -194,7 +310,63 @@ export default function SearchResult({ sortOptions }: Props) {
 
       <Grid container spacing={6}>
         <Grid item lg={3} xs={12}>
-          <ProductFilterCard />
+          {/* Filter content */}
+          <Card>
+            <Box mb={4}>
+              <H5 mb={2}>Price Range</H5>
+              <FlexBox alignItems="center">
+                <TextField
+                  type="number"
+                  placeholder="Min"
+                  value={priceRange[0]}
+                  onChange={(e) =>
+                    handlePriceRangeChange([
+                      Number(e.target.value),
+                      priceRange[1],
+                    ])
+                  }
+                />
+                <Box mx={1}>-</Box>
+                <TextField
+                  type="number"
+                  placeholder="Max"
+                  value={priceRange[1]}
+                  onChange={(e) =>
+                    handlePriceRangeChange([
+                      priceRange[0],
+                      Number(e.target.value),
+                    ])
+                  }
+                />
+              </FlexBox>
+            </Box>
+
+            <Box mb={4}>
+              <H5 mb={2}>Brands</H5>
+              {Array.from(new Set(products.map((p) => p.brand?.name))).map(
+                (brand) => (
+                  <CheckBox
+                    key={brand}
+                    label={brand || ""}
+                    checked={selectedBrands.includes(brand || "")}
+                    onChange={() => handleBrandChange(brand || "")}
+                  />
+                )
+              )}
+            </Box>
+
+            <Box mb={4}>
+              <H5 mb={2}>Ratings</H5>
+              {[5, 4, 3, 2, 1].map((rating) => (
+                <CheckBox
+                  key={rating}
+                  label={`${rating} Star`}
+                  checked={selectedRatings.includes(rating)}
+                  onChange={() => handleRatingChange(rating)}
+                />
+              ))}
+            </Box>
+          </Card>
         </Grid>
 
         <Grid item lg={9} xs={12}>

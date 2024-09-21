@@ -10,7 +10,6 @@ import useWindowSize from "@hook/useWindowSize";
 import Product from "@models/product.model";
 import axios from "axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Spinner from "@component/Spinner";
 import SkeletonGrid from "@component/skeleton/SkeletonProducts";
 import Container from "@component/Container";
 
@@ -35,7 +34,6 @@ export default function Section2() {
   const width = useWindowSize();
   const [visibleSlides, setVisibleSlides] = useState(4);
 
-  const queryClient = useQueryClient();
   useEffect(() => {
     if (width < 500) setVisibleSlides(1);
     else if (width < 650) setVisibleSlides(2);

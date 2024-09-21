@@ -150,7 +150,7 @@ export default function ProductCard1({
   rating,
   images,
   shopId,
-  shop = null,
+  shop,
   sale_price,
   ...props
 }: ProductCard1Props) {
@@ -354,7 +354,7 @@ export default function ProductCard1({
                   {title}
                 </H3>
                 <Typography as="p" text-muted fontSize="12px">
-                  Sold by: {shop ? shop?.shopName : "Unknown"}
+                  Sold by: {shop ? shop.shopName : ""}
                 </Typography>
               </Link>
 
