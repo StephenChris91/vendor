@@ -170,7 +170,7 @@ export default function SettingsPage() {
       case "carousel":
         return (
           <CarouselSettings
-            createCarouselItem={createCarouselItem}
+            // createCarouselItem={createCarouselItem}
             setHasUnsavedChanges={setHasUnsavedChanges}
           />
         );
