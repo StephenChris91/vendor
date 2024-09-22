@@ -1,6 +1,13 @@
 "use client";
 
-import { Children, useRef, useState, useEffect, cloneElement, ReactElement } from "react";
+import {
+  Children,
+  useRef,
+  useState,
+  useEffect,
+  cloneElement,
+  ReactElement,
+} from "react";
 // STYLED COMPONENT
 import { AccordionWrapper } from "./styles";
 
@@ -11,7 +18,10 @@ type AccordionProps = {
 };
 // ==========================================
 
-export default function Accordion({ expanded = false, children }: AccordionProps) {
+export default function Accordion({
+  expanded = false,
+  children,
+}: AccordionProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(expanded);
   const [headerHeight, setHeaderHeight] = useState(0);

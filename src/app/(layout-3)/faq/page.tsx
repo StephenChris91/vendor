@@ -1,9 +1,7 @@
-const FAQ = () => {
-  return (
-    <>
-      <h1>This is an FAQ Page</h1>
-    </>
-  );
+import PrivacyPolicyFAQ from "@component/PrivacyPolicyFAQ";
+
+const FAQPage = () => {
+  return <PrivacyPolicyFAQ />;
 };
 
-export default FAQ;
+export default FAQPage;
