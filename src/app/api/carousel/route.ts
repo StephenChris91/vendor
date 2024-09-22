@@ -15,10 +15,9 @@ const carouselItemSchema = z.object({
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        console.log("Received data:", body); // Add this line for debugging
+        console.log("Received data:", body);
         const validatedData = carouselItemSchema.parse(body);
 
-        // Ensure imgUrl is not an empty string
         if (validatedData.imgUrl === "") {
             validatedData.imgUrl = null;
         }
@@ -27,7 +26,7 @@ export async function POST(req: NextRequest) {
             data: validatedData,
         });
 
-        console.log("Created carousel item:", newCarouselItem); // Add this line for debugging
+        console.log("Created carousel item:", newCarouselItem);
         return NextResponse.json(newCarouselItem, { status: 201 });
     } catch (error) {
         console.error('Error creating carousel item:', error);
@@ -41,11 +40,48 @@ export async function GET() {
             orderBy: {
                 createdAt: 'desc'
             },
-            take: 5 // Limit to the 5 most recent items
+            take: 5
         });
         return NextResponse.json(carouselItems);
     } catch (error) {
         console.error('Error fetching carousel items:', error);
         return NextResponse.json({ error: 'Failed to fetch carousel items' }, { status: 500 });
+    }
+}
+
+export async function PUT(req: NextRequest) {
+    try {
+        const { id, ...data } = await req.json();
+        const validatedData = carouselItemSchema.parse(data);
+
+        if (validatedData.imgUrl === "") {
+            validatedData.imgUrl = null;
+        }
+
+        const updatedCarouselItem = await db.mainCarousel.update({
+            where: { id },
+            data: validatedData,
+        });
+
+        console.log("Updated carousel item:", updatedCarouselItem);
+        return NextResponse.json(updatedCarouselItem);
+    } catch (error) {
+        console.error('Error updating carousel item:', error);
+        return NextResponse.json({ error: 'Failed to update carousel item' }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const { id } = await req.json();
+        await db.mainCarousel.delete({
+            where: { id },
+        });
+
+        console.log("Deleted carousel item with id:", id);
+        return NextResponse.json({ message: 'Carousel item deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting carousel item:', error);
+        return NextResponse.json({ error: 'Failed to delete carousel item' }, { status: 500 });
     }
 }

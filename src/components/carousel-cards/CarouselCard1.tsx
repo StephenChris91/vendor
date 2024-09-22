@@ -51,10 +51,10 @@ const StyledCarouselCard1 = styled.div`
 
 // ===============================================
 interface Props {
-  title: string;
-  image: string;
-  buttonText: string;
-  description: string;
+  title?: string;
+  image?: string;
+  buttonText?: string;
+  description?: string;
 }
 // ===============================================
 
@@ -72,14 +72,18 @@ export default function CarouselCard1({
           {description}
         </Typography>
 
-        <Button
-          className="button-link"
-          variant="contained"
-          color="primary"
-          p="1rem 1.5rem"
-        >
-          {buttonText}
-        </Button>
+        {buttonText ? (
+          <Button
+            className="button-link"
+            variant="contained"
+            color="primary"
+            p="1rem 1.5rem"
+          >
+            {buttonText}
+          </Button>
+        ) : (
+          ""
+        )}
       </div>
 
       <div className="image-holder">
