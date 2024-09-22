@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Box from "../Box";
 import Card from "../Card";
@@ -12,10 +13,10 @@ import { Button } from "../buttons";
 import Container from "../Container";
 import Typography, { Span } from "../Typography";
 import Categories from "../categories/Categories";
-
 import StyledNavbar from "./styles";
 import navbarNavigations from "@data/navbarNavigations";
 import { useCurrentUser } from "@lib/use-session-client";
+import useWindowSize from "@hook/useWindowSize";
 
 interface Nav {
   url: string;
@@ -33,10 +34,11 @@ type NavbarProps = { navListOpen?: boolean };
 export default function Navbar({ navListOpen }: NavbarProps) {
   const user = useCurrentUser();
   const router = useRouter();
+  const windowWidth = useWindowSize();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNavClick = (nav: Nav) => {
     if (nav.requiresAuth && !user) {
-      // Redirect to login if auth is required but user is not logged in
       router.push("/login");
     } else if (nav.url) {
       router.push(nav.url);
@@ -45,7 +47,6 @@ export default function Navbar({ navListOpen }: NavbarProps) {
 
   const renderNestedNav = (list: Nav[], isRoot = false) => {
     return list?.map((nav: Nav) => {
-      // Conditionally render nav items based on user's login state and role
       if (nav.requiresAuth && !user) return null;
       if (nav.requiresNoAuth && user) return null;
       if (nav.requiresRole && user?.role !== nav.requiresRole) return null;
@@ -91,7 +92,7 @@ export default function Navbar({ navListOpen }: NavbarProps) {
                   boxShadow="large"
                   minWidth="230px"
                 >
-                  {/* {renderNestedNav(nav.child)} */}
+                  {renderNestedNav(nav.child)}
                 </Card>
               </div>
             </FlexBox>
@@ -163,7 +164,27 @@ export default function Navbar({ navListOpen }: NavbarProps) {
     });
   };
 
-  return (
+  const MobileMenu = () => (
+    <Box
+      position="fixed"
+      top="0"
+      left="0"
+      right="0"
+      bottom="0"
+      bg="white"
+      zIndex="1000"
+      overflowY="auto"
+      p="1rem"
+    >
+      <FlexBox justifyContent="space-between" mb="1rem">
+        <Typography variant="h6">Menu</Typography>
+        <Icon onClick={() => setMobileMenuOpen(false)}>close</Icon>
+      </FlexBox>
+      <Box>{renderNestedNav(navbarNavigations)}</Box>
+    </Box>
+  );
+
+  const DesktopNavbar = () => (
     <StyledNavbar>
       <Container
         height="100%"
@@ -183,17 +204,37 @@ export default function Navbar({ navListOpen }: NavbarProps) {
             >
               Categories
             </Typography>
-
             <Icon className="dropdown-icon" variant="small">
               chevron-right
             </Icon>
           </Button>
         </Categories>
-
         <FlexBox style={{ gap: 32 }}>
           {renderNestedNav(navbarNavigations, true)}
         </FlexBox>
       </Container>
     </StyledNavbar>
+  );
+
+  const MobileNavbar = () => (
+    <StyledNavbar>
+      <Container
+        height="100%"
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Icon onClick={() => setMobileMenuOpen(true)}>menu</Icon>
+        <Typography variant="h6">Vendorspot</Typography>
+        <Icon>search</Icon>
+      </Container>
+      {mobileMenuOpen && <MobileMenu />}
+    </StyledNavbar>
+  );
+
+  return windowWidth && windowWidth < 768 ? (
+    <MobileNavbar />
+  ) : (
+    <DesktopNavbar />
   );
 }

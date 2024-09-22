@@ -46,7 +46,10 @@ export default function ShopList() {
                 id={item.id}
                 name={item.shopName || "Unnamed Shop"}
                 phone={item.shopSettings?.phoneNumber || "N/A"}
-                address={item.address?.city || "N/A"}
+                address={{
+                  city: item.address?.city || "N/A",
+                  state: item.address?.state || "N/A",
+                }}
                 rating={5}
                 imgUrl={item.logo || "/placeholder-image.jpg"}
                 coverImgUrl={item.banner || "/placeholder-banner.jpg"}

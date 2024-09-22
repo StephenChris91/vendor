@@ -18,7 +18,10 @@ type ShopCard1Props = {
   phone: string;
   rating: number;
   imgUrl: string;
-  address: string;
+  address: {
+    city: string;
+    state: string;
+  };
   shopUrl: string;
   coverImgUrl: string;
 };
@@ -45,25 +48,25 @@ export default function ShopCard1({
           <Rating size="small" value={rating || 0} outof={5} color="warn" />
         </Box>
 
-        {/* <FlexBox mb="8px"> */}
-        {/* <Icon defaultcolor="currentColor" size="15px" mt="5px"> */}
-        {/* map-pin-2 */}
-        {/* </Icon> */}
+        <FlexBox mb="8px">
+          <Icon defaultcolor="currentColor" size="15px" mt="5px">
+            map-pin-2
+          </Icon>
 
-        {/* <SemiSpan color="white" ml="12px">
-            {address}
-          </SemiSpan> */}
-        {/* </FlexBox> */}
+          <SemiSpan color="white" ml="12px">
+            {`${address.city}, ${address.state}`}
+          </SemiSpan>
+          {/* </FlexBox> */}
 
-        {/* <FlexBox> */}
-        {/* <Icon defaultcolor="currentColor" size="15px" mt="4px"> */}
-        {/* phone_filled */}
-        {/* </Icon> */}
+          {/* <FlexBox> */}
+          {/* <Icon defaultcolor="currentColor" size="15px" mt="4px"> */}
+          {/* phone_filled */}
+          {/* </Icon> */}
 
-        {/* <SemiSpan color="white" ml="12px">
+          {/* <SemiSpan color="white" ml="12px">
             {phone}
           </SemiSpan> */}
-        {/* </FlexBox> */}
+        </FlexBox>
       </div>
 
       <FlexBox pl="30px" pr="18px" justifyContent="space-between">
