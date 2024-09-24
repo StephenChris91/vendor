@@ -10,14 +10,14 @@ import styled from "styled-components";
 import Icon from "@component/icon/Icon";
 
 const StyledAccordionHeader = styled(AccordionHeader)`
-  background-color: #1f2937;
-  border: 1px solid #374151;
+  background-color: #2b58e6;
+  border: 1px solid #1f41ae;
   border-radius: 3px;
   padding: 20px 10px;
   height: auto;
   transition: background-color 0.3s ease;
   &:hover {
-    background-color: #374151;
+    background-color: #1f41ae;
   }
 `;
 
@@ -25,16 +25,19 @@ const AccordionTitle = styled(H3)`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #e5e7eb;
+  color: #fff;
   padding: 8px;
   cursor: pointer;
 `;
 
 const AccordionContent = styled(Paragraph)`
-  color: #9ca3af;
-  background-color: #1f2937;
+  color: #fff;
+  background-color: #2f5ff8;
   padding: 10px 8px;
   height: auto;
+  &:hover {
+    background-color: #1f41ae;
+  }
 `;
 
 const PrivacyPolicyFAQ = () => {

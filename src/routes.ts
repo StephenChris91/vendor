@@ -3,21 +3,33 @@
  * An array of routes accessible to all users who visit the site.
  * @type {string[]}
  */
-export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/admin/adminLogin', '/address', '/address/:id', '/orders', '/orders/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shop', '/shops', '/shops/:id', '/shops/*', '/product', '/product/*', '/product/id', '/product/:id', '/product/search', '/product/search/:id', '/product/search/*', '/shops/:slug', '/track', '/compare', '/support', '/verification'];
+export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/address', '/address/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shop', '/shops', '/shops/:id', '/shops/*', '/product', '/product/*', '/product/id', '/product/:id', '/product/search', '/product/search/:id', '/product/search/*', '/shops/:slug', '/track', '/compare', '/support', '/verification'];
 
 /**
  * @description: Authenticated routes
  * An array of routes accessible to only authenticated users who visit the site.
  * @type {string[]}
  */
-export const authRoutes: (string | undefined)[] = ['/login', '/signup', '/new-password', '/onboarding', '/onboarding/confirmation', '/checkout', '/vendor', '/vendor/*', '/vendor/dashboard', '/orders', '/orders/*', '/orders/:id'];
+export const authRoutes: (string | undefined)[] = [
+    '/login',
+    '/signup',
+    '/new-password',
+    '/onboarding',
+    '/onboarding/confirmation',
+    '/checkout',
+    '/vendor',
+    '/vendor/*',
+    '/vendor/dashboard',
+    '/orders',
+    '/orders/:id'
+];
 
 /**
  * @description: Authenticated routes
  * An array of routes accessible to only users with admin roles. This routes will redirect to the admin dashboard
  * @type {string[]}
  */
-export const adminRoutes: (string | undefined)[] = ['/admin', '/admin/dashboard', "/admin/vendors", "/admin/products", "/admin/orders", "/admin/customers", "/admin/settings", "/admin/*"];
+export const adminRoutes: (string | undefined)[] = ['/admin', '/admin/dashboard', "/admin/vendors", "/admin/products", "/admin/orders", "/admin/customers", "/admin/settings", "/admin/*", '/admin/orders', '/admin/orders/*', '/admin/orders/:id'];
 
 
 /**

@@ -78,6 +78,8 @@ export default function DashboardNavigation() {
     },
   ];
 
+  if (!user) return null;
+
   const linkList = user?.role === "Vendor" ? vendorLinks : customerLinks;
 
   return (

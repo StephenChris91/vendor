@@ -9,7 +9,7 @@ import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H3, Paragraph } from "@component/Typography";
 import { LogoutButton } from "@component/logout-button";
-import { createShop } from "actions/createshop";
+import { createOrUpdateShop } from "actions/createshop";
 import { ShopStatus } from "@prisma/client";
 import { signOut } from "next-auth/react";
 
@@ -125,7 +125,7 @@ const MultiStepForm = () => {
         category: formData.shopSettings.category,
       };
 
-      const result = await createShop(shopData);
+      const result = await createOrUpdateShop(shopData);
 
       if (result.status === "success") {
         toast.success("Shop created successfully!");

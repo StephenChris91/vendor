@@ -12,10 +12,12 @@ import { IconButton } from "@component/buttons";
 import Typography, { H5, Small } from "@component/Typography";
 import { currency } from "@utils/utils";
 import { Order } from "@models/order.model";
+import { useCurrentUser } from "@lib/use-session-client";
 
 type OrderRowProps = { order: Order };
 
 export default function OrderRow({ order }: OrderRowProps) {
+  const user = useCurrentUser();
   const getColor = (status: string) => {
     switch (status) {
       case "Pending":
@@ -30,7 +32,13 @@ export default function OrderRow({ order }: OrderRowProps) {
   };
 
   return (
-    <Link href={`/vendor/orders/${order.id}`}>
+    <Link
+      href={
+        user?.role === "Vendor"
+          ? `/vendor/orders/${order.id}`
+          : `/orders/${order.id}`
+      }
+    >
       <TableRow my="1rem" padding="6px 18px">
         <H5 m="6px" textAlign="left">
           #{order.id.substring(0, 8)}

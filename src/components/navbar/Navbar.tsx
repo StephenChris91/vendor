@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Box from "../Box";
 import Card from "../Card";
@@ -17,6 +17,7 @@ import StyledNavbar from "./styles";
 import navbarNavigations from "@data/navbarNavigations";
 import { useCurrentUser } from "@lib/use-session-client";
 import useWindowSize from "@hook/useWindowSize";
+import styled from "styled-components";
 
 interface Nav {
   url: string;
@@ -31,17 +32,57 @@ interface Nav {
 
 type NavbarProps = { navListOpen?: boolean };
 
+const MobileNavToggle = styled(Icon)`
+  display: none;
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const SideNav = styled(Box)<{ open: boolean }>`
+  position: fixed;
+  top: 0;
+  left: ${(props) => (props.open ? "0" : "-300px")};
+  width: 300px;
+  height: 100%;
+  background-color: white;
+  transition: left 0.3s ease-in-out;
+  z-index: 1000;
+  overflow-y: auto;
+`;
+
+const Overlay = styled(Box)<{ open: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: ${(props) => (props.open ? "block" : "none")};
+  z-index: 999;
+`;
+
 export default function Navbar({ navListOpen }: NavbarProps) {
   const user = useCurrentUser();
   const router = useRouter();
   const windowWidth = useWindowSize();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [sideNavOpen, setSideNavOpen] = useState(false);
+
+  useEffect(() => {
+    if (windowWidth !== null) {
+      setIsMobile(windowWidth < 768);
+    }
+  }, [windowWidth]);
 
   const handleNavClick = (nav: Nav) => {
     if (nav.requiresAuth && !user) {
       router.push("/login");
     } else if (nav.url) {
       router.push(nav.url);
+    }
+    if (isMobile) {
+      setSideNavOpen(false);
     }
   };
 
@@ -164,34 +205,33 @@ export default function Navbar({ navListOpen }: NavbarProps) {
     });
   };
 
+  const toggleSideNav = () => {
+    setSideNavOpen(!sideNavOpen);
+  };
+
   const MobileMenu = () => (
-    <Box
-      position="fixed"
-      top="0"
-      left="0"
-      right="0"
-      bottom="0"
-      bg="white"
-      zIndex="1000"
-      overflowY="auto"
-      p="1rem"
-    >
-      <FlexBox justifyContent="space-between" mb="1rem">
-        <Typography variant="h6">Menu</Typography>
-        <Icon onClick={() => setMobileMenuOpen(false)}>close</Icon>
-      </FlexBox>
-      <Box>{renderNestedNav(navbarNavigations)}</Box>
-    </Box>
+    <>
+      <SideNav open={sideNavOpen}>
+        <FlexBox justifyContent="space-between" p="1rem">
+          <Typography variant="h6">Menu</Typography>
+          <Icon onClick={toggleSideNav}>close</Icon>
+        </FlexBox>
+        <Box p="1rem">{renderNestedNav(navbarNavigations)}</Box>
+      </SideNav>
+      <Overlay open={sideNavOpen} onClick={toggleSideNav} />
+    </>
   );
 
-  const DesktopNavbar = () => (
-    <StyledNavbar>
-      <Container
-        height="100%"
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-      >
+  const NavbarContent = () => (
+    <Container
+      height="100%"
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+    >
+      {isMobile ? (
+        <MobileNavToggle onClick={toggleSideNav}>menu</MobileNavToggle>
+      ) : (
         <Categories open={navListOpen}>
           <Button width="278px" height="40px" bg="body.default" variant="text">
             <Icon>categories</Icon>
@@ -209,32 +249,19 @@ export default function Navbar({ navListOpen }: NavbarProps) {
             </Icon>
           </Button>
         </Categories>
+      )}
+      {!isMobile && (
         <FlexBox style={{ gap: 32 }}>
           {renderNestedNav(navbarNavigations, true)}
         </FlexBox>
-      </Container>
-    </StyledNavbar>
+      )}
+    </Container>
   );
 
-  const MobileNavbar = () => (
+  return (
     <StyledNavbar>
-      <Container
-        height="100%"
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-      >
-        <Icon onClick={() => setMobileMenuOpen(true)}>menu</Icon>
-        <Typography variant="h6">Vendorspot</Typography>
-        <Icon>search</Icon>
-      </Container>
-      {mobileMenuOpen && <MobileMenu />}
+      <NavbarContent />
+      {isMobile && <MobileMenu />}
     </StyledNavbar>
-  );
-
-  return windowWidth && windowWidth < 768 ? (
-    <MobileNavbar />
-  ) : (
-    <DesktopNavbar />
   );
 }

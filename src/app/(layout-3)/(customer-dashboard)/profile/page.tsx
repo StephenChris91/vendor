@@ -13,6 +13,7 @@ import DashboardPageHeader from "@component/layout/DashboardPageHeader";
 import { EditProfileButton } from "@sections/customer-dashboard/profile";
 import { useCurrentUser } from "@lib/use-session-client";
 import { getCustomerProfile } from "actions/customer";
+import Spinner from "@component/Spinner";
 
 export default function Profile() {
   const user = useCurrentUser();
@@ -28,7 +29,7 @@ export default function Profile() {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   if (error) {

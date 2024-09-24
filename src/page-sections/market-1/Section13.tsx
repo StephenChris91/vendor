@@ -84,7 +84,7 @@ export default function Section13() {
           {productList.map((item) => (
             <Box py="0.25rem" key={item.id}>
               <Card p="1rem" borderRadius={8}>
-                <Link href={`/product/${item.slug}`}>
+                <Link href={`/product/${item.id}`}>
                   <HoverBox
                     borderRadius={8}
                     mb="0.5rem"

@@ -7,7 +7,7 @@ const navbarNavigations = [
     requiresRole: ''
   },
   {
-    title: "FAQ", url: "/faq", badge: "",
+    title: "Our Policy", url: "/faq", badge: "",
     requiresAuth: false,
     requiresNoAuth: false,
     requiresRole: ''

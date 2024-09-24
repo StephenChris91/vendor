@@ -50,8 +50,8 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
     const handler = window.PaystackPop.setup({
       key:
         process.env.NODE_ENV !== "production"
-          ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!
-          : process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY!,
+          ? process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY!
+          : process.env.PAYSTACK_LIVE_SECRET_KEY!,
       email: userEmail,
       amount: 200000, // 2000 Naira in kobo
       ref: `REF-${userId}-${Date.now()}`,

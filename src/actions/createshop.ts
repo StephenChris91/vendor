@@ -14,14 +14,14 @@ const extendedShopSchema = shopSchema.extend({
     shopSettings: shopSettingsSchema,
     status: z.nativeEnum(ShopStatus),
     hasPaid: z.boolean(),
-    category: z.string(), // Changed from categoryName to category
+    category: z.string(),
 });
 
-export async function createShop(values: z.infer<typeof extendedShopSchema>) {
+export async function createOrUpdateShop(values: z.infer<typeof extendedShopSchema>) {
     const session = await auth();
 
-    if (!session?.user) {
-        return { status: 'error', error: 'User not authenticated' };
+    if (!session?.user?.id) {
+        return { status: 'error', error: 'User not authenticated or User ID not found in session' };
     }
 
     const validInput = extendedShopSchema.safeParse(values);
@@ -45,86 +45,125 @@ export async function createShop(values: z.infer<typeof extendedShopSchema>) {
         status,
         paymentInfo,
         shopSettings,
-        category, // Changed from categoryName to category
+        category,
     } = validInput.data;
 
     try {
-        // // First, find or create the category
-        // let categoryRecord = await db.category.findFirst({
-        //     where: { name: category },
-        // });
-
-        // if (!categoryRecord) {
-        //     categoryRecord = await db.category.create({
-        //         data: {
-        //             name: category,
-        //             slug: category.toLowerCase().replace(/\s+/g, '-'),
-        //         },
-        //     });
-        // }
-
-        const shop = await db.shop.create({
-            data: {
-                shopName,
-                description,
-                logo,
-                banner,
-                slug,
-                status,
-                user: {
-                    connect: { id: session.user.id },
-                },
-                address: {
-                    create: {
-                        street: address.street,
-                        city: address.city,
-                        state: address.state,
-                        postalCode: address.postalCode,
-                        country: address.country,
-                    },
-                },
-                paymentInfo: {
-                    create: {
-                        accountName: paymentInfo.accountName,
-                        accountNumber: paymentInfo.accountNumber,
-                        bankName: paymentInfo.bankName,
-                    },
-                },
-                shopSettings: {
-                    create: {
-                        phoneNumber: shopSettings.phoneNumber,
-                        website: shopSettings.website,
-                        businessHours: shopSettings.businessHours,
-                        category: shopSettings.category,
-                        deliveryOptions: shopSettings.deliveryOptions,
-                        isActive: shopSettings.isActive,
-                    },
-                },
-
-            },
-            include: {
-                address: true,
-                paymentInfo: true,
-                shopSettings: true,
-            },
+        // Check if the user already has a shop
+        const existingShop = await db.shop.findUnique({
+            where: { userId: session.user.id },
         });
+
+        let shop;
+        if (existingShop) {
+            // Update existing shop
+            shop = await db.shop.update({
+                where: { id: existingShop.id },
+                data: {
+                    shopName,
+                    description,
+                    logo,
+                    banner,
+                    slug,
+                    status,
+                    address: {
+                        update: {
+                            street: address.street,
+                            city: address.city,
+                            state: address.state,
+                            postalCode: address.postalCode,
+                            country: address.country,
+                        },
+                    },
+                    paymentInfo: {
+                        update: {
+                            accountName: paymentInfo.accountName,
+                            accountNumber: paymentInfo.accountNumber,
+                            bankName: paymentInfo.bankName,
+                        },
+                    },
+                    shopSettings: {
+                        update: {
+                            phoneNumber: shopSettings.phoneNumber,
+                            website: shopSettings.website,
+                            businessHours: shopSettings.businessHours,
+                            category: shopSettings.category,
+                            deliveryOptions: shopSettings.deliveryOptions,
+                            isActive: shopSettings.isActive,
+                        },
+                    },
+                },
+                include: {
+                    address: true,
+                    paymentInfo: true,
+                    shopSettings: true,
+                },
+            });
+        } else {
+            // Create new shop
+            shop = await db.shop.create({
+                data: {
+                    shopName,
+                    description,
+                    logo,
+                    banner,
+                    slug,
+                    status,
+                    userId: session.user.id,
+                    address: {
+                        create: {
+                            street: address.street,
+                            city: address.city,
+                            state: address.state,
+                            postalCode: address.postalCode,
+                            country: address.country,
+                        },
+                    },
+                    paymentInfo: {
+                        create: {
+                            accountName: paymentInfo.accountName,
+                            accountNumber: paymentInfo.accountNumber,
+                            bankName: paymentInfo.bankName,
+                        },
+                    },
+                    shopSettings: {
+                        create: {
+                            phoneNumber: shopSettings.phoneNumber,
+                            website: shopSettings.website,
+                            businessHours: shopSettings.businessHours,
+                            category: shopSettings.category,
+                            deliveryOptions: shopSettings.deliveryOptions,
+                            isActive: shopSettings.isActive,
+                        },
+                    },
+                },
+                include: {
+                    address: true,
+                    paymentInfo: true,
+                    shopSettings: true,
+                },
+            });
+        }
 
         // Update user's paid and onboarded status
         await db.user.update({
             where: { id: session.user.id },
             data: {
-                // hasPaid: true,
                 isOnboardedVendor: false, // Set to true after document verification
             },
         });
 
         revalidatePath('/');
-        return { status: 'success', shop, message: 'Shop has been created successfully' };
+        return {
+            status: 'success',
+            shop,
+            message: existingShop ? 'Shop has been updated successfully' : 'Shop has been created successfully'
+        };
     } catch (error) {
         console.error(error);
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
             return { status: 'error', message: `Database error: ${error.message}` };
         }
-        return { status: 'error', message: 'Failed to create shop' };
+        return { status: 'error', message: 'Failed to create or update shop' };
     }
 }

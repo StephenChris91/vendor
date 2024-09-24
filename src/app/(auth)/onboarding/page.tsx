@@ -1,73 +1,76 @@
 "use client";
 
-import React, { useEffect } from "react";
-import MultiStepForm from "lib/useMultistep";
+import React, { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { FormProvider } from "@context/formcontext";
-import { OnboardingStyledRoot, StyledRoot } from "@sections/auth/styles";
 import Box from "@component/Box";
 import FlexBox from "@component/FlexBox";
 import { H1 } from "@component/Typography";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { Button } from "@component/buttons";
 import ShopOnboardingForm from "lib/useMultistep";
+import Spinner from "@component/Spinner";
+import styled from "styled-components";
+
+const OnboardingStyledRoot = styled.div`
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+`;
 
 const Onboarding = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-
-  const handleRedirect = () => {
-    window.location.href = "/";
-  };
+  const [pageState, setPageState] = useState("loading");
 
   useEffect(() => {
     if (status === "authenticated") {
       if (session.user.role !== "Vendor") {
-        window.location.href = "/profile";
+        router.replace("/profile");
       } else if (session.user.shopStatus === "Approved") {
-        window.location.href = "/vendor/dashboard";
+        router.replace("/vendor/dashboard");
+      } else if (session.user.shopStatus === "Pending") {
+        setPageState("pending");
+      } else {
+        setPageState("onboarding");
       }
+    } else if (status === "unauthenticated") {
+      router.replace("/login");
     }
-  }, [session, status]);
+  }, [session, status, router]);
 
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
-
-  if (!session || session.user.role !== "Vendor") {
-    return null; // or redirect to login
-  }
-
-  if (session.user.shopStatus === "Pending") {
-    return (
-      <OnboardingStyledRoot>
-        <FlexBox
-          height="100vh"
-          width="100vw"
-          justifyContent="space-between"
-          alignItems="center"
-          margin="auto"
+  const OnboardingContent = () => (
+    <FlexBox
+      height="100%"
+      width="100%"
+      justifyContent="space-between"
+      alignItems="stretch"
+    >
+      <Box
+        width="50%"
+        backgroundColor="primary.main"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        p="3rem"
+      >
+        <H1
+          color="white"
+          fontSize={{ xs: "2rem", sm: "3rem", md: "4rem", lg: "5rem" }}
+          textAlign="center"
         >
+          Onboarding
+        </H1>
+      </Box>
+      <Box
+        width="50%"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        overflow="auto"
+      >
+        {pageState === "pending" ? (
           <Box
-            width="50%"
-            height="100%"
-            backgroundColor="primary.main"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            p="3rem"
-          >
-            <H1
-              color="white"
-              fontSize={{ xs: "2rem", sm: "3rem", md: "4rem", lg: "5rem" }}
-              textAlign="center"
-            >
-              Onboarding
-            </H1>
-          </Box>
-          <Box
-            width="50%"
-            height="100%"
             display="flex"
             flexDirection="column"
             alignItems="center"
@@ -75,58 +78,42 @@ const Onboarding = () => {
           >
             <H1 color="primary.600" marginBottom={3}>
               Your shop is still pending approval.
-            </H1>{" "}
+            </H1>
             <Button
               variant="contained"
               color="secondary"
-              onClick={handleRedirect}
+              onClick={() => router.push("/")}
             >
               Return Home
             </Button>
           </Box>
-        </FlexBox>
-      </OnboardingStyledRoot>
-    );
-  }
-
-  return (
-    <OnboardingStyledRoot>
-      <FlexBox
-        height="100vh"
-        width="100vw"
-        justifyContent="space-between"
-        alignItems="center"
-        margin="auto"
-      >
-        <Box
-          width="50%"
-          height="100%"
-          backgroundColor="primary.main"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          p="3rem"
-        >
-          <H1
-            color="white"
-            fontSize={{ xs: "2rem", sm: "3rem", md: "4rem", lg: "5rem" }}
-            textAlign="center"
-          >
-            Onboarding
-          </H1>
-        </Box>
-        <Box
-          width="50%"
-          height="100%"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
+        ) : (
           <FormProvider>
             <ShopOnboardingForm />
           </FormProvider>
-        </Box>
-      </FlexBox>
+        )}
+      </Box>
+    </FlexBox>
+  );
+
+  // if (pageState === "loading") {
+  //   return (
+  //     <OnboardingStyledRoot>
+  //       <Spinner
+  //         style={{
+  //           position: "absolute",
+  //           top: "50%",
+  //           left: "50%",
+  //           transform: "translate(-50%, -50%)",
+  //         }}
+  //       />
+  //     </OnboardingStyledRoot>
+  //   );
+  // }
+
+  return (
+    <OnboardingStyledRoot>
+      <OnboardingContent />
     </OnboardingStyledRoot>
   );
 };
