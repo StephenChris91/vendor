@@ -69,7 +69,7 @@ const AddShopAddress: React.FC<AddShopAddressProps> = ({
           city: values.cityOption ? values.cityOption.value : "",
           postalCode: values.postalCode,
           country: values.country,
-          state: values.state, // Send state code to the database
+          state: values.state,
         },
       });
     },

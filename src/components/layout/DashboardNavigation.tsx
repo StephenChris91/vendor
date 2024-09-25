@@ -17,26 +17,24 @@ export default function DashboardNavigation() {
     {
       title: "DASHBOARD",
       list: [
-        { href: "/orders", title: "Orders", iconName: "bag", count: 5 },
-        { href: "/wish-list", title: "Wishlist", iconName: "heart", count: 19 },
+        { href: "/orders", title: "Orders", iconName: "bag" },
+        { href: "/wish-list", title: "Wishlist", iconName: "heart" },
         {
           href: "/support-tickets",
           title: "Support Tickets",
           iconName: "customer-service",
-          count: 1,
         },
       ],
     },
     {
       title: "ACCOUNT SETTINGS",
       list: [
-        { href: "/profile", title: "Profile Info", iconName: "user", count: 3 },
-        { href: "/address", title: "Addresses", iconName: "pin", count: 16 },
+        { href: "/profile", title: "Profile Info", iconName: "user" },
+        { href: "/address", title: "Addresses", iconName: "pin" },
         {
           href: "/payment-methods",
           title: "Payment Methods",
           iconName: "credit-card",
-          count: 4,
         },
       ],
     },
@@ -50,7 +48,6 @@ export default function DashboardNavigation() {
           href: "/vendor/products",
           title: "Products",
           iconName: "box",
-          count: null,
         },
         {
           href: "/vendor/products/create",
@@ -61,7 +58,6 @@ export default function DashboardNavigation() {
           href: "/vendor/orders",
           title: "Orders",
           iconName: "bag",
-          count: null,
         },
       ],
     },
@@ -72,7 +68,6 @@ export default function DashboardNavigation() {
           href: "/vendor/account-settings",
           title: "Settings",
           iconName: "settings",
-          count: null,
         },
       ],
     },
@@ -117,7 +112,6 @@ export default function DashboardNavigation() {
                   <span>{listItem.title}</span>
                 </FlexBox>
               </FlexBox>
-              {listItem.count !== null && <span>{listItem.count}</span>}
             </StyledDashboardNav>
           ))}
         </Fragment>

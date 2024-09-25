@@ -5,6 +5,8 @@ import Providers from "@utils/providers";
 import SessionProviderServer from "@utils/session-provider-server";
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
+import Script from "next/script";
+
 // THEME PROVIDER
 const openSans = Open_Sans({ subsets: ["latin"] });
 
@@ -28,6 +30,11 @@ export default async function RootLayout({
           <Providers>
             {children}
             {/* <TawkToChat /> */}
+            <Script
+              src="https://js.paystack.co/v1/inline.js"
+              strategy="beforeInteractive"
+              crossOrigin="anonymous"
+            />
           </Providers>
         </SessionProviderServer>
       </body>

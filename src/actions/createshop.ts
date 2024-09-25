@@ -13,7 +13,7 @@ const extendedShopSchema = shopSchema.extend({
     paymentInfo: paymentInfoSchema,
     shopSettings: shopSettingsSchema,
     status: z.nativeEnum(ShopStatus),
-    hasPaid: z.boolean(),
+    hasPaid: z.boolean().optional(), // Optional in case not provided
     category: z.string(),
 });
 
@@ -24,14 +24,19 @@ export async function createOrUpdateShop(values: z.infer<typeof extendedShopSche
         return { status: 'error', error: 'User not authenticated or User ID not found in session' };
     }
 
-    const validInput = extendedShopSchema.safeParse(values);
+    // Clean the values to remove undefined or optional fields
+    const cleanedValues = Object.fromEntries(Object.entries(values).filter(([_, v]) => v !== undefined));
+
+    console.log("Cleaned Values: ", cleanedValues); // Log cleaned values for debugging
+
+    const validInput = extendedShopSchema.safeParse(cleanedValues);
 
     if (!validInput.success) {
-        console.error("Validation errors:", validInput.error.errors);
+        console.error("Validation errors:", validInput.error.errors); // Log detailed validation errors
         return {
             status: 'error',
             error: 'Invalid form data',
-            details: validInput.error.errors
+            details: validInput.error.errors // Include error details
         };
     }
 

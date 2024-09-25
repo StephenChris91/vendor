@@ -104,6 +104,17 @@ const GlobalStyles = createGlobalStyle`
   0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.paystack-button {
+  background-color: #0AA5FF;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
 `;
 
 export default GlobalStyles;

@@ -36,11 +36,7 @@ const steps = [
   { component: AddPaymentInfo, label: "Payment Info" },
   { component: AddShopAddress, label: "Shop Address" },
   { component: AddShopSettings, label: "Shop Settings" },
-  {
-    component: ProcessPayment,
-    label: "Make Payment",
-    action: updatePaymentStatus as UpdatePaymentStatusType,
-  },
+  { component: ProcessPayment, label: "Make Payment" },
   {
     component: UploadVerificationDocuments,
     label: "Upload Verification Documents",
@@ -173,7 +169,10 @@ const MultiStepForm = () => {
         setStepValidation(newStepValidation);
       },
       isPaymentProcessed,
-      updatePaymentStatus: updatePaymentStatus as UpdatePaymentStatusType,
+      onPaymentSuccess: () => {
+        setPaymentProcessed(true);
+        handleNextStep();
+      },
     };
   };
 

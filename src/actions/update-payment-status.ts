@@ -3,11 +3,11 @@
 'use server';
 
 import { db } from "../../prisma/prisma";
+import { revalidatePath } from "next/cache";
 
-
-export const updatePaymentStatus = async (userId: string): Promise<{ success: boolean; message: string; user?: any }> => {
+export async function updatePaymentStatus(userId: string) {
     if (!userId) {
-        throw new Error('User ID is required');
+        return { success: false, message: 'User ID is required' };
     }
 
     try {
@@ -15,6 +15,8 @@ export const updatePaymentStatus = async (userId: string): Promise<{ success: bo
             where: { id: userId },
             data: { hasPaid: true },
         });
+
+        revalidatePath('/'); // Revalidate the path where this data is used
 
         return { success: true, message: 'Payment status updated successfully', user: updatedUser };
     } catch (error) {

@@ -19,6 +19,14 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_GITHUB_CLIENT_SECRET,
   },
 
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      config.devtool = "cheap-module-source-map";
+      config.output.crossOriginLoading = "anonymous";
+    }
+    return config;
+  },
+
   images: {
     domains: [
       "via.placeholder.com",

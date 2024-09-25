@@ -1,20 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Script from "next/script";
 import toast from "react-hot-toast";
-import { Button } from "@component/buttons";
 import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
+import { updatePaymentStatus } from "actions/update-payment-status";
+import { Button } from "@component/buttons";
 
 interface ProcessPaymentProps {
   setPaymentProcessed: (status: boolean) => void;
   userEmail: string;
   userId: string;
-  updatePaymentStatus: (
-    userId: string
-  ) => Promise<{ success: boolean; message: string; user?: any }>;
-  onNextStep: () => void;
+  onPaymentSuccess: () => void;
   setStepValidation: (isValid: boolean) => void;
 }
 
@@ -28,72 +25,101 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
   setPaymentProcessed,
   userEmail,
   userId,
-  updatePaymentStatus,
-  onNextStep,
+  onPaymentSuccess,
   setStepValidation,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
     setStepValidation(false);
+
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v1/inline.js";
+    script.async = true;
+    script.onload = () => setScriptLoaded(true);
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
-  const handlePayment = () => {
-    if (!isScriptLoaded) {
-      toast.error("Payment system is not ready. Please try again in a moment.");
-      return;
-    }
+  const handleSuccess = (response: any) => {
+    console.log("Payment successful:", response);
 
-    setIsLoading(true);
+    const payload = {
+      transactionRef: response.reference,
+      userId: userId,
+    };
 
-    const handler = window.PaystackPop.setup({
-      key:
-        process.env.NODE_ENV !== "production"
-          ? process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY!
-          : process.env.PAYSTACK_LIVE_SECRET_KEY!,
-      email: userEmail,
-      amount: 200000, // 2000 Naira in kobo
-      ref: `REF-${userId}-${Date.now()}`,
-      onClose: function () {
-        setIsLoading(false);
-        toast.error("Payment cancelled. Please try again.");
+    // Send payment info to the server
+    fetch("/api/payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      callback: function (response: any) {
-        handlePaymentCallback(response);
-      },
-    });
-
-    handler.openIframe();
+      body: JSON.stringify(payload),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.message) {
+          console.log("Server response:", data);
+          // Move to the next step (UploadVerificationDocuments)
+          onPaymentSuccess(); // Trigger the next step
+        }
+      })
+      .catch((err) => console.error("Payment processing error:", err));
   };
 
-  const handlePaymentCallback = async (response: any) => {
-    try {
-      const result = await updatePaymentStatus(userId);
-      if (result.success) {
-        setPaymentProcessed(true);
-        setStepValidation(true);
-        toast.success("Payment successful!");
-        onNextStep();
-      } else {
-        throw new Error("Failed to update payment status");
-      }
-    } catch (error) {
-      console.error("Error processing payment:", error);
-      toast.error(
-        "There was an issue processing your payment. Please try again."
-      );
-    } finally {
-      setIsLoading(false);
+  const handlePayment = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    const successRef = `REF-${userId}-${Date.now()}`;
+
+    if (window.PaystackPop && scriptLoaded) {
+      const handler = window.PaystackPop.setup({
+        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+        email: userEmail,
+        amount: 200000, // 2000 Naira in kobo
+        ref: successRef,
+        callback: (response: any) => handleSuccess(response), // Pass the full response here
+        onClose: () => {
+          toast.error("Payment cancelled. Please try again.");
+        },
+      });
+      handler.openIframe();
+    } else {
+      toast.error("Payment system is not ready. Please try again.");
     }
   };
+
+  // const handlePayment = (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     if (window.PaystackPop && scriptLoaded) {
+  //       const handler = window.PaystackPop.setup({
+  //         key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+  //         email: userEmail,
+  //         amount: 200000, // 2000 Naira in kobo
+  //         ref: `REF-${userId}-${Date.now()}`,
+  //         callback: handleSuccess,
+  //         onClose: () => {
+  //           toast.error("Payment cancelled. Please try again.");
+  //         },
+  //       });
+  //       handler.openIframe();
+  //     } else {
+  //       toast.error("Payment system is not ready. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error initiating payment:", error);
+  //     toast.error("An unexpected error occurred while initiating the payment.");
+  //   }
+  // };
 
   return (
     <Box className="content" width="auto" height="auto" paddingBottom={6}>
-      <Script
-        src="https://js.paystack.co/v1/inline.js"
-        onLoad={() => setIsScriptLoaded(true)}
-      />
       <H5
         fontWeight="600"
         fontSize="12px"
@@ -109,22 +135,24 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
         Paystack.
       </Small>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handlePayment}
-        disabled={isLoading || !isScriptLoaded}
-        fullwidth
-      >
-        {isLoading
-          ? "Processing..."
-          : isScriptLoaded
-          ? "Proceed to Payment"
-          : "Loading Payment System..."}
-      </Button>
+      {scriptLoaded ? (
+        <Button
+          onClick={handlePayment}
+          disabled={isLoading}
+          variant="contained"
+          color="primary"
+          fullwidth
+        >
+          {isLoading ? "Processing..." : "Pay Now"}
+        </Button>
+      ) : (
+        <Button variant="contained" color="primary" fullwidth disabled>
+          Loading payment system...
+        </Button>
+      )}
 
       <Small color="text.secondary" mt="1rem" display="block">
-        By clicking "Proceed to Payment", you agree to our terms of service.
+        By clicking "Pay Now", you agree to our terms of service.
       </Small>
     </Box>
   );

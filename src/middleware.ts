@@ -56,13 +56,18 @@ export default auth((req) => {
 
         // Handle non-logged in users
         if (!isLoggedIn) {
-            // Allow access to public routes
-            if (isPublicRoute) {
+            // Allow access to public routes and login route
+            if (isPublicRoute || nextUrl.pathname === '/login') {
                 return null;
             }
             // Redirect to login for protected routes
             if (isAuthRoute || isCheckoutRoute || isVendorRoute || isAdminRoute || isOrdersRoute(nextUrl.pathname)) {
-                return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(nextUrl.pathname)}`, nextUrl));
+                const callbackUrl = nextUrl.pathname;
+                if (callbackUrl === '/login') {
+                    // Prevent redirect loop
+                    return null;
+                }
+                return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`, nextUrl));
             }
         }
 
@@ -79,15 +84,17 @@ export default auth((req) => {
             // Handle vendor-specific logic
             if (user.role === "Vendor") {
                 if (isOnboardingRoute) return null;
+
+                // Redirect onboarded vendors with a shop to vendor dashboard
+                if (user.isOnboardedVendor && user.shop) {
+                    return NextResponse.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
+                }
+
+                // Redirect non-onboarded vendors to onboarding
                 if (!user.isOnboardedVendor && !isPublicRoute && !isOnboardingRoute) {
                     return NextResponse.redirect(new URL('/onboarding', nextUrl));
                 }
-                if (user.isOnboardedVendor && !user.shop && !isPublicRoute && !isOnboardingRoute) {
-                    return NextResponse.redirect(new URL('/onboarding', nextUrl));
-                }
-                if (user.isOnboardedVendor && user.shop && isAuthRoute) {
-                    return NextResponse.redirect(new URL(DEFAULT_VENDOR_REDIRECT, nextUrl));
-                }
+
                 if (isVendorRoute) return null;
             }
 
