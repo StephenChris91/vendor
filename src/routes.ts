@@ -3,7 +3,7 @@
  * An array of routes accessible to all users who visit the site.
  * @type {string[]}
  */
-export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/address', '/address/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shop', '/shops', '/shops/:id', '/shops/*', '/product', '/product/*', '/product/id', '/product/:id', '/product/search', '/product/search/:id', '/product/search/*', '/shops/:slug', '/track', '/compare', '/support', '/verification'];
+export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/address', '/address/:id', '/payment-methods', '/payment-method/:id', '/wish-list', '/payment', '/cart', '/vendors', '/vendors/:id', '/shop', '/shops', '/shops/:id', '/shops/*', '/product', '/product/*', '/product/id', '/product/:id', '/product/search', '/product/search/:id', '/product/search/*', '/shops/:slug', '/track', '/compare', '/support', '/verification', '/login', '/signup'];
 
 /**
  * @description: Authenticated routes
@@ -11,8 +11,7 @@ export const publicRoutes: (string | undefined)[] = ['/', '/dashboard', '/addres
  * @type {string[]}
  */
 export const authRoutes: (string | undefined)[] = [
-    '/login',
-    '/signup',
+    ,
     '/new-password',
     '/onboarding',
     '/onboarding/confirmation',
