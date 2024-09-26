@@ -32,6 +32,7 @@ const nextConfig = {
       "via.placeholder.com",
       "mukoxyechbobgdvpbirs.supabase.co",
       "vendorspot-marketplace.s3.eu-north-1.amazonaws.com",
+      "new-vendors.s3.eu-north-1.amazonaws.com",
       "picsum.photos",
       "res.cloudinary.com",
       "vendorspot.s3.eu-north-1.amazonaws.com",
