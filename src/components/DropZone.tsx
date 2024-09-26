@@ -5,7 +5,6 @@ import Box from "@component/Box";
 import Divider from "@component/Divider";
 import { Button } from "@component/buttons";
 import Typography, { H5, Small } from "@component/Typography";
-import { uploadFile } from "actions/upload-logo";
 
 export interface DropZoneProps {
   uploadType: string;
@@ -13,32 +12,24 @@ export interface DropZoneProps {
   acceptedFileTypes?: Record<string, string[]>;
   multiple?: boolean;
   onAuthError?: () => void;
-  useS3?: boolean;
-  onUpload?: (url: string, file: File) => void; // Updated this line
+  onUpload?: (url: string, file: File) => void;
 }
 
 export default function DropZone({
+  uploadType,
   maxSize = 5 * 1024 * 1024,
   acceptedFileTypes = { "image/*": [".png", ".jpg", ".jpeg", ".gif"] },
   multiple = false,
   onAuthError,
-  useS3 = true,
   onUpload,
 }: DropZoneProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      console.log("Files dropped:", acceptedFiles);
-      setFiles(acceptedFiles);
-      if (!useS3 && onUpload && acceptedFiles.length > 0) {
-        // If not using S3, immediately call onUpload with the file and its object URL
-        onUpload(URL.createObjectURL(acceptedFiles[0]), acceptedFiles[0]);
-      }
-    },
-    [useS3, onUpload]
-  );
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    console.log("Files dropped:", acceptedFiles);
+    setFiles(acceptedFiles);
+  }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -48,28 +39,36 @@ export default function DropZone({
   });
 
   const handleUpload = async () => {
-    if (files.length > 0 && useS3) {
+    if (files.length > 0) {
       setIsUploading(true);
       try {
         const formData = new FormData();
         formData.append("file", files[0]);
 
-        const result = await uploadFile(formData);
-        console.log("Upload result:", result); // Log this for debugging
+        const response = await fetch(`/api/upload/${uploadType}`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
 
         if (result.url) {
           toast.success("File uploaded successfully!");
           if (onUpload) {
-            onUpload(result.url, files[0]); // Call onUpload with the returned URL and the file
+            onUpload(result.url, files[0]);
           }
           setFiles([]);
         } else {
           throw new Error("No URL returned from server");
         }
       } catch (error) {
-        console.error("Error in upload:", error); // Log the error details
+        console.error("Error in upload:", error);
         if (error instanceof Error) {
-          if (error.message === "Unauthorized") {
+          if (error.message.includes("401")) {
             toast.error("You are not authorized. Please log in and try again.");
             onAuthError && onAuthError();
           } else {
@@ -117,22 +116,20 @@ export default function DropZone({
           or
         </Typography>
 
-        {useS3 && (
-          <Button
-            color="primary"
-            bg="primary.light"
-            px="2rem"
-            mb="22px"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleUpload();
-            }}
-            disabled={isUploading || files.length === 0}
-          >
-            {isUploading ? "Uploading..." : "Upload"}
-          </Button>
-        )}
+        <Button
+          color="primary"
+          bg="primary.light"
+          px="2rem"
+          mb="22px"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleUpload();
+          }}
+          disabled={isUploading || files.length === 0}
+        >
+          {isUploading ? "Uploading..." : "Upload"}
+        </Button>
 
         <Small color="text.muted">
           Max file size: {maxSize / (1024 * 1024)}MB
