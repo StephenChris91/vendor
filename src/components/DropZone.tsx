@@ -18,7 +18,6 @@ export interface DropZoneProps {
 }
 
 export default function DropZone({
-  uploadType,
   maxSize = 5 * 1024 * 1024,
   acceptedFileTypes = { "image/*": [".png", ".jpg", ".jpeg", ".gif"] },
   multiple = false,
@@ -56,6 +55,7 @@ export default function DropZone({
         formData.append("file", files[0]);
 
         const result = await uploadFile(formData);
+        console.log("Upload result:", result); // Log this for debugging
 
         if (result.url) {
           toast.success("File uploaded successfully!");
@@ -67,7 +67,7 @@ export default function DropZone({
           throw new Error("No URL returned from server");
         }
       } catch (error) {
-        console.error("Error in upload:", error);
+        console.error("Error in upload:", error); // Log the error details
         if (error instanceof Error) {
           if (error.message === "Unauthorized") {
             toast.error("You are not authorized. Please log in and try again.");
