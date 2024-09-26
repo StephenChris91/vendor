@@ -5,17 +5,18 @@
 import { auth } from 'auth';
 import { createFolder, folderExists } from '@utils/s3Client';
 import { Upload } from "@aws-sdk/lib-storage";
-import { S3Client, S3ClientConfig } from "@aws-sdk/client-s3";
+import { s3Client } from '@lib/utils';
+// import { S3Client, S3ClientConfig } from "@aws-sdk/client-s3";
 
-const s3Config: S3ClientConfig = {
-    region: process.env.AWS_BUCKET_REGION!,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-    },
-};
+// const s3Config: S3ClientConfig = {
+//     region: process.env.AWS_BUCKET_REGION!,
+//     credentials: {
+//         accessKeyId: process.env.AWS_ACCESS_KEY!,
+//         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+//     },
+// };
 
-const s3Client = new S3Client(s3Config);
+// const s3Client = new S3Client(s3Config);
 export async function uploadFile(formData: FormData) {
     const session = await auth();
     console.log("Session data:", session); // Check session in production
