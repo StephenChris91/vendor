@@ -21,11 +21,13 @@ export async function uploadFile(formData: FormData) {
     console.log("Session data:", session); // Check session in production
 
     if (!session || !session.user) {
+        console.log('User is not authorized');
         throw new Error('Unauthorized');
     }
 
     const file = formData.get('file') as File;
     if (!file) {
+        console.log('No file uploaded');
         throw new Error('No file uploaded');
     }
 
