@@ -11,7 +11,6 @@ interface DocumentData {
   type: string;
 }
 
-// actions/submitVerificationDocuments.ts
 
 export async function submitVerificationDocuments(
   userId: string,
