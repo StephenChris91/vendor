@@ -79,7 +79,10 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
 
     if (window.PaystackPop && scriptLoaded) {
       const handler = window.PaystackPop.setup({
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+        key:
+          process.env.NODE_ENV !== "production"
+            ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+            : process.env.PAYSTACK_LIVE_KEY,
         email: userEmail,
         amount: 200000, // 2000 Naira in kobo
         ref: successRef,
