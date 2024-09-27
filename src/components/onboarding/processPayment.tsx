@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
 import { Button } from "@component/buttons";
-import { PaystackPop } from "@paystack/inline-js";
+import PaystackPop from "@paystack/inline-js";
 
 interface ProcessPaymentProps {
   setPaymentProcessed: (status: boolean) => void;
