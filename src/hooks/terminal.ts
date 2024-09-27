@@ -5,7 +5,7 @@ const API_KEY = "sk_test_nfkFJs8y9KARbAEfIzxZC4DBwpFE6Hcr";
 const API_URL = 'https://sandbox.terminal.africa/v1';
 
 async function makeRequest(endpoint: string, method: string, body: any = null) {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetch(`${process.env.NODE_ENV !== "production" ? API_URL : process.env.TERMINAL_LIVE_URL}${endpoint}`, {
         method,
         headers: {
             'Content-Type': 'application/json',
