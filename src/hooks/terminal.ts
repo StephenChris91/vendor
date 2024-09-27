@@ -4,7 +4,7 @@ import { formatPhoneNumber } from "utils/phoneUtils";
 const API_KEY = "sk_test_nfkFJs8y9KARbAEfIzxZC4DBwpFE6Hcr";
 const API_URL = 'https://sandbox.terminal.africa/v1';
 const TERMINAL_LIVE_URL = "https://api.terminal.africa/v1"
-async function makeRequest(endpoint: string, method: string, body: any = null) {
+export async function makeRequest(endpoint: string, method: string, body: any = null) {
     const response = await fetch(`${process.env.NODE_ENV !== "production" ? API_URL : TERMINAL_LIVE_URL}${endpoint}`, {
         method,
         headers: {

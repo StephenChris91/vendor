@@ -1,7 +1,5 @@
 // utils/fetchCities.ts
 
-import axios from 'axios';
-
 interface City {
     name: string;
     countryCode: string;
@@ -10,17 +8,35 @@ interface City {
     longitude: string;
 }
 
+const API_KEY = "sk_test_nfkFJs8y9KARbAEfIzxZC4DBwpFE6Hcr";
+const API_URL = 'https://sandbox.terminal.africa/v1';
+const TERMINAL_LIVE_URL = "https://api.terminal.africa/v1";
+
+async function makeRequest(endpoint: string, method: string, body: any = null) {
+    const response = await fetch(`${process.env.NODE_ENV !== "production" ? API_URL : TERMINAL_LIVE_URL}${endpoint}`, {
+        method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+        },
+        body: body ? JSON.stringify(body) : null
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'API request failed');
+    }
+
+    return response.json();
+}
+
 export async function fetchCities(countryCode: string, stateCode: string): Promise<City[]> {
     try {
-        const response = await axios.get(`${process.env.NODE_ENV !== "production" ? process.env.NEXT_PUBLIC_TERMINAL_DEV_URL! : process.env.TERMINAL_LIVE_URL}/cities`, {
-            params: { country_code: countryCode, state_code: stateCode },
-            headers: {
-                'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TERMINAL_TEST_API_KEY!}`
-            }
-        });
+        const endpoint = `/cities?country_code=${countryCode}&state_code=${stateCode}`;
+        const response = await makeRequest(endpoint, 'GET');
 
-        if (response.data.status && Array.isArray(response.data.data)) {
-            return response.data.data;
+        if (response.status && Array.isArray(response.data)) {
+            return response.data;
         } else {
             throw new Error('Invalid response format');
         }
