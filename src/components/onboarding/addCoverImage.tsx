@@ -65,11 +65,36 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
   }, []);
 
   const handleUpload = useCallback(
-    (url: string) => {
-      setIsUploading(false);
-      formik.setFieldValue("coverImage", url, true);
-      updateFormData({ banner: url });
-      toast.success("Shop cover image uploaded successfully!");
+    async (file: File) => {
+      setIsUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/api/upload/shop-banner", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.url) {
+          formik.setFieldValue("coverImage", result.url, true);
+          updateFormData({ banner: result.url });
+          toast.success("Shop cover image uploaded successfully!");
+        } else {
+          throw new Error("No URL returned from server");
+        }
+      } catch (error) {
+        console.error("Error uploading cover image:", error);
+        toast.error("Failed to upload cover image. Please try again.");
+      } finally {
+        setIsUploading(false);
+      }
     },
     [formik, updateFormData]
   );
@@ -80,7 +105,6 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
   };
 
   useEffect(() => {
-    // This effect will run whenever the coverImage value changes
     formik.validateForm().then((errors) => {
       setStepValidation(Object.keys(errors).length === 0);
     });

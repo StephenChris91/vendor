@@ -86,9 +86,8 @@ const UploadVerificationDocuments: React.FC<
   });
 
   const handleUpload = useCallback(
-    async (url: string, file: File) => {
+    async (file: File) => {
       try {
-        // Convert file to base64
         const base64Content = await fileToBase64(file);
 
         const newDocument: DocumentData = {
@@ -111,7 +110,6 @@ const UploadVerificationDocuments: React.FC<
     [formik]
   );
 
-  // Helper function to convert file to base64
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -130,7 +128,6 @@ const UploadVerificationDocuments: React.FC<
     newFileNames.splice(index, 1);
     setFileNames(newFileNames);
 
-    // If all documents are removed, set documents as not uploaded
     if (newDocuments.length === 0) {
       setDocumentsUploaded(false);
     }
@@ -147,13 +144,13 @@ const UploadVerificationDocuments: React.FC<
       >
         Please upload PDF or document files for verification
         <h5>
-          2 of the this 3 documents are required to complete your registration.
-          CAC, NIN slip, Address verification no
+          2 of these 3 documents are required to complete your registration:
+          CAC, NIN slip, Address verification
         </h5>
       </H5>
 
       <DropZone
-        // uploadType="verification-documents"
+        uploadType="verification-documents"
         maxSize={10 * 1024 * 1024} // 10MB limit
         acceptedFileTypes={{
           "application/pdf": [".pdf"],

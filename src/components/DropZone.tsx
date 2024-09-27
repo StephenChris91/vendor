@@ -7,12 +7,12 @@ import { Button } from "@component/buttons";
 import Typography, { H5, Small } from "@component/Typography";
 
 export interface DropZoneProps {
-  uploadType?: string;
+  uploadType: string;
   maxSize?: number;
   acceptedFileTypes?: Record<string, string[]>;
   multiple?: boolean;
   onAuthError?: () => void;
-  onUpload?: (url: string, file: File) => void;
+  onUpload?: (file: File) => void;
 }
 
 export default function DropZone({
@@ -42,29 +42,11 @@ export default function DropZone({
     if (files.length > 0) {
       setIsUploading(true);
       try {
-        const formData = new FormData();
-        formData.append("file", files[0]);
-
-        const response = await fetch(`/api/upload/${uploadType}`, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (onUpload) {
+          onUpload(files[0]);
         }
-
-        const result = await response.json();
-
-        if (result.url) {
-          toast.success("File uploaded successfully!");
-          if (onUpload) {
-            onUpload(result.url, files[0]);
-          }
-          setFiles([]);
-        } else {
-          throw new Error("No URL returned from server");
-        }
+        setFiles([]);
+        toast.success("File uploaded successfully!");
       } catch (error) {
         console.error("Error in upload:", error);
         if (error instanceof Error) {
