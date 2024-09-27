@@ -1,3 +1,8 @@
+
+
+export const dynamic = 'force-dynamic';
+
+
 import { NextResponse } from "next/server";
 import { useCurrentSession } from "@lib/use-session-server";
 import { OrderStatus } from "@models/order.model"; // Ensure this is a plain enum or object
