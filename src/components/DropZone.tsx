@@ -7,7 +7,7 @@ import { Button } from "@component/buttons";
 import Typography, { H5, Small } from "@component/Typography";
 
 export interface DropZoneProps {
-  uploadType: string;
+  uploadType?: string;
   maxSize?: number;
   acceptedFileTypes?: Record<string, string[]>;
   multiple?: boolean;

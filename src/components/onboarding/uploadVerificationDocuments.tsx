@@ -153,7 +153,7 @@ const UploadVerificationDocuments: React.FC<
       </H5>
 
       <DropZone
-        uploadType="verification-documents"
+        // uploadType="verification-documents"
         maxSize={10 * 1024 * 1024} // 10MB limit
         acceptedFileTypes={{
           "application/pdf": [".pdf"],
