@@ -2,7 +2,6 @@ import React, { useState, useCallback } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import toast from "react-hot-toast";
-import { submitVerificationDocuments } from "actions/submitVerificationDocuments";
 
 import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
@@ -56,13 +55,36 @@ const UploadVerificationDocuments: React.FC<
       }
 
       try {
-        const result = await submitVerificationDocuments(
-          userId,
-          userEmail,
-          values.documents
-        );
+        const response = await fetch("/api/submit-verification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            userEmail,
+            documents: values.documents,
+          }),
+        });
 
-        if (result.success) {
+        let result;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          result = await response.json();
+        } else {
+          // If the response is not JSON, read it as text
+          const text = await response.text();
+          console.error("Unexpected response:", text);
+          throw new Error("Unexpected response from server");
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            result?.message || `HTTP error! status: ${response.status}`
+          );
+        }
+
+        if (result) {
           toast.success(
             result.message ||
               "Documents submitted successfully for verification!"
@@ -71,7 +93,7 @@ const UploadVerificationDocuments: React.FC<
           setFileNames([]);
           setDocumentsUploaded(true);
         } else {
-          throw new Error(result.message || "Failed to submit documents");
+          throw new Error("No response data from server");
         }
       } catch (error) {
         console.error("Error submitting documents:", error);
