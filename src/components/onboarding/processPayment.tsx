@@ -82,7 +82,7 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
         key:
           process.env.NODE_ENV !== "production"
             ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
-            : process.env.PAYSTACK_LIVE_KEY,
+            : process.env.PAYSTACK_LIVE_SECRET_KEY,
         email: userEmail,
         amount: 200000, // 2000 Naira in kobo
         ref: successRef,
