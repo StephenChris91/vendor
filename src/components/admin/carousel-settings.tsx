@@ -55,9 +55,33 @@ const CarouselSettings: React.FC<CarouselSettingsProps> = ({
     setHasUnsavedChanges(true);
   };
 
-  const handleImageUpload = (url: string) => {
-    setFormData({ ...formData, imgUrl: url });
-    setHasUnsavedChanges(true);
+  const handleImageUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload/carousel-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const result = await response.json();
+
+      if (result.url) {
+        setFormData((prev) => ({ ...prev, imgUrl: result.url }));
+        setHasUnsavedChanges(true);
+        toast.success("Image uploaded successfully!");
+      } else {
+        throw new Error("No URL returned from server");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image. Please try again.");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
