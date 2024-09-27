@@ -9,6 +9,7 @@ interface City {
 }
 
 const API_KEY = "sk_test_nfkFJs8y9KARbAEfIzxZC4DBwpFE6Hcr";
+const LIVE_API_KEY = "sk_live_xOj87IrfMM8wTfVvjsMsSWeHZYTy2siT"
 const API_URL = 'https://sandbox.terminal.africa/v1';
 const TERMINAL_LIVE_URL = "https://api.terminal.africa/v1";
 
@@ -17,7 +18,7 @@ async function makeRequest(endpoint: string, method: string, body: any = null) {
         method,
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.NODE_ENV !== "production" ? API_KEY : process.env.TERMINAL_LIVE_KEY!}`
+            'Authorization': `Bearer ${process.env.NODE_ENV !== "production" ? API_KEY : LIVE_API_KEY}`
         },
         body: body ? JSON.stringify(body) : null
     });
