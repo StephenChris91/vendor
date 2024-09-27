@@ -12,7 +12,7 @@ interface City {
 
 export async function fetchCities(countryCode: string, stateCode: string): Promise<City[]> {
     try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_TERMINAL_DEV_URL!}/cities`, {
+        const response = await axios.get(`${process.env.NODE_ENV !== "production" ? process.env.NEXT_PUBLIC_TERMINAL_DEV_URL! : process.env.TERMINAL_LIVE_URL}/cities`, {
             params: { country_code: countryCode, state_code: stateCode },
             headers: {
                 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TERMINAL_TEST_API_KEY!}`
