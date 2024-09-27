@@ -17,7 +17,7 @@ async function makeRequest(endpoint: string, method: string, body: any = null) {
         method,
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
+            'Authorization': `Bearer ${process.env.NODE_ENV !== "production" ? API_KEY : process.env.TERMINAL_LIVE_KEY!}`
         },
         body: body ? JSON.stringify(body) : null
     });
