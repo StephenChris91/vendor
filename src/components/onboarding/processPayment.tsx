@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
+import { updatePaymentStatus } from "actions/update-payment-status";
 import { Button } from "@component/buttons";
-import PaystackPop from "@paystack/inline-js";
 
 interface ProcessPaymentProps {
   setPaymentProcessed: (status: boolean) => void;
@@ -13,6 +13,12 @@ interface ProcessPaymentProps {
   userId: string;
   onPaymentSuccess: () => void;
   setStepValidation: (isValid: boolean) => void;
+}
+
+declare global {
+  interface Window {
+    PaystackPop: any;
+  }
 }
 
 const ProcessPayment: React.FC<ProcessPaymentProps> = ({
@@ -23,9 +29,20 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
   setStepValidation,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
     setStepValidation(false);
+
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v1/inline.js";
+    script.async = true;
+    script.onload = () => setScriptLoaded(true);
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   const handleSuccess = (response: any) => {
@@ -48,6 +65,7 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
       .then((data) => {
         if (data.message) {
           console.log("Server response:", data);
+          // Move to the next step (UploadVerificationDocuments)
           onPaymentSuccess(); // Trigger the next step
         }
       })
@@ -56,35 +74,53 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
 
   const handlePayment = (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     const successRef = `REF-${userId}-${Date.now()}`;
+    const LIVE_KEY = "sk_live_21ac8cd37be17677b90e37f08c898fae16671e99";
 
-    try {
-      const paystack = new PaystackPop();
-      paystack.newTransaction({
+    if (window.PaystackPop && scriptLoaded) {
+      const handler = window.PaystackPop.setup({
         key:
           process.env.NODE_ENV !== "production"
-            ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!
-            : process.env.NEXT_PUBLIC_PAYSTACK_LIVE_KEY!,
+            ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+            : process.env.LIVE_KEY,
         email: userEmail,
         amount: 200000, // 2000 Naira in kobo
         ref: successRef,
-        onSuccess: (response: any) => {
-          setIsLoading(false);
-          handleSuccess(response);
-        },
-        onCancel: () => {
-          setIsLoading(false);
+        callback: (response: any) => handleSuccess(response), // Pass the full response here
+        onClose: () => {
           toast.error("Payment cancelled. Please try again.");
         },
       });
-    } catch (error) {
-      console.error("Error initiating payment:", error);
-      toast.error("An unexpected error occurred while initiating the payment.");
-      setIsLoading(false);
+      handler.openIframe();
+    } else {
+      toast.error("Payment system is not ready. Please try again.");
     }
   };
+
+  // const handlePayment = (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     if (window.PaystackPop && scriptLoaded) {
+  //       const handler = window.PaystackPop.setup({
+  //         key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+  //         email: userEmail,
+  //         amount: 200000, // 2000 Naira in kobo
+  //         ref: `REF-${userId}-${Date.now()}`,
+  //         callback: handleSuccess,
+  //         onClose: () => {
+  //           toast.error("Payment cancelled. Please try again.");
+  //         },
+  //       });
+  //       handler.openIframe();
+  //     } else {
+  //       toast.error("Payment system is not ready. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error initiating payment:", error);
+  //     toast.error("An unexpected error occurred while initiating the payment.");
+  //   }
+  // };
 
   return (
     <Box className="content" width="auto" height="auto" paddingBottom={6}>
@@ -103,15 +139,21 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
         Paystack.
       </Small>
 
-      <Button
-        onClick={handlePayment}
-        disabled={isLoading}
-        variant="contained"
-        color="primary"
-        fullwidth
-      >
-        {isLoading ? "Processing..." : "Pay Now"}
-      </Button>
+      {scriptLoaded ? (
+        <Button
+          onClick={handlePayment}
+          disabled={isLoading}
+          variant="contained"
+          color="primary"
+          fullwidth
+        >
+          {isLoading ? "Processing..." : "Pay Now"}
+        </Button>
+      ) : (
+        <Button variant="contained" color="primary" fullwidth disabled>
+          Loading payment system...
+        </Button>
+      )}
 
       <Small color="text.secondary" mt="1rem" display="block">
         By clicking "Pay Now", you agree to our terms of service.
