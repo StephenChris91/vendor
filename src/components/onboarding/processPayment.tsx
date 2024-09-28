@@ -76,14 +76,14 @@ const ProcessPayment: React.FC<ProcessPaymentProps> = ({
     e.preventDefault();
 
     const successRef = `REF-${userId}-${Date.now()}`;
-    const LIVE_KEY = "sk_live_21ac8cd37be17677b90e37f08c898fae16671e99";
+    const LIVE_KEY = "pk_live_2ae9d58a920408181224feb1d029fa68c8b6fb6a";
 
     if (window.PaystackPop && scriptLoaded) {
       const handler = window.PaystackPop.setup({
         key:
           process.env.NODE_ENV !== "production"
-            ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
-            : process.env.LIVE_KEY,
+            ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!
+            : process.env.NEXT_PUBLIC_PAYSTACK_LIVE_KEY!,
         email: userEmail,
         amount: 200000, // 2000 Naira in kobo
         ref: successRef,
