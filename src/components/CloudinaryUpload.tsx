@@ -134,27 +134,6 @@ export default function Uploader({
       </UploadButton>
 
       {error && <ErrorMessage>{error.statusText}</ErrorMessage>}
-
-      {/* {info.length > 0 && (
-        <MediaInfoContainer>
-          {info.map((item, index) => (
-            <div key={index}>
-              {item.resource_type === "image" && (
-                <CldImage
-                  src={item.secure_url}
-                  width={300}
-                  height={300}
-                  alt=""
-                />
-              )}
-              <MediaUrlText>Uploaded Media URL:</MediaUrlText>
-              <MediaUrlLink href={item.secure_url} target="_blank">
-                {item.secure_url}
-              </MediaUrlLink>
-            </div>
-          ))}
-        </MediaInfoContainer>
-      )} */}
     </UploaderContainer>
   );
 }

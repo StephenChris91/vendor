@@ -1,5 +1,3 @@
-// components/admin/carousel-settings.tsx
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,10 +6,10 @@ import { Button } from "@component/buttons";
 import TextField from "@component/text-field";
 import FlexBox from "@component/FlexBox";
 import Box from "@component/Box";
-import DropZone from "@component/DropZone";
 import Modal from "@component/Modal";
 import { CreateCarouselItemInput, MainCarouselItem } from "types";
 import { toast } from "react-hot-toast";
+import Uploader from "@component/CloudinaryUpload"; // Importing the new Uploader
 
 interface CarouselSettingsProps {
   setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
@@ -55,32 +53,11 @@ const CarouselSettings: React.FC<CarouselSettingsProps> = ({
     setHasUnsavedChanges(true);
   };
 
-  const handleImageUpload = async (file: File) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/upload/carousel-image", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to upload image");
-      }
-
-      const result = await response.json();
-
-      if (result.url) {
-        setFormData((prev) => ({ ...prev, imgUrl: result.url }));
-        setHasUnsavedChanges(true);
-        toast.success("Image uploaded successfully!");
-      } else {
-        throw new Error("No URL returned from server");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast.error("Failed to upload image. Please try again.");
+  const handleImageUpload = (uploadedUrls: string[]) => {
+    if (uploadedUrls.length > 0) {
+      setFormData((prev) => ({ ...prev, imgUrl: uploadedUrls[0] }));
+      setHasUnsavedChanges(true);
+      toast.success("Image uploaded successfully!");
     }
   };
 
@@ -206,11 +183,10 @@ const CarouselSettings: React.FC<CarouselSettingsProps> = ({
           value={formData.buttonLink}
         />
 
-        <DropZone
-          uploadType="carousel-image"
-          maxSize={4 * 1024 * 1024}
-          acceptedFileTypes={{ "image/*": [".png", ".jpg", ".jpeg", ".gif"] }}
-          onUpload={handleImageUpload}
+        <Uploader
+          onUploadComplete={handleImageUpload}
+          uploadPreset="vendorspot"
+          buttonText="Upload Carousel Image"
         />
         <FlexBox mt="1rem" mb="1.5rem">
           {formData.imgUrl && (
