@@ -11,7 +11,7 @@ import FlexBox from "@component/FlexBox";
 import TextArea from "@component/textarea";
 import { Button } from "@component/buttons";
 import TextField from "@component/text-field";
-import DropZone from "@component/DropZone";
+import Uploader from "@component/CloudinaryUpload";
 import Product from "@models/product.model";
 import { createProduct } from "actions/creatProducts";
 import toast from "react-hot-toast";
@@ -19,22 +19,16 @@ import CheckBox from "@component/CheckBox";
 import Select, { SelectOption } from "@component/Select";
 import Typography from "@component/Typography";
 import { validationSchema } from "schemas";
-import { uploadToS3 } from "actions/s3Client";
 import { LuHash } from "react-icons/lu";
 import { updateProduct } from "actions/update-product";
 import { primaryCategories } from "@data/primary-categories";
 import { popularBrands } from "@data/primary-brands";
 
-const StyledDropZone = styled(DropZone)`
-  width: 100%;
-  min-height: 200px;
-  margin-bottom: 20px;
-`;
-
 const StyledLabel = styled(Typography)`
   margin-bottom: 10px;
   font-weight: 600;
 `;
+
 interface Props {
   product?: Product;
   categoryOptions: SelectOption[];
@@ -93,38 +87,6 @@ export default function ProductUpdateForm({
   );
   const router = useRouter();
 
-  // useEffect(() => {
-  //   const fetchCategoriesAndBrands = async () => {
-  //     try {
-  //       const [categoriesResponse, brandsResponse] = await Promise.all([
-  //         fetch("/api/categories/get-categories"),
-  //         fetch("/api/brands/get-brands"),
-  //       ]);
-
-  //       const categories = await categoriesResponse.json();
-  //       const brands = await brandsResponse.json();
-  //       setCategoryOption(
-  //         categories.map((cat: any) => ({
-  //           value: cat.id,
-  //           label: cat.name,
-  //         }))
-  //       );
-  //       setSelectBrandOptions(
-  //         brands.map((brand: any) => ({
-  //           value: brand.id,
-  //           label: brand.name,
-  //         }))
-  //       );
-  //     } catch (error) {
-  //       toast.error("Failed to load categories and brands");
-  //     }
-  //   };
-
-  //   console.log("This product is from the update form :", product);
-
-  //   fetchCategoriesAndBrands();
-  // }, []);
-
   const generateSKU = () => {
     return Math.floor(Math.random() * 1000000000);
   };
@@ -153,7 +115,6 @@ export default function ProductUpdateForm({
 
   const checkSlugUniqueness = async (slug: string) => {
     if (product) {
-      // If editing an existing product, consider the slug unique
       setIsSlugUnique(true);
       return true;
     }
@@ -199,6 +160,7 @@ export default function ProductUpdateForm({
     }),
     [product, categoryOption, selectBrandOptions]
   );
+
   const handleFormSubmit = async (
     values: FormValues,
     { setSubmitting, resetForm }: FormikHelpers<FormValues>
@@ -217,10 +179,8 @@ export default function ProductUpdateForm({
     try {
       let result;
       if (product) {
-        // Update existing product
         result = await updateProduct(product.id, transformedValues);
       } else {
-        // Create new product
         result = await createProduct(transformedValues);
       }
 
@@ -251,7 +211,7 @@ export default function ProductUpdateForm({
         onSubmit={handleFormSubmit}
         initialValues={initialValues}
         validationSchema={validationSchema}
-        enableReinitialize={true} // This is important for updating initialValues when product changes
+        enableReinitialize={true}
       >
         {({
           values,
@@ -262,39 +222,6 @@ export default function ProductUpdateForm({
           setFieldValue,
           isSubmitting,
         }) => {
-          const handleUpload = (url: string) => {
-            setFieldValue("image", url);
-          };
-
-          const handleGalleryUpload = async (filesOrFile: File[] | File) => {
-            const uploadFile = async (file: File): Promise<string> => {
-              try {
-                const buffer = await file.arrayBuffer();
-                const key = `products/${Date.now()}_${file.name}`;
-                const result = await uploadToS3(Buffer.from(buffer), key);
-                return result;
-              } catch (error) {
-                console.error("Error uploading file:", error);
-                toast.error(`Failed to upload file: ${file.name}`);
-                throw error;
-              }
-            };
-
-            try {
-              const filesToUpload = Array.isArray(filesOrFile)
-                ? filesOrFile
-                : [filesOrFile];
-              const uploadPromises = filesToUpload.map((file) =>
-                uploadFile(file)
-              );
-              const urls = await Promise.all(uploadPromises);
-              setFieldValue("gallery", [...values.gallery, ...urls]);
-            } catch (error) {
-              console.error("Error uploading files:", error);
-              toast.error("Failed to upload one or more files");
-            }
-          };
-
           const handleNameChange = async (
             e: React.ChangeEvent<HTMLInputElement>
           ) => {
@@ -475,17 +402,10 @@ export default function ProductUpdateForm({
 
                 <Grid item xs={12}>
                   <StyledLabel>Product Image</StyledLabel>
-                  <StyledDropZone
-                    uploadType="product-image"
-                    maxSize={4 * 1024 * 1024}
-                    acceptedFileTypes={{
-                      "image/png": [".png"],
-                      "image/jpeg": [".jpg", ".jpeg"],
-                      "image/gif": [".gif"],
-                      "image/webp": [".webp"],
-                    }}
-                    multiple={false}
-                    onUpload={(url) => setFieldValue("image", url)}
+                  <Uploader
+                    onUploadComplete={(urls) => setFieldValue("image", urls[0])}
+                    uploadPreset="product-images"
+                    buttonText="Upload Product Image"
                   />
                   {values.image && (
                     <FlexBox flexDirection="row" mt={2} flexWrap="wrap">
@@ -496,19 +416,13 @@ export default function ProductUpdateForm({
 
                 <Grid item xs={12}>
                   <StyledLabel>Product Gallery</StyledLabel>
-                  <StyledDropZone
-                    uploadType="product-gallery"
-                    maxSize={4 * 1024 * 1024}
-                    acceptedFileTypes={{
-                      "image/png": [".png"],
-                      "image/jpeg": [".jpg", ".jpeg"],
-                      "image/gif": [".gif"],
-                      "image/webp": [".webp"],
-                    }}
-                    multiple={true}
-                    onUpload={(url) =>
-                      setFieldValue("gallery", [...values.gallery, url])
+                  <Uploader
+                    onUploadComplete={(urls) =>
+                      setFieldValue("gallery", [...values.gallery, ...urls])
                     }
+                    uploadPreset="product-gallery"
+                    multiple={true}
+                    buttonText="Upload Gallery Images"
                   />
                   {values.gallery.length > 0 && (
                     <FlexBox flexDirection="row" mt={2} flexWrap="wrap">

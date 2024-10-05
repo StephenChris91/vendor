@@ -1,8 +1,8 @@
 // app/api/upload/profile-picture/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { uploadToS3, folderExists, createFolder } from 'actions/s3Client';
 import { auth } from 'auth';
+import { createFolder, folderExists, uploadToS3 } from '@utils/s3Client';
 
 export async function POST(request: NextRequest) {
     const session = await auth();

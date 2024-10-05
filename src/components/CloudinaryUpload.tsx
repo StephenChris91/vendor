@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CldUploadButton, CldImage, CldVideoPlayer } from "next-cloudinary";
+import { CldUploadButton, CldImage } from "next-cloudinary";
 import { CloudUpload } from "lucide-react";
 import styled from "styled-components";
 
@@ -75,7 +75,7 @@ interface CloudinaryUploadResult {
     public_id: string;
     width: number;
     height: number;
-  } | null;
+  };
 }
 
 interface CloudinaryError {
@@ -83,18 +83,33 @@ interface CloudinaryError {
 }
 
 interface UploaderProps {
-  onLogoUpload: (logoUrl: string) => void; // New prop to pass URL back to parent
+  onUploadComplete: (uploadedUrls: string[]) => void; // Pass the uploaded URL(s)
+  uploadPreset: string; // Preset to allow flexibility for different purposes (e.g., logos, products, gallery)
+  multiple?: boolean; // Enable multiple file uploads
+  buttonText?: string; // Custom button text (e.g., "Upload Logo" or "Upload Product Images")
 }
 
-export default function Uploader({ onLogoUpload }: UploaderProps) {
-  const [info, setInfo] = useState<CloudinaryUploadResult["info"]>(null);
+export default function Uploader({
+  onUploadComplete,
+  uploadPreset,
+  multiple = false,
+  buttonText = "Upload",
+}: UploaderProps) {
+  const [info, setInfo] = useState<CloudinaryUploadResult["info"][]>([]); // Store array for multiple uploads
   const [error, setError] = useState<CloudinaryError | null>(null);
 
   function handleSuccess(result, widget) {
-    setInfo(result?.info);
-    setError(null);
-    if (result?.info?.secure_url) {
-      onLogoUpload(result.info.secure_url); // Pass URL to parent component
+    const newInfo = result?.info;
+    if (newInfo?.secure_url) {
+      setInfo((prevInfo) => [...prevInfo, newInfo]);
+      setError(null);
+
+      // Pass array of secure URLs to the parent component
+      const uploadedUrls = [
+        ...info.map((item) => item.secure_url),
+        newInfo.secure_url,
+      ];
+      onUploadComplete(uploadedUrls);
     }
     widget.close({
       quiet: true,
@@ -102,22 +117,44 @@ export default function Uploader({ onLogoUpload }: UploaderProps) {
   }
 
   function handleError(error, _widget) {
-    setInfo(null);
+    setInfo([]);
     setError(error);
   }
 
   return (
     <UploaderContainer>
       <UploadButton
-        uploadPreset="vendorspot"
+        uploadPreset={uploadPreset}
         onError={handleError}
         onSuccess={handleSuccess}
+        options={{ multiple }}
       >
         <CloudUpload style={{ marginRight: "0.5rem" }} />
-        Upload
+        {buttonText}
       </UploadButton>
 
       {error && <ErrorMessage>{error.statusText}</ErrorMessage>}
+
+      {/* {info.length > 0 && (
+        <MediaInfoContainer>
+          {info.map((item, index) => (
+            <div key={index}>
+              {item.resource_type === "image" && (
+                <CldImage
+                  src={item.secure_url}
+                  width={300}
+                  height={300}
+                  alt=""
+                />
+              )}
+              <MediaUrlText>Uploaded Media URL:</MediaUrlText>
+              <MediaUrlLink href={item.secure_url} target="_blank">
+                {item.secure_url}
+              </MediaUrlLink>
+            </div>
+          ))}
+        </MediaInfoContainer>
+      )} */}
     </UploaderContainer>
   );
 }

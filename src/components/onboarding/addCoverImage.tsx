@@ -5,7 +5,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import Uploader from "@component/CloudinaryUpload";
 
-interface AddLogoProps {
+interface AddBannerProps {
   updateFormData: (data: { banner: string }) => void;
   initialBanner: string;
   setStepValidation: (isValid: boolean) => void;
@@ -13,7 +13,7 @@ interface AddLogoProps {
   handleNext: () => void; // New prop for navigating to the next step
 }
 
-const AddLogo: React.FC<AddLogoProps> = ({
+const AddBanner: React.FC<AddBannerProps> = ({
   updateFormData,
   initialBanner,
   setStepValidation,
@@ -22,13 +22,14 @@ const AddLogo: React.FC<AddLogoProps> = ({
 }) => {
   const [banner, setBanner] = useState(initialBanner);
 
-  // Callback to handle the uploaded logo URL
+  // Callback to handle the uploaded banner URL
   const handleBannerUpload = useCallback(
-    (uploadedUrl: string) => {
+    (uploadedUrls: string[]) => {
+      const uploadedUrl = uploadedUrls[0]; // Expecting one banner image
       setBanner(uploadedUrl);
       updateFormData({ banner: uploadedUrl });
       setStepValidation(true);
-      toast.success("Logo uploaded successfully!");
+      toast.success("Banner uploaded successfully!");
     },
     [updateFormData, setStepValidation]
   );
@@ -42,16 +43,21 @@ const AddLogo: React.FC<AddLogoProps> = ({
         textAlign="center"
         mb="2.25rem"
       >
-        Add your shop logo
+        Add your shop banner
       </H5>
-      <Uploader onLogoUpload={handleBannerUpload} /> {/* Pass the handler */}
+      {/* Updated Uploader component with proper uploadPreset */}
+      <Uploader
+        onUploadComplete={handleBannerUpload}
+        uploadPreset="vendorspot"
+        buttonText="Upload Banner"
+      />
       {banner && (
         <Box mt={4} display="flex" justifyContent="center">
-          <Image src={banner} alt="Shop Logo" width={600} height={200} />
+          <Image src={banner} alt="Shop Banner" width={600} height={200} />
         </Box>
       )}
     </Box>
   );
 };
 
-export default AddLogo;
+export default AddBanner;

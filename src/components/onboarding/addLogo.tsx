@@ -5,26 +5,12 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import Uploader from "@component/CloudinaryUpload";
 
-interface AddLogoProps {
-  updateFormData: (data: { logo: string }) => void;
-  initialLogo: string;
-  setStepValidation: (isValid: boolean) => void;
-  isNextButtonDisabled: () => boolean; // New prop for button state
-  handleNext: () => void; // New prop for navigating to the next step
-}
-
-const AddLogo: React.FC<AddLogoProps> = ({
-  updateFormData,
-  initialLogo,
-  setStepValidation,
-  isNextButtonDisabled,
-  handleNext,
-}) => {
+const AddLogo = ({ updateFormData, initialLogo, setStepValidation }) => {
   const [logo, setLogo] = useState(initialLogo);
 
-  // Callback to handle the uploaded logo URL
   const handleLogoUpload = useCallback(
-    (uploadedUrl: string) => {
+    (uploadedUrls: string[]) => {
+      const uploadedUrl = uploadedUrls[0]; // Expect only one image
       setLogo(uploadedUrl);
       updateFormData({ logo: uploadedUrl });
       setStepValidation(true);
@@ -44,7 +30,7 @@ const AddLogo: React.FC<AddLogoProps> = ({
       >
         Add your shop logo
       </H5>
-      <Uploader onLogoUpload={handleLogoUpload} /> {/* Pass the handler */}
+      <Uploader onUploadComplete={handleLogoUpload} uploadPreset="vendorspot" />
       {logo && (
         <Box mt={4} display="flex" justifyContent="center">
           <Image src={logo} alt="Shop Logo" width={200} height={200} />

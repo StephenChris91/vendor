@@ -22,11 +22,12 @@ import AddShopAddress from "@component/onboarding/addShopAddress";
 import AddShopSettings from "@component/onboarding/addShopSettings";
 import ProcessPayment from "@component/onboarding/processPayment";
 import UploadVerificationDocuments from "@component/onboarding/uploadVerificationDocuments";
+import AddBanner from "@component/onboarding/addCoverImage";
 
 const steps = [
   { component: AddLogo, label: "Shop Logo" },
   { component: AddBasicInfo, label: "Shop Details" },
-  { component: AddCoverImage, label: "Cover Image" },
+  { component: AddBanner, label: "Cover Image" },
   { component: AddPaymentInfo, label: "Payment Info" },
   { component: AddShopAddress, label: "Shop Address" },
   { component: AddShopSettings, label: "Shop Settings" },
