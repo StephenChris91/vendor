@@ -71,6 +71,7 @@ export async function createOrUpdateShop(values: z.infer<typeof extendedShopSche
                     banner,
                     slug,
                     status,
+                    category,
                     address: {
                         update: {
                             street: address.street,
@@ -114,6 +115,7 @@ export async function createOrUpdateShop(values: z.infer<typeof extendedShopSche
                     banner,
                     slug,
                     status,
+                    category,
                     userId: session.user.id,
                     address: {
                         create: {

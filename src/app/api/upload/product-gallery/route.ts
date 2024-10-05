@@ -1,7 +1,7 @@
 // app/api/upload/product-gallery/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createFolder, folderExists, uploadToS3 } from '@utils/s3Client';
+import { createFolder, folderExists, uploadToS3 } from 'actions/s3Client';
 import { auth } from 'auth';
 
 export async function POST(request: NextRequest) {

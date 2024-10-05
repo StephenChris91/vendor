@@ -1,5 +1,19 @@
 /** @type {import('next').NextConfig} */
 
+const securityHeaders = [
+  {
+    key: "Content-Security-Policy",
+    value: `
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://upload-widget.cloudinary.com https://js.paystack.co;
+      img-src 'self' https://res.cloudinary.com;
+      connect-src 'self' https://api.cloudinary.com https://sandbox.terminal.africa; // Allow terminal.africa for fetch requests
+      style-src 'self' 'unsafe-inline';
+      frame-src 'self' https://upload-widget.cloudinary.com;
+    `.replace(/\n/g, ""), // Make the value a single line to avoid issues
+  },
+];
+
 const nextConfig = {
   reactStrictMode: true,
   compiler: {
@@ -43,42 +57,30 @@ const nextConfig = {
       bodySizeLimit: "4mb", // Increase the limit to 4MB
     },
   },
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value:
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co",
-          },
-        ],
-      },
-    ];
-  },
+  // async headers() {
+  //   return [
+  //     {
+  //       source: "/(.*)", // Apply headers to all routes
+  //       headers: securityHeaders,
+  //     },
+  //     {
+  //       source: "/api/data/new-arrivals",
+  //       headers: [
+  //         { key: "Access-Control-Allow-Credentials", value: "true" },
+  //         { key: "Access-Control-Allow-Origin", value: "*" },
+  //         {
+  //           key: "Access-Control-Allow-Methods",
+  //           value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+  //         },
+  //         {
+  //           key: "Access-Control-Allow-Headers",
+  //           value:
+  //             "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+  //         },
+  //       ],
+  //     },
+  //   ];
+  // },
 };
-
-// Add this new section
-//   async headers() {
-//     return [
-//       {
-//         source: "/api/data/new-arrivals",
-//         headers: [
-//           { key: "Access-Control-Allow-Credentials", value: "true" },
-//           { key: "Access-Control-Allow-Origin", value: "*" },
-//           {
-//             key: "Access-Control-Allow-Methods",
-//             value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
-//           },
-//           {
-//             key: "Access-Control-Allow-Headers",
-//             value:
-//               "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
-//           },
-//         ],
-//       },
-//     ];
-//   },
 
 module.exports = nextConfig;

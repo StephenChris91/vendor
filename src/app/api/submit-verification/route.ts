@@ -1,7 +1,7 @@
 // app/api/submit-verification-documents/route.ts
 
-import { NextRequest, NextResponse } from 'next/server';
 import { createTransporter } from '@lib/emails/email';
+import { NextRequest, NextResponse } from 'next/server';
 import { Attachment } from 'nodemailer/lib/mailer';
 
 interface DocumentData {
@@ -14,10 +14,10 @@ export async function POST(request: NextRequest) {
     try {
         const { userId, userEmail, documents } = await request.json();
 
-        console.log('Submitting documents for user:', userId);
-        console.log('User email:', userEmail);
-        console.log('Number of documents:', documents.length);
-        console.log('Environment:', process.env.NODE_ENV);
+        // console.log('Submitting documents for user:', userId);
+        // console.log('User email:', userEmail);
+        // console.log('Number of documents:', documents.length);
+        // console.log('Environment:', process.env.NODE_ENV);
 
         const transporter = createTransporter();
 

@@ -10,6 +10,7 @@ import TextField from "@component/text-field";
 import Select from "@component/Select";
 import CheckBox from "@component/CheckBox";
 import { vendorCategories } from "@data/vendor-categories";
+
 interface AddShopSettingsProps {
   updateFormData: (data: { shopSettings: ShopSettings }) => void;
   initialShopSettings: ShopSettings;

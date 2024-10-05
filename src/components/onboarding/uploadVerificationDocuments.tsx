@@ -7,6 +7,7 @@ import Box from "@component/Box";
 import { H5, Small } from "@component/Typography";
 import DropZone from "@component/DropZone";
 import { Button } from "@component/buttons";
+import { submitVerificationDocuments } from "actions/submitVerificationDocuments"; // Import the server action
 
 interface UploadVerificationDocumentsProps {
   userId: string;
@@ -55,45 +56,20 @@ const UploadVerificationDocuments: React.FC<
       }
 
       try {
-        const response = await fetch("/api/submit-verification", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            userEmail,
-            documents: values.documents,
-          }),
-        });
+        // Call the server-side action to submit documents
+        const result = await submitVerificationDocuments(
+          userId,
+          userEmail,
+          values.documents
+        );
 
-        let result;
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-          result = await response.json();
-        } else {
-          // If the response is not JSON, read it as text
-          const text = await response.text();
-          console.error("Unexpected response:", text);
-          throw new Error("Unexpected response from server");
-        }
-
-        if (!response.ok) {
-          throw new Error(
-            result?.message || `HTTP error! status: ${response.status}`
-          );
-        }
-
-        if (result) {
-          toast.success(
-            result.message ||
-              "Documents submitted successfully for verification!"
-          );
+        if (result.success) {
+          toast.success(result.message || "Documents submitted successfully!");
           formik.resetForm();
           setFileNames([]);
           setDocumentsUploaded(true);
         } else {
-          throw new Error("No response data from server");
+          throw new Error("Failed to submit documents.");
         }
       } catch (error) {
         console.error("Error submitting documents:", error);
@@ -107,27 +83,30 @@ const UploadVerificationDocuments: React.FC<
     },
   });
 
+  // Handle file upload using DropZone
   const handleUpload = useCallback(
-    async (file: File) => {
-      try {
-        const base64Content = await fileToBase64(file);
+    async (files: File[]) => {
+      const uploadedFiles = await Promise.all(
+        files.map(async (file) => {
+          const base64Content = await fileToBase64(file);
+          return {
+            name: file.name,
+            content: base64Content,
+            type: file.type,
+          };
+        })
+      );
 
-        const newDocument: DocumentData = {
-          name: file.name,
-          content: base64Content,
-          type: file.type,
-        };
-        formik.setFieldValue("documents", [
-          ...formik.values.documents,
-          newDocument,
-        ]);
-        setFileNames((prevNames) => [...prevNames, file.name]);
+      formik.setFieldValue("documents", [
+        ...formik.values.documents,
+        ...uploadedFiles,
+      ]);
+      setFileNames((prevNames) => [
+        ...prevNames,
+        ...files.map((file) => file.name),
+      ]);
 
-        toast.success("Document uploaded successfully!");
-      } catch (error) {
-        console.error("Error processing file:", error);
-        toast.error("Failed to process document. Please try again.");
-      }
+      toast.success("Documents uploaded successfully!");
     },
     [formik]
   );
@@ -141,6 +120,7 @@ const UploadVerificationDocuments: React.FC<
     });
   };
 
+  // Remove file
   const removeFile = (index: number) => {
     const newDocuments = [...formik.values.documents];
     newDocuments.splice(index, 1);
@@ -171,19 +151,7 @@ const UploadVerificationDocuments: React.FC<
         </h5>
       </H5>
 
-      <DropZone
-        uploadType="verification-documents"
-        maxSize={10 * 1024 * 1024} // 10MB limit
-        acceptedFileTypes={{
-          "application/pdf": [".pdf"],
-          "application/msword": [".doc"],
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            [".docx"],
-          "application/vnd.oasis.opendocument.text": [".odt"],
-        }}
-        multiple={true}
-        onUpload={handleUpload}
-      />
+      <DropZone onChange={handleUpload} />
 
       {formik.touched.documents && formik.errors.documents && (
         <Small color="error.main" mt="0.5rem">

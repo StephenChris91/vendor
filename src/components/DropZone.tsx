@@ -1,131 +1,89 @@
-import React, { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { toast } from "react-hot-toast";
-import Box from "@component/Box";
-import Divider from "@component/Divider";
-import { Button } from "@component/buttons";
-import Typography, { H5, Small } from "@component/Typography";
 
+import Box from "./Box";
+import Divider from "./Divider";
+import { Button } from "./buttons";
+import Typography, { H5, Small } from "./Typography";
+
+// ==============================================================
+// Accept only document files (PDF, Word, etc.), maximum 2 files
 export interface DropZoneProps {
-  uploadType: string;
-  maxSize?: number;
-  acceptedFileTypes?: Record<string, string[]>;
-  multiple?: boolean;
-  onAuthError?: () => void;
-  onUpload?: (file: File) => void;
+  onChange?: (files: File[]) => void;
 }
+// ==============================================================
 
-export default function DropZone({
-  uploadType,
-  maxSize = 5 * 1024 * 1024,
-  acceptedFileTypes = { "image/*": [".png", ".jpg", ".jpeg", ".gif"] },
-  multiple = false,
-  onAuthError,
-  onUpload,
-}: DropZoneProps) {
-  const [files, setFiles] = useState<File[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+export default function DropZone({ onChange }: DropZoneProps) {
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (onChange) onChange(acceptedFiles);
+    },
+    [onChange]
+  );
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log("Files dropped:", acceptedFiles);
-    setFiles(acceptedFiles);
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    maxSize,
-    accept: acceptedFileTypes,
-    multiple,
-  });
-
-  const handleUpload = async () => {
-    if (files.length > 0) {
-      setIsUploading(true);
-      try {
-        if (onUpload) {
-          onUpload(files[0]);
-        }
-        setFiles([]);
-        toast.success("File uploaded successfully!");
-      } catch (error) {
-        console.error("Error in upload:", error);
-        if (error instanceof Error) {
-          if (error.message.includes("401")) {
-            toast.error("You are not authorized. Please log in and try again.");
-            onAuthError && onAuthError();
-          } else {
-            toast.error(`Upload failed: ${error.message}`);
-          }
-        } else {
-          toast.error("An unexpected error occurred during upload");
-        }
-      } finally {
-        setIsUploading(false);
-      }
-    }
-  };
+  const { getRootProps, getInputProps, isDragActive, fileRejections } =
+    useDropzone({
+      onDrop,
+      maxFiles: 2, // Allow only a maximum of 2 files
+      multiple: true,
+      accept: {
+        "application/pdf": [".pdf"],
+        "application/msword": [".doc"],
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          [".docx"],
+      },
+    });
 
   return (
-    <Box {...getRootProps()}>
+    <Box
+      display="flex"
+      minHeight="200px"
+      alignItems="center"
+      border="1px dashed"
+      borderRadius="10px"
+      flexDirection="column"
+      borderColor="gray.400"
+      justifyContent="center"
+      bg={isDragActive && "gray.200"}
+      transition="all 250ms ease-in-out"
+      style={{ outline: "none" }}
+      {...getRootProps()}
+    >
       <input {...getInputProps()} />
-      <Box
-        display="flex"
-        minHeight="200px"
-        alignItems="center"
-        border="1px dashed"
-        borderRadius="10px"
-        flexDirection="column"
-        borderColor="gray.400"
-        justifyContent="center"
-        transition="all 250ms ease-in-out"
-        style={{ outline: "none", cursor: "pointer" }}
+      <H5 mb="18px" color="text.muted">
+        Drag & drop your documents here
+      </H5>
+
+      <Divider width="200px" mx="auto" />
+      <Typography
+        px="1rem"
+        mb="18px"
+        mt="-10px"
+        lineHeight="1"
+        color="text.muted"
+        bg={isDragActive ? "gray.200" : "body.paper"}
       >
-        <H5 mb="18px" color="text.muted">
-          {isDragActive
-            ? "Drop the files here ..."
-            : "Click or drag & drop to upload file"}
-        </H5>
+        or
+      </Typography>
 
-        <Divider width="200px" mx="auto" />
-        <Typography
-          px="1rem"
-          mb="18px"
-          mt="-10px"
-          lineHeight="1"
-          color="text.muted"
-          bg="body.paper"
-        >
-          or
-        </Typography>
+      <Button
+        color="primary"
+        bg="primary.light"
+        px="2rem"
+        mb="22px"
+        type="button"
+      >
+        Select files
+      </Button>
 
-        <Button
-          color="primary"
-          bg="primary.light"
-          px="2rem"
-          mb="22px"
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleUpload();
-          }}
-          disabled={isUploading || files.length === 0}
-        >
-          {isUploading ? "Uploading..." : "Upload"}
-        </Button>
+      <Small color="text.muted">
+        Upload PDF, DOC, or DOCX files (Max: 2 documents)
+      </Small>
 
-        <Small color="text.muted">
-          Max file size: {maxSize / (1024 * 1024)}MB
+      {fileRejections.length > 0 && (
+        <Small color="error.main" mt="1rem">
+          You can only upload a maximum of 2 documents.
         </Small>
-      </Box>
-      {files.length > 0 && (
-        <div>
-          <h4>Selected Files:</h4>
-          <ul>
-            {files.map((file, index) => (
-              <li key={index}>{file.name}</li>
-            ))}
-          </ul>
-        </div>
       )}
     </Box>
   );

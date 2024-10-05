@@ -19,7 +19,7 @@ import CheckBox from "@component/CheckBox";
 import Select, { SelectOption } from "@component/Select";
 import Typography from "@component/Typography";
 import { validationSchema } from "schemas";
-import { uploadToS3 } from "@utils/s3Client";
+import { uploadToS3 } from "actions/s3Client";
 import { LuHash } from "react-icons/lu";
 import { updateProduct } from "actions/update-product";
 import { primaryCategories } from "@data/primary-categories";

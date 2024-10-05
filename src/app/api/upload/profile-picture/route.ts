@@ -1,7 +1,7 @@
 // app/api/upload/profile-picture/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { uploadToS3, folderExists, createFolder } from '@utils/s3Client';
+import { uploadToS3, folderExists, createFolder } from 'actions/s3Client';
 import { auth } from 'auth';
 
 export async function POST(request: NextRequest) {

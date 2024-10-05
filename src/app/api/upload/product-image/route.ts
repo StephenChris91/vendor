@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from 'auth';
-import { createFolder, folderExists, uploadToS3 } from '@utils/s3Client';
+import { createFolder, folderExists, uploadToS3 } from 'actions/s3Client';
 
 export async function POST(request: NextRequest) {
     const session = await auth();

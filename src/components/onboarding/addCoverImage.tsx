@@ -1,114 +1,37 @@
-"use client";
-
-import React, { useState, useCallback, useEffect } from "react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import { toast } from "react-hot-toast";
+import React, { useState, useCallback } from "react";
 import Box from "@component/Box";
-import { H5, Small } from "@component/Typography";
-import DropZone from "@component/DropZone";
-import { Button } from "@component/buttons";
-import Image from "@component/Image";
+import { H5 } from "@component/Typography";
+import Image from "next/image";
+import toast from "react-hot-toast";
+import Uploader from "@component/CloudinaryUpload";
 
-interface AddCoverImageProps {
+interface AddLogoProps {
   updateFormData: (data: { banner: string }) => void;
-  initialCoverImage: string;
-  userName: string;
-  userId: string;
+  initialBanner: string;
   setStepValidation: (isValid: boolean) => void;
+  isNextButtonDisabled: () => boolean; // New prop for button state
+  handleNext: () => void; // New prop for navigating to the next step
 }
 
-const validationSchema = Yup.object().shape({
-  coverImage: Yup.string().required("Shop cover image is required"),
-});
-
-const AddCoverImage: React.FC<AddCoverImageProps> = ({
+const AddLogo: React.FC<AddLogoProps> = ({
   updateFormData,
-  initialCoverImage,
-  userName,
-  userId,
+  initialBanner,
   setStepValidation,
+  isNextButtonDisabled,
+  handleNext,
 }) => {
-  const [isUploading, setIsUploading] = useState(false);
+  const [banner, setBanner] = useState(initialBanner);
 
-  const formik = useFormik({
-    initialValues: {
-      coverImage: initialCoverImage || "",
+  // Callback to handle the uploaded logo URL
+  const handleBannerUpload = useCallback(
+    (uploadedUrl: string) => {
+      setBanner(uploadedUrl);
+      updateFormData({ banner: uploadedUrl });
+      setStepValidation(true);
+      toast.success("Logo uploaded successfully!");
     },
-    validationSchema,
-    onSubmit: (values) => {
-      updateFormData({ banner: values.coverImage });
-    },
-    validate: (values) => {
-      try {
-        validationSchema.validateSync(values);
-        setStepValidation(true);
-        return {};
-      } catch (error) {
-        if (error instanceof Yup.ValidationError) {
-          setStepValidation(false);
-          return { [error.path as string]: error.message };
-        }
-        return {};
-      }
-    },
-  });
-
-  useEffect(() => {
-    if (initialCoverImage && initialCoverImage !== formik.values.coverImage) {
-      formik.setFieldValue("coverImage", initialCoverImage);
-    }
-  }, [initialCoverImage]);
-
-  useEffect(() => {
-    formik.validateForm();
-  }, []);
-
-  const handleUpload = useCallback(
-    async (file: File) => {
-      setIsUploading(true);
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await fetch("/api/upload/shop-banner", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (result.url) {
-          formik.setFieldValue("coverImage", result.url, true);
-          updateFormData({ banner: result.url });
-          toast.success("Shop cover image uploaded successfully!");
-        } else {
-          throw new Error("No URL returned from server");
-        }
-      } catch (error) {
-        console.error("Error uploading cover image:", error);
-        toast.error("Failed to upload cover image. Please try again.");
-      } finally {
-        setIsUploading(false);
-      }
-    },
-    [formik, updateFormData]
+    [updateFormData, setStepValidation]
   );
-
-  const handleRemoveCoverImage = () => {
-    formik.setFieldValue("coverImage", "", true);
-    updateFormData({ banner: "" });
-  };
-
-  useEffect(() => {
-    formik.validateForm().then((errors) => {
-      setStepValidation(Object.keys(errors).length === 0);
-    });
-  }, [formik.values.coverImage]);
 
   return (
     <Box className="content" width="auto" height="auto" paddingBottom={6}>
@@ -119,56 +42,16 @@ const AddCoverImage: React.FC<AddCoverImageProps> = ({
         textAlign="center"
         mb="2.25rem"
       >
-        Upload a cover image for your shop
+        Add your shop logo
       </H5>
-
-      <DropZone
-        uploadType="shop-banner"
-        maxSize={4 * 1024 * 1024}
-        acceptedFileTypes={{
-          "image/png": [".png"],
-          "image/jpeg": [".jpg", ".jpeg"],
-          "image/gif": [".gif"],
-          "image/webp": [".webp"],
-        }}
-        multiple={false}
-        onUpload={handleUpload}
-      />
-
-      {formik.touched.coverImage && formik.errors.coverImage && (
-        <Small color="error.main" mt="0.5rem">
-          {formik.errors.coverImage}
-        </Small>
-      )}
-
-      {isUploading && (
-        <Small color="text.muted" mt="1rem">
-          Uploading cover image...
-        </Small>
-      )}
-
-      {formik.values.coverImage && (
-        <Box mt="2rem">
-          <H5 mb="0.5rem">Preview:</H5>
-          <Image
-            src={formik.values.coverImage}
-            alt="Shop Cover Image Preview"
-            width={300}
-            height={150}
-            style={{ objectFit: "cover" }}
-          />
-          <Button
-            mt="1rem"
-            variant="outlined"
-            color="primary"
-            onClick={handleRemoveCoverImage}
-          >
-            Remove Cover Image
-          </Button>
+      <Uploader onLogoUpload={handleBannerUpload} /> {/* Pass the handler */}
+      {banner && (
+        <Box mt={4} display="flex" justifyContent="center">
+          <Image src={banner} alt="Shop Logo" width={600} height={200} />
         </Box>
       )}
     </Box>
   );
 };
 
-export default AddCoverImage;
+export default AddLogo;

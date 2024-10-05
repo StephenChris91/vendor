@@ -4,13 +4,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from 'auth';
 import { createFolder, folderExists, uploadToS3 } from '@utils/s3Client';
 
+
 export async function POST(request: NextRequest) {
     const session = await auth();
     if (!session || !session.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    if (session) console.log(session);
 
     try {
         const formData = await request.formData();
@@ -31,10 +30,10 @@ export async function POST(request: NextRequest) {
         const filePath = `${folderPath}/${fileName}`;
         const url = await uploadToS3(buffer, filePath);
 
-        // Ensure we're returning a JSON object with the url property
-        return NextResponse.json({ url: url });
+        return NextResponse.json({ url });
     } catch (error) {
-        console.error('Error uploading product image:', error);
-        return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+        console.error('Error during file upload:', error); // Log the detailed error here
+        return NextResponse.json({ error: error.message || 'Upload failed' }, { status: 500 });
     }
 }
+

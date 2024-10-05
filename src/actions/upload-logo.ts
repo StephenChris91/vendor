@@ -5,18 +5,26 @@
 import { auth } from 'auth';
 import { createFolder, folderExists } from '@utils/s3Client';
 import { Upload } from "@aws-sdk/lib-storage";
-import { s3Client } from '@lib/utils';
-// import { S3Client, S3ClientConfig } from "@aws-sdk/client-s3";
+// import { s3Client } from '@lib/utils';
+import { S3Client, S3ClientConfig } from "@aws-sdk/client-s3";
 
-// const s3Config: S3ClientConfig = {
-//     region: process.env.AWS_BUCKET_REGION!,
-//     credentials: {
-//         accessKeyId: process.env.AWS_ACCESS_KEY!,
-//         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-//     },
-// };
+const s3Config: S3ClientConfig = {
+    region: process.env.NEXT_PUBLIC_AWS_BUCKET_REGION!,
+    credentials: {
+        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY!,
+        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
+    },
+};
 
-// const s3Client = new S3Client(s3Config);
+const s3Client = new S3Client(s3Config);
+
+console.log({
+    key: process.env.NEXT_PUBLIC_AWS_BUCKET_REGION!,
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY!,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
+})
+
+
 export async function uploadFile(formData: FormData) {
     const session = await auth();
     console.log("Session data:", session); // Check session in production
@@ -52,7 +60,7 @@ export async function uploadFile(formData: FormData) {
     const upload = new Upload({
         client: s3Client,
         params: {
-            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME,
             Key: filePath,
             Body: buffer,
             ContentType: file.type,
@@ -62,7 +70,7 @@ export async function uploadFile(formData: FormData) {
     try {
         const result = await upload.done();
         console.log("Upload result:", result); // Log the upload result
-        const url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${filePath}`;
+        const url = `https://${process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_BUCKET_REGION}.amazonaws.com/${filePath}`;
         return { url };
     } catch (error) {
         console.error('Error uploading to S3:', error); // Log error

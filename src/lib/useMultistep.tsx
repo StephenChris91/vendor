@@ -22,12 +22,6 @@ import AddShopAddress from "@component/onboarding/addShopAddress";
 import AddShopSettings from "@component/onboarding/addShopSettings";
 import ProcessPayment from "@component/onboarding/processPayment";
 import UploadVerificationDocuments from "@component/onboarding/uploadVerificationDocuments";
-import { updatePaymentStatus } from "actions/update-payment-status";
-
-// Define the correct type for updatePaymentStatus
-type UpdatePaymentStatusType = (
-  userId: string
-) => Promise<{ success: boolean; message: string; user?: any }>;
 
 const steps = [
   { component: AddLogo, label: "Shop Logo" },
@@ -44,13 +38,19 @@ const steps = [
 ];
 
 const MultiStepForm = () => {
-  const [currentStep, setCurrentStep] = useState(0);
+  // Retrieve the initial step from localStorage or default to 0
+  const initialStep = () => {
+    const storedStep = localStorage.getItem("currentStep");
+    return storedStep ? JSON.parse(storedStep) : 0;
+  };
+
+  const [currentStep, setCurrentStep] = useState<number>(initialStep);
   const { formData, updateFormData } = useFormContext();
   const user = useCurrentUser();
   const [isPaymentProcessed, setPaymentProcessed] = useState(false);
   const [showPaymentWarning, setShowPaymentWarning] = useState(false);
   const [documentsUploaded, setDocumentsUploaded] = useState(false);
-  const [stepValidation, setStepValidation] = useState(steps.map(() => false));
+  const [stepValidation, setStepValidation] = useState(steps.map(() => true));
   const router = useRouter();
 
   useEffect(() => {
@@ -58,6 +58,11 @@ const MultiStepForm = () => {
       setPaymentProcessed(true);
     }
   }, [user]);
+
+  // Save the current step to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("currentStep", JSON.stringify(currentStep));
+  }, [currentStep]);
 
   const handleNextStep = () => {
     if (currentStep === 5) {
@@ -81,7 +86,6 @@ const MultiStepForm = () => {
   const handleConfirmPayment = () => {
     setShowPaymentWarning(false);
     if (isPaymentProcessed) {
-      // Skip payment processing if already paid
       setCurrentStep(currentStep + 2);
     } else {
       setCurrentStep(currentStep + 1);
@@ -94,7 +98,7 @@ const MultiStepForm = () => {
         shopName: formData.shopName,
         description: formData.description,
         logo: formData.logo,
-        banner: formData.coverImage,
+        banner: formData.banner,
         slug: formData.slug,
         status: ShopStatus.Pending,
         hasPaid: isPaymentProcessed,
@@ -118,13 +122,16 @@ const MultiStepForm = () => {
           deliveryOptions: formData.shopSettings.deliveryOptions,
           isActive: formData.shopSettings.isActive,
         },
-        category: formData.shopSettings.category,
+        category: formData.shopSettings.category, // Add this line to include the category
       };
 
       const result = await createOrUpdateShop(shopData);
 
       if (result.status === "success") {
+        localStorage.removeItem("formData");
+        localStorage.removeItem("currentStep");
         toast.success("Shop created successfully!");
+        localStorage.removeItem("multiStepFormData"); // Clear saved data
         await signOut({ redirect: false });
         router.push("/");
       } else {
@@ -141,40 +148,41 @@ const MultiStepForm = () => {
     }
   };
 
-  const StepComponent = steps[currentStep].component;
+  const isNextButtonDisabled = () => !stepValidation[currentStep];
 
-  const getStepProps = () => {
-    return {
-      updateFormData: (data: Partial<FormData>) => {
-        updateFormData(data);
-      },
-      userName: user?.firstname || "",
-      userEmail: user?.email || "",
-      userId: user?.id || "",
-      initialLogo: formData.logo || "",
-      initialShopName: formData.shopName || "",
-      initialSlug: formData.slug || "",
-      initialDescription: formData.description || "",
-      initialCoverImage: formData.coverImage || "",
-      initialPaymentInfo: formData.paymentInfo,
-      initialAddress: formData.address,
-      initialShopSettings: formData.shopSettings,
-      setPaymentProcessed,
-      formData,
-      onNextStep: handleNextStep,
-      setDocumentsUploaded,
-      setStepValidation: (isValid: boolean) => {
-        const newStepValidation = [...stepValidation];
-        newStepValidation[currentStep] = isValid;
-        setStepValidation(newStepValidation);
-      },
-      isPaymentProcessed,
-      onPaymentSuccess: () => {
-        setPaymentProcessed(true);
-        handleNextStep();
-      },
-    };
-  };
+  const getStepProps = () => ({
+    updateFormData,
+    userName: user?.firstname || "",
+    userEmail: user?.email || "",
+    userId: user?.id || "",
+    initialLogo: formData.logo || "",
+    initialBanner: formData.banner || "",
+    initialShopName: formData.shopName || "",
+    initialSlug: formData.slug || "",
+    initialDescription: formData.description || "",
+    initialCoverImage: formData.banner || "",
+    initialPaymentInfo: formData.paymentInfo,
+    initialAddress: formData.address,
+    initialShopSettings: formData.shopSettings,
+    setPaymentProcessed,
+    formData,
+    onNextStep: handleNextStep,
+    setDocumentsUploaded,
+    setStepValidation: (isValid: boolean) => {
+      const newStepValidation = [...stepValidation];
+      newStepValidation[currentStep] = isValid;
+      setStepValidation(newStepValidation);
+    },
+    isNextButtonDisabled,
+    handleNext: handleNextStep, // Pass the handleNext function
+    isPaymentProcessed,
+    onPaymentSuccess: () => {
+      setPaymentProcessed(true);
+      handleNextStep();
+    },
+  });
+
+  const StepComponent = steps[currentStep].component;
 
   if (showPaymentWarning) {
     return (
@@ -212,10 +220,16 @@ const MultiStepForm = () => {
   return (
     <OnboardingStyledRoot>
       <Box padding="2rem" width="100%">
-        <H3 textAlign="center" mb="2rem">
-          {steps[currentStep].label}
-        </H3>
-
+        <FlexBox
+          justifyContent="space-between"
+          alignItems="center"
+          margin="auto"
+        >
+          <H3 textAlign="center" mb="2rem">
+            {steps[currentStep].label}
+          </H3>
+          <LogoutButton />
+        </FlexBox>
         <Box mb="2rem">
           <StepComponent {...getStepProps()} />
         </Box>
@@ -226,7 +240,7 @@ const MultiStepForm = () => {
               variant="outlined"
               color="primary"
               onClick={handlePrevious}
-              disabled={currentStep === 7} // Disable on document upload step
+              disabled={currentStep === 7}
             >
               Previous
             </Button>
@@ -252,7 +266,6 @@ const MultiStepForm = () => {
             </Button>
           )}
         </FlexBox>
-        <LogoutButton>Logout</LogoutButton>
       </Box>
     </OnboardingStyledRoot>
   );
