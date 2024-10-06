@@ -19,8 +19,9 @@ export const authRoutes: (string | undefined)[] = [
     '/vendor',
     '/vendor/*',
     '/vendor/dashboard',
-    '/orders',
-    '/orders/:id'
+    '/order',
+    '/order/:id',
+
 ];
 
 /**
@@ -49,7 +50,7 @@ export const apiAuthPrefix = '/api/auth';
  * @description: A default redirect path for authenticated users
  * @type {string}
  */
-export const DEFAULT_LOGIN_REDIRECT = '/';
+export const DEFAULT_LOGIN_REDIRECT = '/profile';
 
 /**
  * @description: A default redirect path for admin users

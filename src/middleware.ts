@@ -61,7 +61,7 @@ export default auth((req) => {
                 return null;
             }
             // Redirect to login for protected routes
-            if (isAuthRoute || isCheckoutRoute || isVendorRoute || isAdminRoute || isOrdersRoute(nextUrl.pathname)) {
+            if (isAuthRoute || isCheckoutRoute || isVendorRoute || isAdminRoute) {
                 const callbackUrl = nextUrl.pathname;
                 if (callbackUrl === '/login') {
                     // Prevent redirect loop
