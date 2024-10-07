@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 import { Button } from "@component/buttons";
 import { useAuth } from "@context/authContext";
 import { useCart } from "hooks/useCart"; // Import the useCart hook
+import { RiLogoutCircleRLine } from "react-icons/ri";
 
 interface LogoutButtonProps {
   children?: React.ReactNode;
@@ -51,7 +52,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
       bg="primary.light"
       px="1rem"
     >
-      {isLoading ? "Logging out..." : children || "Logout"}
+      {isLoading ? "Logging out..." : children || <RiLogoutCircleRLine />}
     </Button>
   );
 };

@@ -9,8 +9,8 @@ import FlexBox from "@component/FlexBox";
 import { H1 } from "@component/Typography";
 import { Button } from "@component/buttons";
 import ShopOnboardingForm from "lib/useMultistep";
-import Spinner from "@component/Spinner";
 import styled from "styled-components";
+import useWindowSize from "hooks/useWindowSize"; // Import the custom hook
 
 const OnboardingStyledRoot = styled.div`
   width: 100vw;
@@ -22,6 +22,8 @@ const Onboarding = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [pageState, setPageState] = useState("loading");
+  const windowWidth = useWindowSize(); // Use the custom hook to detect window width
+  const isMobile = windowWidth !== null && windowWidth <= 768; // Define breakpoint for mobile screens
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -45,25 +47,30 @@ const Onboarding = () => {
       width="100%"
       justifyContent="space-between"
       alignItems="stretch"
+      flexDirection={isMobile ? "column" : "row"} // Stack vertically on mobile
     >
-      <Box
-        width="50%"
-        backgroundColor="primary.main"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        p="3rem"
-      >
-        <H1
-          color="white"
-          fontSize={{ xs: "2rem", sm: "3rem", md: "4rem", lg: "5rem" }}
-          textAlign="center"
+      {/* Hide the left section on mobile */}
+      {!isMobile && (
+        <Box
+          width="50%"
+          backgroundColor="primary.main"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          p="3rem"
         >
-          Onboarding
-        </H1>
-      </Box>
+          <H1
+            color="white"
+            fontSize={{ xs: "2rem", sm: "3rem", md: "4rem", lg: "5rem" }}
+            textAlign="center"
+          >
+            Onboarding
+          </H1>
+        </Box>
+      )}
+
       <Box
-        width="50%"
+        width={isMobile ? "100%" : "50%"} // Full width on mobile
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -95,21 +102,6 @@ const Onboarding = () => {
       </Box>
     </FlexBox>
   );
-
-  // if (pageState === "loading") {
-  //   return (
-  //     <OnboardingStyledRoot>
-  //       <Spinner
-  //         style={{
-  //           position: "absolute",
-  //           top: "50%",
-  //           left: "50%",
-  //           transform: "translate(-50%, -50%)",
-  //         }}
-  //       />
-  //     </OnboardingStyledRoot>
-  //   );
-  // }
 
   return (
     <OnboardingStyledRoot>

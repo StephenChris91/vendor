@@ -12,6 +12,8 @@ import { LogoutButton } from "@component/logout-button";
 import { createOrUpdateShop } from "actions/createshop";
 import { ShopStatus } from "@prisma/client";
 import { signOut } from "next-auth/react";
+import styled from "styled-components";
+import useWindowSize from "hooks/useWindowSize";
 
 // Import all step components here
 import AddLogo from "@component/onboarding/addLogo";
@@ -23,6 +25,48 @@ import AddShopSettings from "@component/onboarding/addShopSettings";
 import ProcessPayment from "@component/onboarding/processPayment";
 import UploadVerificationDocuments from "@component/onboarding/uploadVerificationDocuments";
 import AddBanner from "@component/onboarding/addCoverImage";
+
+const ResponsiveBox = styled(Box)`
+  padding: 1rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+`;
+
+const ResponsiveFlexBox = styled(FlexBox)`
+  flex-direction: column;
+  align-items: center;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+`;
+
+const ResponsiveH3 = styled(H3)`
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+
+  @media (min-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+`;
+
+const ResponsiveButton = styled(Button)`
+  width: 100%;
+  margin-top: 1rem;
+
+  @media (min-width: 768px) {
+    width: auto;
+    margin-top: 0;
+  }
+`;
 
 const steps = [
   { component: AddLogo, label: "Shop Logo" },
@@ -39,7 +83,6 @@ const steps = [
 ];
 
 const MultiStepForm = () => {
-  // Retrieve the initial step from localStorage or default to 0
   const initialStep = () => {
     const storedStep = localStorage.getItem("currentStep");
     return storedStep ? JSON.parse(storedStep) : 0;
@@ -53,6 +96,8 @@ const MultiStepForm = () => {
   const [documentsUploaded, setDocumentsUploaded] = useState(false);
   const [stepValidation, setStepValidation] = useState(steps.map(() => true));
   const router = useRouter();
+  const windowWidth = useWindowSize();
+  const isMobile = windowWidth !== null && windowWidth < 768;
 
   useEffect(() => {
     if (user?.hasPaid) {
@@ -60,7 +105,6 @@ const MultiStepForm = () => {
     }
   }, [user]);
 
-  // Save the current step to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("currentStep", JSON.stringify(currentStep));
   }, [currentStep]);
@@ -70,7 +114,6 @@ const MultiStepForm = () => {
       setShowPaymentWarning(true);
     } else if (currentStep < steps.length - 1) {
       if (currentStep === 6 && isPaymentProcessed) {
-        // Skip payment processing if already paid
         setCurrentStep(currentStep + 2);
       } else {
         setCurrentStep(currentStep + 1);
@@ -123,7 +166,7 @@ const MultiStepForm = () => {
           deliveryOptions: formData.shopSettings.deliveryOptions,
           isActive: formData.shopSettings.isActive,
         },
-        category: formData.shopSettings.category, // Add this line to include the category
+        category: formData.shopSettings.category,
       };
 
       const result = await createOrUpdateShop(shopData);
@@ -132,7 +175,7 @@ const MultiStepForm = () => {
         localStorage.removeItem("formData");
         localStorage.removeItem("currentStep");
         toast.success("Shop created successfully!");
-        localStorage.removeItem("multiStepFormData"); // Clear saved data
+        localStorage.removeItem("multiStepFormData");
         await signOut({ redirect: false });
         router.push("/");
       } else {
@@ -175,7 +218,7 @@ const MultiStepForm = () => {
       setStepValidation(newStepValidation);
     },
     isNextButtonDisabled,
-    handleNext: handleNextStep, // Pass the handleNext function
+    handleNext: handleNextStep,
     isPaymentProcessed,
     onPaymentSuccess: () => {
       setPaymentProcessed(true);
@@ -187,24 +230,22 @@ const MultiStepForm = () => {
 
   if (showPaymentWarning) {
     return (
-      <Box padding="2rem" width="100%">
-        <H3 textAlign="center" mb="2rem">
-          Payment Warning
-        </H3>
+      <ResponsiveBox>
+        <ResponsiveH3>Payment Warning</ResponsiveH3>
         <Paragraph mb="2rem">
           {isPaymentProcessed
             ? "You have already made a payment. Proceeding will take you to the document upload step."
             : "Please note that after processing the payment, you will not be able to return to previous steps. Make sure all your information is correct before proceeding."}
         </Paragraph>
-        <FlexBox justifyContent="space-between">
-          <Button
+        <ResponsiveFlexBox>
+          <ResponsiveButton
             variant="outlined"
             color="primary"
             onClick={() => setShowPaymentWarning(false)}
           >
             Go Back
-          </Button>
-          <Button
+          </ResponsiveButton>
+          <ResponsiveButton
             variant="contained"
             color="primary"
             onClick={handleConfirmPayment}
@@ -212,62 +253,56 @@ const MultiStepForm = () => {
             {isPaymentProcessed
               ? "Proceed to Document Upload"
               : "Proceed to Payment"}
-          </Button>
-        </FlexBox>
-      </Box>
+          </ResponsiveButton>
+        </ResponsiveFlexBox>
+      </ResponsiveBox>
     );
   }
 
   return (
     <OnboardingStyledRoot>
-      <Box padding="2rem" width="100%">
-        <FlexBox
-          justifyContent="space-between"
-          alignItems="center"
-          margin="auto"
-        >
-          <H3 textAlign="center" mb="2rem">
-            {steps[currentStep].label}
-          </H3>
+      <ResponsiveBox>
+        <ResponsiveFlexBox>
+          <ResponsiveH3>{steps[currentStep].label}</ResponsiveH3>
           <LogoutButton />
-        </FlexBox>
+        </ResponsiveFlexBox>
         <Box mb="2rem">
           <StepComponent {...getStepProps()} />
         </Box>
 
-        <FlexBox justifyContent="space-between" mt="2rem">
+        <ResponsiveFlexBox>
           {currentStep > 0 && (
-            <Button
+            <ResponsiveButton
               variant="outlined"
               color="primary"
               onClick={handlePrevious}
               disabled={currentStep === 7}
             >
               Previous
-            </Button>
+            </ResponsiveButton>
           )}
           {currentStep < steps.length - 1 && (
-            <Button
+            <ResponsiveButton
               variant="contained"
               color="primary"
               onClick={handleNextStep}
               disabled={!stepValidation[currentStep]}
             >
               {currentStep === 5 ? "Review Payment" : "Next"}
-            </Button>
+            </ResponsiveButton>
           )}
           {currentStep === steps.length - 1 && (
-            <Button
+            <ResponsiveButton
               variant="contained"
               color="primary"
               onClick={handleFinish}
               disabled={!documentsUploaded}
             >
               Finish
-            </Button>
+            </ResponsiveButton>
           )}
-        </FlexBox>
-      </Box>
+        </ResponsiveFlexBox>
+      </ResponsiveBox>
     </OnboardingStyledRoot>
   );
 };
