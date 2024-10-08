@@ -26,11 +26,20 @@ import ProcessPayment from "@component/onboarding/processPayment";
 import UploadVerificationDocuments from "@component/onboarding/uploadVerificationDocuments";
 import AddBanner from "@component/onboarding/addCoverImage";
 
+const OnboardingStyledRootFullHeight = styled(OnboardingStyledRoot)`
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+`;
+
 const ResponsiveBox = styled(Box)`
   padding: 1rem;
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 
   @media (min-width: 768px) {
     padding: 2rem;
@@ -40,6 +49,7 @@ const ResponsiveBox = styled(Box)`
 const ResponsiveFlexBox = styled(FlexBox)`
   flex-direction: column;
   align-items: center;
+  margin-bottom: 1rem;
 
   @media (min-width: 768px) {
     flex-direction: row;
@@ -53,19 +63,40 @@ const ResponsiveH3 = styled(H3)`
   text-align: center;
 
   @media (min-width: 768px) {
-    font-size: 2rem;
+    font-size: 1.75rem;
     margin-bottom: 2rem;
   }
 `;
 
 const ResponsiveButton = styled(Button)`
   width: 100%;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 
   @media (min-width: 768px) {
     width: auto;
     margin-top: 0;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
+`;
+
+const StepComponentWrapper = styled(Box)`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+`;
+
+const ButtonContainer = styled(FlexBox)`
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 0;
+  background-color: #fff;
+  position: sticky;
+  bottom: 0;
 `;
 
 const steps = [
@@ -230,47 +261,48 @@ const MultiStepForm = () => {
 
   if (showPaymentWarning) {
     return (
-      <ResponsiveBox>
-        <ResponsiveH3>Payment Warning</ResponsiveH3>
-        <Paragraph mb="2rem">
-          {isPaymentProcessed
-            ? "You have already made a payment. Proceeding will take you to the document upload step."
-            : "Please note that after processing the payment, you will not be able to return to previous steps. Make sure all your information is correct before proceeding."}
-        </Paragraph>
-        <ResponsiveFlexBox>
-          <ResponsiveButton
-            variant="outlined"
-            color="primary"
-            onClick={() => setShowPaymentWarning(false)}
-          >
-            Go Back
-          </ResponsiveButton>
-          <ResponsiveButton
-            variant="contained"
-            color="primary"
-            onClick={handleConfirmPayment}
-          >
+      <OnboardingStyledRootFullHeight>
+        <ResponsiveBox>
+          <ResponsiveH3>Payment Warning</ResponsiveH3>
+          <Paragraph mb="2rem">
             {isPaymentProcessed
-              ? "Proceed to Document Upload"
-              : "Proceed to Payment"}
-          </ResponsiveButton>
-        </ResponsiveFlexBox>
-      </ResponsiveBox>
+              ? "You have already made a payment. Proceeding will take you to the document upload step."
+              : "Please note that after processing the payment, you will not be able to return to previous steps. Make sure all your information is correct before proceeding."}
+          </Paragraph>
+          <ResponsiveFlexBox>
+            <ResponsiveButton
+              variant="outlined"
+              color="primary"
+              onClick={() => setShowPaymentWarning(false)}
+            >
+              Go Back
+            </ResponsiveButton>
+            <ResponsiveButton
+              variant="contained"
+              color="primary"
+              onClick={handleConfirmPayment}
+            >
+              {isPaymentProcessed
+                ? "Proceed to Document Upload"
+                : "Proceed to Payment"}
+            </ResponsiveButton>
+          </ResponsiveFlexBox>
+        </ResponsiveBox>
+      </OnboardingStyledRootFullHeight>
     );
   }
 
   return (
-    <OnboardingStyledRoot>
+    <OnboardingStyledRootFullHeight>
       <ResponsiveBox>
         <ResponsiveFlexBox>
           <ResponsiveH3>{steps[currentStep].label}</ResponsiveH3>
           <LogoutButton />
         </ResponsiveFlexBox>
-        <Box mb="2rem">
+        <StepComponentWrapper>
           <StepComponent {...getStepProps()} />
-        </Box>
-
-        <ResponsiveFlexBox>
+        </StepComponentWrapper>
+        <ButtonContainer>
           {currentStep > 0 && (
             <ResponsiveButton
               variant="outlined"
@@ -301,9 +333,9 @@ const MultiStepForm = () => {
               Finish
             </ResponsiveButton>
           )}
-        </ResponsiveFlexBox>
+        </ButtonContainer>
       </ResponsiveBox>
-    </OnboardingStyledRoot>
+    </OnboardingStyledRootFullHeight>
   );
 };
 
