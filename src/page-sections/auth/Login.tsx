@@ -176,7 +176,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           </FlexBox>
         </Box>
 
-        <FlexBox
+        {/* <FlexBox
           mb="0.75rem"
           height="40px"
           color="white"
@@ -191,9 +191,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           </Icon>
 
           <Small fontWeight="600">Continue with Facebook</Small>
-        </FlexBox>
+        </FlexBox> */}
 
-        <FlexBox
+        {/* <FlexBox
           mb="1.25rem"
           height="40px"
           color="white"
@@ -209,7 +209,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           </Icon>
 
           <Small fontWeight="600">Continue with Google</Small>
-        </FlexBox>
+        </FlexBox> */}
 
         <FlexBox justifyContent="center" mb="1.25rem">
           <SemiSpan>Don't have account?</SemiSpan>
