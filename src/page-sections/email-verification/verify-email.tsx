@@ -10,6 +10,7 @@ import Card from "@component/Card";
 import { H4, Paragraph } from "@component/Typography";
 import FlexBox from "@component/FlexBox";
 import Icon from "@component/icon/Icon";
+import Spinner from "@component/Spinner";
 
 const StyledCard = styled(Card)`
   padding: 2rem;
@@ -91,7 +92,18 @@ const VerifyEmail = () => {
               <LoadingIcon size="40px" color="primary">
                 refresh-ccw
               </LoadingIcon>
-              <Paragraph mt={2}>Verifying your email...</Paragraph>
+              <Paragraph mt={2}>
+                <Spinner
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    borderRadius: "50%",
+                    backgroundColor: "#f3f3f3",
+                    transformOrigin: "center",
+                    margin: "0 auto",
+                  }}
+                />
+              </Paragraph>
             </FlexBox>
           )}
         </StyledCard>
