@@ -23,7 +23,7 @@ const domain = process.env.NODE_ENV === 'production'
 export const sendVerificationEmail = async (email: string, token: string) => {
   const confirmationLink = `${domain}/verification?token=${token}`;
   const emailProps: EmailTemplateProps = {
-    logoUrl: `${domain}/logo.png`, // Adjust this to your actual logo URL
+    logoUrl: `/public/assets/images/logo-2.svg`, // Adjust this to your actual logo URL
     emailHeading: 'Verify Your Email Address',
     emailBody: `
     <p>Please click the button below to verify your email address:</p>
