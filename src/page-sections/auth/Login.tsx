@@ -39,9 +39,23 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const handleFormSubmit = async (values: any) => {
     setIsLoading(true);
     try {
-      const result = await login(values);
+      const result = await login(values); // Calls the server-side login function
+
       if (result.error) {
-        toast.error(result.error);
+        // Handle specific errors and show appropriate messages
+        if (result.error === "Invalid email or password") {
+          toast.error(
+            "The email or password you entered is incorrect. Please try again."
+          );
+        } else if (result.error === "This user does not exist!") {
+          toast.error("The account with this email does not exist.");
+        } else if (result.success === "Confirmation email sent") {
+          toast.success(
+            "A confirmation email has been sent to your inbox. Please verify your email to proceed."
+          );
+        } else {
+          toast.error(result.error);
+        }
       } else if (result.success) {
         // Use the signIn function from next-auth/react on the client side
         const signInResult = await signIn("credentials", {
@@ -66,7 +80,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(error?.message);
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -78,26 +92,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       onSubmit: handleFormSubmit,
       validationSchema: formSchema,
     });
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const result = await signIn("google", { redirect: false });
-      if (result?.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("Signed in with Google successfully");
-        refreshAuth();
-        if (onLoginSuccess) {
-          onLoginSuccess();
-        }
-        // You might want to add logic here to redirect based on user role
-        // This would require checking the user's role after signing in with Google
-      }
-    } catch (error) {
-      console.error("Google sign-in error:", error);
-      toast.error("An error occurred during Google sign-in. Please try again.");
-    }
-  };
 
   return (
     <StyledRoot mx="auto" my="2rem" boxShadow="large" borderRadius={8}>
@@ -175,41 +169,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </Span>
           </FlexBox>
         </Box>
-
-        {/* <FlexBox
-          mb="0.75rem"
-          height="40px"
-          color="white"
-          bg="#3B5998"
-          borderRadius={5}
-          cursor="pointer"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Icon variant="small" defaultcolor="auto" mr="0.5rem">
-            facebook-filled-white
-          </Icon>
-
-          <Small fontWeight="600">Continue with Facebook</Small>
-        </FlexBox> */}
-
-        {/* <FlexBox
-          mb="1.25rem"
-          height="40px"
-          color="white"
-          bg="#4285F4"
-          borderRadius={5}
-          cursor="pointer"
-          alignItems="center"
-          justifyContent="center"
-          onClick={handleGoogleSignIn}
-        >
-          <Icon variant="small" defaultcolor="auto" mr="0.5rem">
-            google-1
-          </Icon>
-
-          <Small fontWeight="600">Continue with Google</Small>
-        </FlexBox> */}
 
         <FlexBox justifyContent="center" mb="1.25rem">
           <SemiSpan>Don't have account?</SemiSpan>
